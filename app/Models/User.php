@@ -22,6 +22,8 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
+        'expire_at',
+        'code'
     ];
 
     /**
@@ -60,5 +62,19 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+    public function generateCode()
+    {
+        $this->timestamps = false;
+        $this->code = rand(1000, 9999);
+        $this->expire_at = now()->addMinute();
+        $this->save();
+    }
+    public function resetTwoFactorCode()
+    {
+        $this->timestamps = false;
+        $this->code = null;
+        $this->expire_at = null;
+        $this->save();
     }
 }

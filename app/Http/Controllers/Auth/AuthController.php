@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\TwoFactorMail;
 use App\Models\User;
+use App\Notifications\TwoFactorCode;
+use Illuminate\Support\Facades\Mail;
 use Validator;
 
 
@@ -33,9 +36,17 @@ class AuthController extends Controller
         $user->password = bcrypt(request()->password);
         $user->save();
 
+        $user->generateCode();
 
+        Mail::to($user->email)->send(new TwoFactorMail($user->code, $user->name));
 
-        return response()->json($user, 201);
+        $credentials = request(['email', 'password']);
+
+        if (!$token = auth()->attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        return $this->respondWithToken($token);
     }
 
 
