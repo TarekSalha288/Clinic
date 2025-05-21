@@ -21,8 +21,10 @@ class AuthController extends Controller
     public function register()
     {
         $validator = Validator::make(request()->all(), [
-            'name' => 'required',
+            'first_name' => 'required',
+            'last_name' => 'required',
             'email' => 'required|email|unique:users',
+            'phone' => 'required|unique:users|regex:/^\+963\d{9}$/',
             'password' => 'required|confirmed|min:8',
         ]);
 
@@ -31,14 +33,16 @@ class AuthController extends Controller
         }
 
         $user = new User;
-        $user->name = request()->name;
+        $user->first_name = request()->first_name;
+        $user->last_name = request()->last_name;
         $user->email = request()->email;
+        $user->phone = request()->phone;
         $user->password = bcrypt(request()->password);
         $user->save();
 
         $user->generateCode();
 
-        Mail::to($user->email)->send(new TwoFactorMail($user->code, $user->name));
+        Mail::to($user->email)->send(new TwoFactorMail($user->code, $user->first_name));
 
         $credentials = request(['email', 'password']);
 
