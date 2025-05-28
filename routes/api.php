@@ -72,4 +72,5 @@ Route::group(['middleware'=>[TwoFactor::class,'api','auth']],function($router){
   Route::get('/leave/{id}',[UserController::class,'getLeaves']);
 
     Route::get('/doctor/{dayId}/{departmentId}',[UserController::class,'getDoctorsInDay']);
+    Route::get('/search',[UserController::class,'search']);
 });

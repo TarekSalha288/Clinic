@@ -4,6 +4,7 @@ namespace App\Services;
 use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\Day;
+use App\Models\User;
 
 class UserService
 {
@@ -99,4 +100,39 @@ return ['status'=>200,'data'=>$doctors];
         ];
     }
 }
+public function search()
+{
+    try {
+        $query = request('search');
+        if (!$query) {
+            return ['status' => 422, 'message' => 'Search query is required'];
+        }
+        $doctors = User::where('role', 'doctor')
+            ->where(function ($q) use ($query) {
+                $q->where('first_name', 'LIKE', "%{$query}%")
+                  ->orWhere('last_name', 'LIKE', "%{$query}%");
+            })
+            ->get();
+        $departments = Department::where('name', 'LIKE', "%{$query}%")->get();
+        if ($doctors->isEmpty() && $departments->isEmpty()) {
+            return ['status' => 404, 'message' => 'No results found'];
+        }
+
+        return [
+            'status' => 200,
+            'data' => [
+                'doctors' => $doctors,
+                'departments' => $departments,
+            ]
+        ];
+
+    } catch (\Exception $e) {
+        return [
+            'status' => 500,
+            'message' => 'Something went wrong',
+            'error' => $e->getMessage()
+        ];
+    }
+}
+
 }

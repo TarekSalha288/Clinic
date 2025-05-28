@@ -74,4 +74,14 @@ $this->userService=$userService;
         default => $this->response("Unknown error", null, 520),
     };
     }
+    public function search(){
+$data=$this->userService->search();
+  return match ($data['status']) {
+        200 => $this->response("Here are the results", ['results' => $data['data']], 200),
+        404 => $this->response("No results found", null, 404),
+        422 => $this->response("Validation error: missing search query", null, 422),
+        500 => $this->response("Server error: " . $data['error'], null, 500),
+        default => $this->response("Unknown error", null, 520),
+    };
+}
 }

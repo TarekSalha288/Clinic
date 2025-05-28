@@ -121,6 +121,7 @@ $user = User::where('role','secretary')->first();
             'last_name' => request('last_name'),
             'phone' => request('phone'),
             'password' => bcrypt(request('password')),
+            'role'=>'doctor',
         ]);
 
         $department = Department::where('name', request('department'))->first();
