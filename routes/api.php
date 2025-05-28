@@ -56,6 +56,8 @@ Route::group([
     'middleware' => [TwoFactor::class, DoctorMiddleware::class, 'api', 'auth']
 ], function ($router) {
     Route::post('/postArticle', [DoctorController::class, 'postArticale']);
+    Route::put('/updateArticle/{id}', [DoctorController::class, 'updateArticle']);
+    Route::delete('/deleteArticle/{id}', [DoctorController::class, 'deleteArticle']);
     Route::post('/imageUpload', [DoctorController::class, 'uploadImages']);
     Route::put('/updateProfile', [DoctorController::class, 'updateProfile']);
 });

@@ -51,6 +51,41 @@ class DoctorService
         return ['message' => $message, 'path' => $url];
     }
 
+    public function updateArticle($request, $id)
+    {
+        $article = Post::find($id);
+        $article->update([
+            'title' => $request->title,
+            'body' => $request->body
+        ]);
+        if ($article) {
+            $message = 'article updated successfully';
+        } else {
+            $message = 'article updated failed';
+        }
+        return ['article' => $article, 'message' => $message];
+    }
+    public function deleteArticle($id)
+    {
+        $article = Post::find($id);
+        $body = $article->body;
+        $article->delete();
+        preg_match_all('/\[https?:\/\/[^\/]+(\/storage\/[^\]]+)\]/', $body, $matches);
+
+        $imagePaths = $matches[1];
+
+        foreach ($imagePaths as $path) {
+            $storagePath = str_replace('/storage/', '', $path);
+
+            if (Storage::disk('public')->exists($storagePath)) {
+                Storage::disk('public')->delete($storagePath);
+                $deleted[] = $storagePath;
+            }
+        }
+        $message = 'article deleted successfully';
+        return ['article' => $article, 'message' => $message];
+    }
+
     public function updateProfile($request)
     {
 
