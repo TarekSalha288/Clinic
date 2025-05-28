@@ -16,10 +16,16 @@ class Doctor extends Model
     {
         return $this->belongsTo(User::class);
     }
-    public function days(): BelongsToMany{
-return $this->belongsToMany(Day::class,'mounthly_leaves');
+    public function days(): BelongsToMany
+    {
+        return $this->belongsToMany(Day::class, 'mounthly_leaves');
     }
-    public function department():BelongsTo{
+    public function department(): BelongsTo
+    {
         return $this->belongsTo(Department::class);
+    }
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
     }
 }

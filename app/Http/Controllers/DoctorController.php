@@ -79,4 +79,29 @@ class DoctorController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function getArticles()
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->getArticles();
+            return Response::Success($data['articles'], $data['message']);
+
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function getArticleById($id)
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->getArticleById($id);
+            return Response::Success($data['article'], $data['message']);
+
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+
 }

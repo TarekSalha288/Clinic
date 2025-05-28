@@ -78,4 +78,5 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(Doctor::class);
     }
+
 }

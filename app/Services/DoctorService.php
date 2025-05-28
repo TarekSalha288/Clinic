@@ -53,11 +53,34 @@ class DoctorService
 
     public function updateArticle($request, $id)
     {
-        $article = Post::find($id);
+        $article = Post::where('id', $id)->first();
+        $oldbody = $article->body;
+        $newbody = $request->body;
         $article->update([
             'title' => $request->title,
             'body' => $request->body
         ]);
+
+        preg_match_all('/\[https?:\/\/[^\/]+(\/storage\/[^\]]+)\]/', $oldbody, $matches);
+        $oldPaths = $matches[1];
+        preg_match_all('/\[https?:\/\/[^\/]+(\/storage\/[^\]]+)\]/', $newbody, $matches);
+        $newPaths = $matches[1];
+
+        foreach ($oldPaths as $oldPath) {
+            $flag = true;
+            foreach ($newPaths as $newPath) {
+                if ($oldPath === $newPath) {
+                    $flag = false;
+                    break;
+                }
+            }
+            if ($flag) {
+                if (Storage::disk('public')->exists($oldPath))
+                    Storage::disk('public')->delete($oldPath);
+            }
+        }
+
+
         if ($article) {
             $message = 'article updated successfully';
         } else {
@@ -85,10 +108,31 @@ class DoctorService
         $message = 'article deleted successfully';
         return ['article' => $article, 'message' => $message];
     }
+    public function getArticles()
+    {
+        $doctor = auth()->user()->doctor;
+        $articles = $doctor->posts;
+        if ($articles->isNotEmpty()) {
+            $message = 'Articles return successfully';
+        } else {
+            $message = "Articles failed";
+        }
+        return ['articles' => $articles, 'message' => $message];
+    }
+    public function getArticleById($id)
+    {
+        $doctor = auth()->user()->doctor;
+        $article = $doctor->posts()->where('id', $id)->first();
+        if ($article) {
+            $message = "article return successfully";
+        } else {
+            $message = "article return failed";
+        }
+        return ['article' => $article, 'message' => $message];
+    }
 
     public function updateProfile($request)
     {
-
         $user = User::find(auth()->user()->id);
         if ($user) {
             $user->update([
