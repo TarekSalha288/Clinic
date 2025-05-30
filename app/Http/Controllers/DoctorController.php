@@ -55,4 +55,53 @@ class DoctorController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function updateArticle(PostArticaleRequest $request, $id)
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->updateArticle($request, $id);
+            return Response::Success($data['article'], $data['message']);
+
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function deleteArticle($id)
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->deleteArticle($id);
+            return Response::Success($data['article'], $data['message']);
+
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function getArticles()
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->getArticles();
+            return Response::Success($data['articles'], $data['message']);
+
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function getArticleById($id)
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->getArticleById($id);
+            return Response::Success($data['article'], $data['message']);
+
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+
 }
