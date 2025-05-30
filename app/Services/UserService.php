@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Services;
+
+use App\Models\Apointment;
 use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\Day;
@@ -11,8 +13,20 @@ class UserService
   public function getDoctor($id){
       try {
           $doctor=Doctor::find($id);
-          if($doctor)
-          return $doctor;
+          $docInfo=[];
+          if($doctor){
+            $apointments=Apointment::where('doctor_id',$doctor->id)->get();
+            foreach($apointments as $apointment)
+
+ $docInfo = [
+                'department' => $doctor->department,
+                'days' => $doctor->days,
+                'user' => $doctor->user,
+                'apointments' => ['apointments'=>$apointments, 'patients'=>$doctor->apointments],
+            ];
+           return $docInfo;
+          }
+
           return null;
       } catch (\Exception $e) {
           throw $e;
@@ -21,8 +35,14 @@ class UserService
   public function getDoctors(){
       try {
           $doctors=Doctor::all();
-          if($doctors)
-          return $doctors;
+          if($doctors){
+            foreach($doctors as $doctor){
+               $doctor->department;
+               $doctor->user;
+            }
+            return $doctors;
+          }
+
           return null;
       } catch (\Exception $e) {
           throw $e;

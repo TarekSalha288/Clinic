@@ -22,4 +22,7 @@ return $this->belongsToMany(Day::class,'mounthly_leaves');
     public function department():BelongsTo{
         return $this->belongsTo(Department::class);
     }
+    public function apointments():BelongsToMany{
+        return $this->belongsToMany(Patient::class,'apointments');
+    }
 }
