@@ -25,11 +25,8 @@ public function createSecretary()
             'password'   => 'required|string|confirmed|min:8',
         ]);
 
-        if ($validator->fails()) {
-            return [
-                'status' => 400,
-                'errors' => $validator->errors()
-            ];
+       if ($validator->fails()) {
+            return response()->json($validator->errors()->toJson(), 400);
         }
 
         // Check for existing secretary if needed
