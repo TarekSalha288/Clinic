@@ -35,7 +35,7 @@ class DoctorController extends Controller
     {
         $data = [];
         try {
-            $data = $this->doctorService->uploadImage($request);
+            $data = $this->doctorService->uploadImage($request, 'posts');
             return Response::Success($data['path'], $data['message']);
 
         } catch (Throwable $th) {
@@ -49,6 +49,18 @@ class DoctorController extends Controller
         try {
             $data = $this->doctorService->updateProfile($request);
             return Response::Success($data['user'], $data['message']);
+
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function uploadImagesForProfile(ImageUploadRequest $request)
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->uploadImage($request, 'Profile_Photo');
+            return Response::Success($data['path'], $data['message']);
 
         } catch (Throwable $th) {
             $message = $th->getMessage();

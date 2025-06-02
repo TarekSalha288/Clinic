@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 class DoctorService
 {
+    use UploadImageTrait;
     public function postArtical($request)
     {
         $user_id = auth()->user()->id;
@@ -28,24 +29,15 @@ class DoctorService
         }
         return ['message' => $message, 'post' => $post];
     }
-    public function uploadImage($request)
+    public function uploadImage($request, $folderName)
     {
-        $user = auth()->user();
-        $message = 'there is no file to upload';
-        $url = null;
+        $user_id = auth()->user()->id;
 
-        if ($request->hasFile('image')) {
-            $imageFile = $request->file('image');
-
-            $imageName = md5_file($imageFile->getRealPath()) . '.' . $imageFile->getClientOriginalExtension();
-            $path = "images/posts/$user->id/$imageName";
-
-            if (!Storage::disk('public')->exists($path)) {
-                Storage::disk('public')->putFileAs("images/posts/$user->id", $imageFile, $imageName);
-            }
-
-            $url = Storage::url($path);
-            $message = 'image uploaded successfully';
+        $url = $this->ImageUpload($request, $user_id, $folderName);
+        if ($url) {
+            $message = "image uploaded successfully";
+        } else {
+            $message = 'there is no file to upload';
         }
 
         return ['message' => $message, 'path' => $url];

@@ -62,6 +62,8 @@ Route::group([
     Route::get('/getAtricleById/{id}', [DoctorController::class, 'getArticleById']);
     Route::post('/imageUpload', [DoctorController::class, 'uploadImages']);
     Route::put('/updateProfile', [DoctorController::class, 'updateProfile']);
+    Route::post('/imageProfileUpload', [DoctorController::class, 'uploadImagesForProfile']);
+
 });
 
 Route::group([
