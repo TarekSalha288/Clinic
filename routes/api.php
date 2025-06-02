@@ -68,6 +68,7 @@ Route::group([
     'middleware' => [TwoFactor::class, PatientMiddleware::class, 'api', 'auth']
 ], function ($router) {
     Route::post('/pateintProfile', [PatientController::class, 'postPatientProfile']);
+    Route::post('/addChild', [PatientController::class, 'addChild']);
 });
 
 

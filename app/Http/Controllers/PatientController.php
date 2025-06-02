@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AddChildRequest;
 use App\Http\Requests\PatientProfileRequest;
 use App\Http\Responses\Response;
 use App\Services\PatientService;
@@ -20,6 +21,18 @@ class PatientController extends Controller
         try {
             $data = $this->patientService->postPatientInformation($request);
             return Response::Success($data['patient'], $data['message']);
+
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function addChild(AddChildRequest $request)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->addChild($request);
+            return Response::Success($data['son'], $data['message']);
 
         } catch (Throwable $th) {
             $message = $th->getMessage();

@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('patients', function (Blueprint $table) {
-             $table->unsignedInteger('id', 6)->primary()->autoIncrement();
+            $table->unsignedInteger('id', 6)->primary()->autoIncrement();
 
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete()->cascadeOnUpdate();
@@ -19,12 +19,12 @@ return new class extends Migration {
             $table->string('gender');
             $table->integer('age');
             $table->string('blood_type');
-            $table->string('chronic_diseases');
-            $table->string('medication_allergies');
-            $table->string('permanent_medications');
-            $table->string('previous_surgeries');
-            $table->string('previous_illnesses');
-            $table->string('medical_analysis');
+            $table->string('chronic_diseases')->nullable();
+            $table->string('medication_allergies')->nullable();
+            $table->string('permanent_medications')->nullable();
+            $table->string('previous_surgeries')->nullable();
+            $table->string('previous_illnesses')->nullable();
+            $table->string('medical_analysis')->nullable();
             $table->double('honest_score')->default(5);
             $table->timestamps();
         });
