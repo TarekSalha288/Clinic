@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Apointment;
 use App\Models\Doctor;
 use App\Models\Post;
 use App\Models\User;
 use App\UploadImageTrait;
+use Carbon\Carbon;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -138,6 +140,21 @@ class DoctorService
             $message = 'profile updated successfully';
         }
         return ['message' => $message, 'user' => $user];
+    }
+    public function getApointments()
+    {
+        $user_id = auth()->user()->id;
+        $doctor_id = Doctor::find($user_id)->id;
+        $apointments = Apointment::forDoctor($doctor_id)
+            ->accepted()
+            ->today()
+            ->get();
+        if ($apointments) {
+            $message = 'apointments return successfully';
+        } else {
+            $message = 'apointments return failed';
+        }
+        return ['message' => $message, 'apointments' => $apointments];
     }
 
 }

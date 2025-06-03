@@ -115,6 +115,16 @@ class DoctorController extends Controller
             return Response::Error($data, $message);
         }
     }
-
+    public function getApointments()
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->getApointments();
+            return Response::Success($data['apointments'], $data['message']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
 
 }
