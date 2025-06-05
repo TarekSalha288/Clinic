@@ -66,7 +66,10 @@ Route::group([
     Route::get('/getProfileImage', [DoctorController::class, 'getProfileImage']);
     Route::delete('/deleteProfileImage', [DoctorController::class, 'deleteProfileImage']);
     Route::get('/getApointments', [DoctorController::class, 'getApointments']);
-
+    Route::post('/postPreview/{id}', [DoctorController::class, 'postPreview']);
+    Route::put('/updatePreview', [DoctorController::class, 'updatePreview']);
+    Route::delete('/deletepreview', [DoctorController::class, 'deletepreview']);
+    Route::get('/getPreviews', [DoctorController::class, 'getPreviews']);
 });
 
 Route::group([

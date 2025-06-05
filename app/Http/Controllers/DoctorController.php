@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\PostArticaleRequest;
+use App\Http\Requests\PostPreviewRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Responses\Response;
+use App\Models\Preview;
 use App\Services\DoctorService;
 use Illuminate\Http\Request;
 use Throwable;
@@ -143,6 +145,50 @@ class DoctorController extends Controller
         try {
             $data = $this->doctorService->getApointments();
             return Response::Success($data['apointments'], $data['message']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function postPreview(PostPreviewRequest $request, $patient_id)
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->postPreview($request, $patient_id);
+            return Response::Success($data['preview'], $data['message']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function updatePreview(PostPreviewRequest $request, $preview_id)
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->updatePreview($request, $preview_id);
+            return Response::Success($data['preview'], $data['message']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function deletePreview($preview_id)
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->deletePreview($preview_id);
+            return Response::Success($data['preview'], $data['message']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function getPreviews()
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->getPreviews();
+            return Response::Success($data['previewss'], $data['message']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);

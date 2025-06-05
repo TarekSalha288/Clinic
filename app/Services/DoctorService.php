@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Models\Apointment;
 use App\Models\Department;
 use App\Models\Doctor;
+use App\Models\Patient;
 use App\Models\Post;
+use App\Models\Preview;
 use App\Models\Rate;
 use App\Models\User;
 use App\UploadImageTrait;
@@ -204,18 +206,106 @@ class DoctorService
     }
     public function getApointments()
     {
-        $user_id = auth()->user()->id;
-        $doctor_id = Doctor::find($user_id)->id;
-        $apointments = Apointment::forDoctor($doctor_id)
+        $user = auth()->user();
+        $doctor = $user->doctor;
+        $apointments = Apointment::forDoctor($doctor->id)
             ->accepted()
             ->today()
             ->get();
-        if ($apointments) {
+        // if it dont work because the date in the database not today
+        $formatedApointments = [];
+
+        foreach ($apointments as $apointment) {
+            $patient_info = User::find(Patient::where('id', $apointment->patient_id)->first()->user_id);
+            $apointment = [
+                'id' => $apointment->id,
+                'patient_name' => $patient_info->first_name . " " . $patient_info->last_name,
+                'patient_phone' => $patient_info->phone,
+                'patient_photo' => $patient_info->img_path,
+                'apointment_date' => $apointment->apointment_date,
+                'apointment_status' => $apointment->apointment_status,
+                'status' => $apointment->status,
+            ];
+            $formatedApointments[] = $apointment;
+
+        }
+        $formatedApointments = $this->addDoctorInfo($formatedApointments, $doctor, $user);
+
+        if ($apointments->isNotEmpty()) {
             $message = 'apointments return successfully';
         } else {
             $message = 'apointments return failed';
         }
-        return ['message' => $message, 'apointments' => $apointments];
+        return ['message' => $message, 'apointments' => $formatedApointments];
     }
-
+    public function postPreview($request, $patient_id)
+    {
+        $doctor = auth()->user()->doctor;
+        $preview = Preview::create([
+            'patient_id' => $patient_id,
+            'doctor_id' => $doctor->id,
+            'department_id' => $doctor->department_id,
+            'diagnoseis' => $request->diagnoseis,
+            'diagnoseis_type' => $request->diagnoseis_type,
+            'medicine' => $request->medicine,
+            'notes' => $request->notes,
+            'date' => Carbon::today(),
+            'status' => $request->status
+        ]);
+        if ($preview) {
+            $message = "preview added successfully";
+        } else {
+            $message = "preview added failed";
+        }
+        return ['preview' => $preview, 'message' => $message];
+    }
+    public function updatePreview($request, $preview_id)
+    {
+        $preview = Preview::find($preview_id);
+        if ($preview) {
+            $updatePreview = $preview->update([
+                'diagnoseis' => $request->diagnoseis,
+                'diagnoseis_type' => $request->diagnoseis_type,
+                'medicine' => $request->medicine,
+                'notes' => $request->notes,
+                'status' => $request->status
+            ]);
+            $preview->save();
+            if ($updatePreview) {
+                $message = "preview updated successfully";
+            } else {
+                $message = "preview updated failed";
+            }
+        } else {
+            $message = "preview not found";
+        }
+        return ['message' => $message, 'preview' => $updatePreview];
+    }
+    public function deletePreview($preview_id)
+    {
+        $preview = Preview::find($preview_id);
+        if ($preview) {
+            $deletedPreview = $preview->delete();
+            $preview->save();
+            if ($deletedPreview) {
+                $message = "preview deleted successfully";
+            } else {
+                $message = "preview deleted failed";
+            }
+        } else {
+            $message = "preview not found";
+        }
+        return ['message' => $message, 'preview' => $preview];
+    }
+    public function getPreviews()
+    {
+        $doctor = auth()->user()->doctor;
+        $previews = Preview::where('doctor_id', $doctor->id)->get();
+        if ($previews) {
+            $message = "previews return successfully";
+        } else {
+            $message = "previews return failed";
+        }
+        return ['message' => $message, 'previews' => $previews];
+    }
 }
