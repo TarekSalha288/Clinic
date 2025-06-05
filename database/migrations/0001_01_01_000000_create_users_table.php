@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->string('phone')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('img_path')->nullable();
             $table->string('role')->default('patient');
             $table->integer('enter_id')->nullable();
             $table->string('code')->nullable();

@@ -63,6 +63,8 @@ Route::group([
     Route::post('/imageUpload', [DoctorController::class, 'uploadImages']);
     Route::put('/updateProfile', [DoctorController::class, 'updateProfile']);
     Route::post('/imageProfileUpload', [DoctorController::class, 'uploadImagesForProfile']);
+    Route::get('/getProfileImage', [DoctorController::class, 'getProfileImage']);
+    Route::delete('/deleteProfileImage', [DoctorController::class, 'deleteProfileImage']);
     Route::get('/getApointments', [DoctorController::class, 'getApointments']);
 
 });

@@ -67,6 +67,28 @@ class DoctorController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function getProfileImage()
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->getProfileImage();
+            return Response::Success($data['path'], $data['message']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function deleteProfileImage()
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->deleteProfileImage();
+            return Response::Success($data['path'], $data['message']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
     public function updateArticle(PostArticaleRequest $request, $id)
     {
         $data = [];
