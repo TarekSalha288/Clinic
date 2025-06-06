@@ -177,7 +177,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->deletePreview($preview_id);
-            return Response::Success($data['preview'], $data['message']);
+            return Response::Success($data['preview'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);
@@ -188,7 +188,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->getPreviews();
-            return Response::Success($data['previewss'], $data['message']);
+            return Response::Success($data['previews'], $data['message']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);

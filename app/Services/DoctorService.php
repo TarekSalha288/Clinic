@@ -40,9 +40,7 @@ class DoctorService
     }
     public function postArtical($request)
     {
-        $user_id = auth()->user()->id;
-        $doctor = Doctor::query()->where('user_id', $user_id)->first();
-        $doctor_id = $doctor->id;
+        $doctor_id = auth()->user()->doctor->id;
         $post = Post::query()->create([
             'doctor_id' => $doctor_id,
             'title' => $request->title,
@@ -106,7 +104,7 @@ class DoctorService
 
     public function updateArticle($request, $id)
     {
-        $article = Post::where('id', $id)->first();
+        $article = Post::find($id);
         $oldbody = $article->body;
         $newbody = $request->body;
         $article->update([
@@ -279,23 +277,25 @@ class DoctorService
         } else {
             $message = "preview not found";
         }
-        return ['message' => $message, 'preview' => $updatePreview];
+        return ['message' => $message, 'preview' => $preview];
     }
     public function deletePreview($preview_id)
     {
         $preview = Preview::find($preview_id);
         if ($preview) {
             $deletedPreview = $preview->delete();
-            $preview->save();
             if ($deletedPreview) {
+                $code = 200;
                 $message = "preview deleted successfully";
             } else {
+                $code = 400;
                 $message = "preview deleted failed";
             }
         } else {
+            $code = 404;
             $message = "preview not found";
         }
-        return ['message' => $message, 'preview' => $preview];
+        return ['message' => $message, 'preview' => $preview, 'code' => $code];
     }
     public function getPreviews()
     {

@@ -67,8 +67,8 @@ Route::group([
     Route::delete('/deleteProfileImage', [DoctorController::class, 'deleteProfileImage']);
     Route::get('/getApointments', [DoctorController::class, 'getApointments']);
     Route::post('/postPreview/{id}', [DoctorController::class, 'postPreview']);
-    Route::put('/updatePreview', [DoctorController::class, 'updatePreview']);
-    Route::delete('/deletepreview', [DoctorController::class, 'deletepreview']);
+    Route::put('/updatePreview/{id}', [DoctorController::class, 'updatePreview']);
+    Route::delete('/deletePreview/{id}', [DoctorController::class, 'deletepreview']);
     Route::get('/getPreviews', [DoctorController::class, 'getPreviews']);
 });
 
