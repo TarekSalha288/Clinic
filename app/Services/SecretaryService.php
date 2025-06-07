@@ -34,9 +34,14 @@ class SecretaryService
                     'message' => 'Doctor not found'
                 ];
             }
+            $user_id=null;
+            if($patient->user){
+                $user_id=$patient->user->id;
+            }
 
              $appointment = Apointment::create([
                 'patient_id' => $patient->id,
+                'user_id'=>$user_id,
                 'doctor_id' => request('doctor_id'),
                 'department_id' => $doctor->department->id,
                 'apointment_date' => request('appointment_date'),
@@ -64,7 +69,9 @@ class SecretaryService
                 'medical_analysis' => 'required|string|max:500',
 
   'appointment_date'=>'required|date_format:Y-m-d H:i:s.u',
-  'doctor_id'=>'required'
+  'doctor_id'=>'required',
+  'first_name'=>'required|string',
+  'last_name'=>'required|string'
             ]);
 
             if ($validator->fails()) {
@@ -76,6 +83,9 @@ class SecretaryService
 
             $patient = Patient::create([
                 'birth_date' => request('birth_date'),
+                'first_name'=>request('last_name'),
+                'last_name'=>request('last_name'),
+                'phone'=>request('phone'),
                 'gender' => request('gender'),
                 'age' => request('age'),
                 'blood_type' => request('blood_type'),
