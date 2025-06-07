@@ -19,9 +19,9 @@ class AdminController extends Controller
   public function createSecretary()
 {
     $data = $this->AdminService->createSecretary();
- if ($data->original) {
-            return $this->response($data->original, null, 400);
-        }
+//  if ($data['msg']) {
+//             return $this->response($data['msg'], null, 400);
+//         }
     return match ($data['status']) {
         201 => $this->response("Secretary Created Successfully", ['secretary' => $data['user']], 201),
         400 => $this->response("Validation failed", $data['errors'], 400),

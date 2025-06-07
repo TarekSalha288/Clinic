@@ -85,6 +85,9 @@ Route::group([
 ], function ($router) {
     Route::post('secretary/leave/{id}', [SecretaryController::class, 'addMounthlyLeave']);
     Route::delete('secretary/leave', [SecretaryController::class, 'removeMonthlyLeaves']);
+    Route::post('secretary/apointment',[SecretaryController::class,'reserve']);
+     Route::post('secretary/apointment/{id}',[SecretaryController::class,'acceptReverse']);
+     Route::delete('secretary/apointment/{id}',[SecretaryController::class,'rejectReverse']);
 
 });
 //////Any Body Can Access

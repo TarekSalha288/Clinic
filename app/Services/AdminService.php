@@ -26,13 +26,14 @@ public function createSecretary()
         ]);
 
        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
+          return [
+        'status' => 400,
+        'errors' => $validator->errors()->toArray(),
+    ];
         }
-
-        // Check for existing secretary if needed
         $existing = User::where('role', 'secretary')->first();
         if ($existing) {
-            return ['status' => 409]; // Conflict
+            return ['status' => 409];
         }
 
         $user = User::create([

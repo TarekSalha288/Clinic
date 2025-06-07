@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Patient extends Model
@@ -28,4 +29,8 @@ protected $keyType = 'string';
 public function doctors():BelongsToMany{
     return $this->belongsToMany(Doctor::class,'apointments');
 }
+public function user():BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

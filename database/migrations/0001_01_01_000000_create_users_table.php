@@ -25,6 +25,7 @@ return new class extends Migration {
             $table->integer('enter_id')->nullable();
             $table->string('code')->nullable();
             $table->dateTime('expire_at')->nullable();
+            $table->string('fcm_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
