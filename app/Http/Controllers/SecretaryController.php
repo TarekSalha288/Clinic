@@ -43,6 +43,34 @@ $this->SecretaryServece=$SecretaryServece;
         default => $this->response("Unknown error", null, 520),
          };
     }
+    public function appointments(){
+        $data=$this->SecretaryServece->appointments();
+         return match ($data['status']){
+            200 => $this->response($data['message'], ['appointment' => null], 200),
+             400 => $this->response($data['errors'], null, 400),
+              404=> $this->response($data['message'], null, 404),
+        500 => $this->response("Server error: " . $data['error'], null, 500),
+        default => $this->response("Unknown error", null, 520),
+    };}
+    public function search(){
+
+        $data = $this->SecretaryServece->search();
+        return match ($data['status']) {
+            200 => $this->response("Here are the results", ['results' => $data['data']], 200),
+            404 => $this->response("No results found", null, 404),
+            422 => $this->response("Validation error: missing search query", null, 422),
+            500 => $this->response("Server error: " . $data['error'], null, 500),
+            default => $this->response("Unknown error", null, 520),
+        };
+    }
+    public function apointments(){
+          $data = $this->SecretaryServece->apointments();
+        return match ($data['status']) {
+            200 => $this->response($data['message'],  $data['data'], 200),
+            404 => $this->response($data['message'], null, 404),
+            500 => $this->response("Server error: " . $data['error'], null, 500),
+            default => $this->response("Unknown error", null, 520)
+    };}
     public function addMounthlyLeave($doctorId){
 $data=$this->SecretaryServece->addMonthlyLeave($doctorId);
   return match ($data['status']) {
@@ -64,5 +92,14 @@ public function removeMonthlyleaves(){
    };
 
 
+}
+public function relaseRate(){
+ $data= $this->SecretaryServece->relaseRate();
+   return match($data['status']){
+200=> $this->response($data['message'],null,200),
+404=> $this->response($data['message'],null,404),
+500=>  $this->response($data['error'],null,500),
+ default => $this->response("Unknown error", null, 520),
+   };
 }
 }

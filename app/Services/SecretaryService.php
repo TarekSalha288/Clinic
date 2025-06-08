@@ -83,7 +83,7 @@ class SecretaryService
 
             $patient = Patient::create([
                 'birth_date' => request('birth_date'),
-                'first_name'=>request('last_name'),
+                'first_name'=>request('first_name'),
                 'last_name'=>request('last_name'),
                 'phone'=>request('phone'),
                 'gender' => request('gender'),
@@ -120,6 +120,7 @@ class SecretaryService
         ];
     }
 }
+
 
 public function acceptReverse($id)
 {
@@ -212,6 +213,28 @@ public function deleteReverse($id){
         ];
     }
 }
+public function appointments(){
+    try{
+         $validator = Validator::make(request()->all(), ['doctor_id'=>'required','apointment_date'=>'required']);
+          if ($validator->fails()) {
+                return [
+                    'status' => 400,
+                    'errors' => $validator->errors()->toArray()
+                ];
+            }
+$apointments=Apointment::where('apointment_date',request('apointment_date'))->where('doctor_id',request('doctor_id'))->get();
+if($apointments->isEmpty())
+    return ['status'=>404,'message'=>"No appointments for this doctor"];
+return ['status'=>200,'message'=>'This is appointments for this doctor','data'=>$apointments];
+
+    }catch(\Exception $e){
+         return [
+            'status' => 500,
+            'message' => 'Something went wrong.',
+            'error' => $e->getMessage(),
+        ];
+    }
+}
     public function addMonthlyLeave($doctorId)
     {
         try {
@@ -261,7 +284,43 @@ public function deleteReverse($id){
             ];
         }
     }
+ public function search()
+{
+    try {
+        $query = request('search');
+        if (!$query) {
+            return ['status' => 422, 'message' => 'Search query is required'];
+        }
 
+
+        $patients = Patient::where(function ($q) use ($query) {
+                $q->where('first_name', 'LIKE', "%{$query}%")
+                  ->orWhere('last_name', 'LIKE', "%{$query}%");
+            })->get();
+
+        // Merge apointments
+        $appointments = $patients->flatMap(function ($patient) {
+            return $patient->apointments()->with(['patient', 'doctor.user', 'department'])->get();;
+        });
+        if ($appointments->isEmpty()) {
+            return ['status' => 404, 'message' => 'No appointments found'];
+        }
+
+        return [
+            'status' => 200,
+            'data' => $appointments
+        ];
+
+    } catch (\Exception $e) {
+        return [
+            'status' => 500,
+            'message' => 'Something went wrong',
+            'error' => $e->getMessage()
+        ];
+    }
+
+
+    }
     public function removeMonthlyleaves()
     {
         try {
@@ -274,4 +333,38 @@ public function deleteReverse($id){
             ];
         }
     }
+    public function apointments(){
+try{
+$apointments=Apointment::orderBy('apointment_date','ASC')->with(['patient','doctor.user','department'])->get();
+if($apointments->isEmpty())
+return ['status'=>404,'message'=>'No appointments yet'];
+return ['status'=>200,'message'=>'That is all appointments','data'=>$apointments];
+}catch(\Exception $e){
+      return [
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+}
+    }
+    public function relaseRate(){
+        try{
+           $apointments= Apointment::where('status','accepted')->get();
+           if($apointments->isEmpty())
+           return ['status'=>404,'message'=>'No latecomers'];
+           foreach($apointments as $apointment){
+            $patient = $apointment->patient;
+$patient->honest_score -= 0.5;
+$patient->save();
+
+           }
+           return ['status'=>200,'message'=>'Relase rates done'];
+        }catch(\Exception $e){
+         return [
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+
+        }
+    }
+
 }

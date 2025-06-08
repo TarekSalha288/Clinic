@@ -107,7 +107,7 @@ class UserService
             ];
         }
     }
-    public function getDoctorsInDay($dayId, $departmentId)
+    public function getDoctorsInDayAndDepartment($dayId, $departmentId)
     {
         try {
             $day = Day::find($dayId);
@@ -161,6 +161,35 @@ class UserService
             ];
         }
     }
+public function getDoctorsAndDepartment($dayId)
+{
+    try {
+        $departments = Department::with(['doctors' => function ($query) use ($dayId) {
+            $query->whereHas('days', function ($q) use ($dayId) {
+                $q->where('day_id', $dayId);
+            })->with('user');
+        }])->get();
+
+        if ($departments->isEmpty()) {
+            return ['status' => 404, 'message' => 'No departments found'];
+        }
+
+        return [
+            'status' => 200,
+            'message' => 'That is departments with doctors of this day',
+            'data' => $departments
+        ];
+
+    } catch (\Exception $e) {
+        return [
+            'status' => 500,
+            'message' => 'Something went wrong',
+            'error' => $e->getMessage()
+        ];
+    }
+}
+
+
 
 
 }

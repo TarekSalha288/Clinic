@@ -67,13 +67,23 @@ class UserController extends Controller
             default => $this->response("Unknown error", null, 520),
         };
     }
-    public function getDoctorsInDay($dayId, $departmentId)
+    public function getDoctorsInDayAndDepartment($dayId, $departmentId)
     {
-        $data = $this->userService->getDoctorsInDay($dayId, $departmentId);
+        $data = $this->userService->getDoctorsInDayAndDepartment($dayId, $departmentId);
         return match ($data['status']) {
             200 => $this->response("That is doctors of this day: ", ['doctors' => $data['data']], 200),
             404 => $this->response("Day  not found", null, 404),
             400 => $this->response("No doctors yet in this day", null, 400),
+            500 => $this->response("Server error: " . $data['error'], null, 500),
+            default => $this->response("Unknown error", null, 520),
+        };
+    }
+    public function getDoctorsAndDepartment($dayId){
+           $data = $this->userService->getDoctorsAndDepartment($dayId);
+        return match ($data['status']) {
+            200 => $this->response("That is doctors of this day: ",  $data['data'], 200),
+            404 => $this->response("Day  not found", null, 404),
+            400 => $this->response($data['message'], null, 400),
             500 => $this->response("Server error: " . $data['error'], null, 500),
             default => $this->response("Unknown error", null, 520),
         };
