@@ -89,9 +89,19 @@ Route::group([
 ], function ($router) {
     Route::post('secretary/leave/{id}', [SecretaryController::class, 'addMounthlyLeave']);
     Route::delete('secretary/leave', [SecretaryController::class, 'removeMonthlyLeaves']);
+
     Route::post('secretary/apointment',[SecretaryController::class,'reserve']);
      Route::post('secretary/apointment/{id}',[SecretaryController::class,'acceptReverse']);
      Route::delete('secretary/apointment/{id}',[SecretaryController::class,'rejectReverse']);
+     Route::get('secretary/apointment',[SecretaryController::class,'appointments']);
+       Route::get('secretary/apointments',[SecretaryController::class,'apointments']);
+       Route::get('/secretary/search', [SecretaryController::class, 'search']);
+       Route::post('secretary/rate',[SecretaryController::class,'relaseRate']);
+
+    Route::post('secretary/apointment', [SecretaryController::class, 'reserve']);
+    Route::post('secretary/apointment/{id}', [SecretaryController::class, 'acceptReverse']);
+    Route::delete('secretary/apointment/{id}', [SecretaryController::class, 'rejectReverse']);
+
 
 });
 //////Any Body Can Access
@@ -103,6 +113,11 @@ Route::group(['middleware' => [TwoFactor::class, 'api', 'auth']], function ($rou
     Route::get('department/{id}', [UserController::class, 'getDepartment']);
     Route::get('/leave/{id}', [UserController::class, 'getLeaves']);
 
+
+    Route::get('/doctor/{dayId}/{departmentId}', [UserController::class, 'getDoctorsInDayAndDepartment']);
+    Route::get('/doctors/{dayId}', [UserController::class, 'getDoctorsAndDepartment']);
+
     Route::get('/doctor/{dayId}/{departmentId}', [UserController::class, 'getDoctorsInDay']);
+
     Route::get('/search', [UserController::class, 'search']);
 });
