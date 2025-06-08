@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\FavoritePost;
 use App\Models\Patient;
+use App\Models\Post;
 use App\Models\Son;
 
 class PatientService
@@ -38,7 +40,13 @@ class PatientService
             'birth_date' => $request->birth_date,
             'gender' => $request->gender,
             'age' => $request->age,
-            'blood_type' => $request->blood_type
+            'blood_type' => $request->blood_type,
+            'chronic_diseases' => $request->chronic_diseases,
+            'medication_allergies' => $request->medication_allergies,
+            'permanent_medications' => $request->permanent_medications,
+            'previous_surgeries' => $request->previous_surgeries,
+            'previous_illnesses' => $request->previous_illnesses,
+            'medical_analysis' => $request->medical_analysis,
         ]);
         $son = Son::create([
             'patient_id' => $patient->id,
@@ -52,6 +60,75 @@ class PatientService
             $message = 'son profile not added to the system';
         }
         return ['message' => $message, 'son' => $son];
+    }
+
+    public function getArticles()
+    {
+        $articles = Post::all();
+        if ($articles) {
+            $message = "articles return successfully";
+        } else {
+            $message = "articles return failed";
+        }
+        return ['message' => $message, 'articles' => $articles];
+    }
+    public function addArticleFav($id)
+    {
+        $article = Post::find($id);
+        $patient = auth()->user()->patient;
+        if ($article && $patient) {
+            $addFav = FavoritePost::create([
+                'patient_id' => $patient->id,
+                'post_id' => $id
+            ]);
+            if ($addFav) {
+                $message = "article added to favorite successfully";
+                $code = 200;
+            } else {
+                $message = "article added to favorite failed";
+                $code = 400;
+            }
+        } else {
+            $message = "article or patient not found";
+            $code = 404;
+        }
+        return ['fav' => $article, 'message' => $message, 'code' => $code];
+    }
+    public function deleteArticleFav($id)
+    {
+        $patient = auth()->user()->patient;
+        $favArticle = $patient->favoritePosts()->where('post_id', $id);
+        if ($favArticle && $patient) {
+            $deleteFav = $favArticle->delete();
+            if ($deleteFav) {
+                $message = "article deleted from favorite successfully";
+                $code = 200;
+            } else {
+                $message = "article deleted from favorite failed";
+                $code = 400;
+            }
+        } else {
+            $message = "article or patient not found";
+            $code = 404;
+        }
+        return ['fav' => $favArticle, 'message' => $message, 'code' => $code];
+    }
+    public function getFavArticles()
+    {
+        $patient = auth()->user()->patient;
+        $favArticles = $patient->favoritePosts()->get();
+        if ($favArticles) {
+            $formatedArticles = [];
+            foreach ($favArticles as $favArticle) {
+                $formatedArticles[] = Post::find($favArticle->post_id);
+            }
+            $message = "favorite articles return successfully";
+            $code = 200;
+        } else {
+            $message = "no favorite articles";
+            $code = 404;
+        }
+        return ['fav' => $formatedArticles, 'message' => $message, 'code' => $code];
 
     }
 }

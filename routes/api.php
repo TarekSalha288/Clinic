@@ -61,10 +61,10 @@ Route::group([
     Route::get('/getAtricles', [DoctorController::class, 'getArticles']);
     Route::get('/getAtricleById/{id}', [DoctorController::class, 'getArticleById']);
     Route::post('/imageUpload', [DoctorController::class, 'uploadImages']);
-    Route::put('/updateProfile', [DoctorController::class, 'updateProfile']);
     Route::post('/imageProfileUpload', [DoctorController::class, 'uploadImagesForProfile']);
     Route::get('/getProfileImage', [DoctorController::class, 'getProfileImage']);
     Route::delete('/deleteProfileImage', [DoctorController::class, 'deleteProfileImage']);
+    Route::put('/updateProfile', [DoctorController::class, 'updateProfile']);
     Route::get('/getApointments', [DoctorController::class, 'getApointments']);
     Route::post('/postPreview/{id}', [DoctorController::class, 'postPreview']);
     Route::put('/updatePreview/{id}', [DoctorController::class, 'updatePreview']);
@@ -77,6 +77,10 @@ Route::group([
 ], function ($router) {
     Route::post('/pateintProfile', [PatientController::class, 'postPatientProfile']);
     Route::post('/addChild', [PatientController::class, 'addChild']);
+    Route::get('/getArticlesApp', [PatientController::class, 'getArticles']);
+    Route::post('/addArticleFav/{id}', [PatientController::class, 'addArticleFav']);
+    Route::delete('/deleteArticleFav/{id}', [PatientController::class, 'deleteArticleFav']);
+    Route::get('/getArticlesFav', [PatientController::class, 'getArticlesFav']);
 });
 
 
@@ -85,9 +89,9 @@ Route::group([
 ], function ($router) {
     Route::post('secretary/leave/{id}', [SecretaryController::class, 'addMounthlyLeave']);
     Route::delete('secretary/leave', [SecretaryController::class, 'removeMonthlyLeaves']);
-    Route::post('secretary/apointment',[SecretaryController::class,'reserve']);
-     Route::post('secretary/apointment/{id}',[SecretaryController::class,'acceptReverse']);
-     Route::delete('secretary/apointment/{id}',[SecretaryController::class,'rejectReverse']);
+    Route::post('secretary/apointment', [SecretaryController::class, 'reserve']);
+    Route::post('secretary/apointment/{id}', [SecretaryController::class, 'acceptReverse']);
+    Route::delete('secretary/apointment/{id}', [SecretaryController::class, 'rejectReverse']);
 
 });
 //////Any Body Can Access
@@ -98,7 +102,6 @@ Route::group(['middleware' => [TwoFactor::class, 'api', 'auth']], function ($rou
     Route::get('doctor/{id}', [UserController::class, 'getDoctor']);
     Route::get('department/{id}', [UserController::class, 'getDepartment']);
     Route::get('/leave/{id}', [UserController::class, 'getLeaves']);
-
     Route::get('/doctor/{dayId}/{departmentId}', [UserController::class, 'getDoctorsInDay']);
     Route::get('/search', [UserController::class, 'search']);
 });

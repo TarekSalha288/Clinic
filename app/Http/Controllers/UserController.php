@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Responses\Response;
 use App\ResponseJson;
 use App\Services\UserService;
 use Illuminate\Http\Request;
-
+use Throwable;
 class UserController extends Controller
 {
     use ResponseJson;
@@ -89,4 +91,5 @@ class UserController extends Controller
             default => $this->response("Unknown error", null, 520),
         };
     }
+
 }

@@ -21,6 +21,12 @@ class AuthController extends Controller
      */
     public function register()
     {
+        $email = request()->email;
+        $existingUser = User::where('email', $email)->first();
+        if ($existingUser && !is_null($existingUser->code)) {
+            $existingUser->delete();
+        }
+
         $validator = Validator::make(request()->all(), [
             'first_name' => 'required',
             'last_name' => 'required',
@@ -32,6 +38,7 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
+
 
         $user = new User;
         $user->first_name = request()->first_name;
@@ -64,6 +71,8 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         $json = $this->respondWithToken($token)->getContent();
+        $user->fcm_token = $token;
+        $user->save();
         $array = json_decode($json, true);
         return response()->json(['token' => $array, 'user' => $user], 200);
 
