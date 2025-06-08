@@ -15,8 +15,8 @@ return new class extends Migration {
 
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete()->cascadeOnUpdate();
-           $table->string('first_name');
-            $table->string('last_name');
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
             $table->string('phone')->nullable();
             $table->date('birth_date');
             $table->string('gender');
@@ -28,7 +28,7 @@ return new class extends Migration {
             $table->string('previous_surgeries')->nullable();
             $table->string('previous_illnesses')->nullable();
             $table->string('medical_analysis')->nullable();
-            $table->double('honest_score')->default(5);
+            $table->double('honest_score')->default(100);
             $table->timestamps();
         });
     }

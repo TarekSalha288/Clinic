@@ -102,6 +102,22 @@ class DoctorService
         return ['message' => $message, 'path' => $img_path];
     }
 
+    public function updateProfile($request)
+    {
+        $user = User::find(auth()->user()->id);
+        if ($user) {
+            $user->update([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'password' => $request->password
+            ]);
+            $user->save();
+            $message = 'profile updated successfully';
+        }
+        return ['message' => $message, 'user' => $user];
+    }
     public function updateArticle($request, $id)
     {
         $article = Post::find($id);
@@ -186,22 +202,6 @@ class DoctorService
         return ['article' => $article, 'message' => $message];
     }
 
-    public function updateProfile($request)
-    {
-        $user = User::find(auth()->user()->id);
-        if ($user) {
-            $user->update([
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'password' => $request->password
-            ]);
-            $user->save();
-            $message = 'profile updated successfully';
-        }
-        return ['message' => $message, 'user' => $user];
-    }
     public function getApointments()
     {
         $user = auth()->user();

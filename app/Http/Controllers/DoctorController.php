@@ -45,18 +45,7 @@ class DoctorController extends Controller
             return Response::Error($data, $message);
         }
     }
-    public function updateProfile(UpdateProfileRequest $request)
-    {
-        $data = [];
-        try {
-            $data = $this->doctorService->updateProfile($request);
-            return Response::Success($data['user'], $data['message']);
 
-        } catch (Throwable $th) {
-            $message = $th->getMessage();
-            return Response::Error($data, $message);
-        }
-    }
     public function uploadImagesForProfile(ImageUploadRequest $request)
     {
         $data = [];
@@ -86,6 +75,18 @@ class DoctorController extends Controller
         try {
             $data = $this->doctorService->deleteProfileImage();
             return Response::Success($data['path'], $data['message']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function updateProfile(UpdateProfileRequest $request)
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->updateProfile($request);
+            return Response::Success($data['user'], $data['message']);
+
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);

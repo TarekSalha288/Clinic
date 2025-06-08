@@ -39,4 +39,48 @@ class PatientController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function getArticles()
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->getArticles();
+            return Response::Success($data['articles'], $data['message']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function addArticleFav($id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->addArticleFav($id);
+            return Response::Success($data['fav'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function deleteArticleFav($id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->deleteArticleFav($id);
+            return Response::Success($data['fav'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function getArticlesFav()
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->getFavArticles();
+            return Response::Success($data['fav'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
 }
