@@ -43,15 +43,19 @@ $this->SecretaryServece=$SecretaryServece;
         default => $this->response("Unknown error", null, 520),
          };
     }
-    public function appointments(){
-        $data=$this->SecretaryServece->appointments();
-         return match ($data['status']){
-            200 => $this->response($data['message'], ['appointment' => null], 200),
-             400 => $this->response($data['errors'], null, 400),
-              404=> $this->response($data['message'], null, 404),
+  public function appointments()
+{
+    $data = $this->SecretaryServece->appointments();
+
+    return match ($data['status']) {
+        200 => $this->response($data['message'], $data['data'], 200),
+        400 => $this->response($data['errors'], null, 400),
+        404 => $this->response($data['message'], null, 404),
         500 => $this->response("Server error: " . $data['error'], null, 500),
         default => $this->response("Unknown error", null, 520),
-    };}
+    };
+}
+
     public function search(){
 
         $data = $this->SecretaryServece->search();
@@ -98,6 +102,16 @@ public function relaseRate(){
    return match($data['status']){
 200=> $this->response($data['message'],null,200),
 404=> $this->response($data['message'],null,404),
+500=>  $this->response($data['error'],null,500),
+ default => $this->response("Unknown error", null, 520),
+   };
+}
+public function enterPatient($id){
+     $data= $this->SecretaryServece->enterPatient($id);
+   return match($data['status']){
+200=> $this->response($data['message'],null,200),
+404=> $this->response($data['message'],null,404),
+400=>$this->response($data['message'],null,400),
 500=>  $this->response($data['error'],null,500),
  default => $this->response("Unknown error", null, 520),
    };

@@ -101,6 +101,7 @@ Route::group([
     Route::post('secretary/apointment', [SecretaryController::class, 'reserve']);
     Route::post('secretary/apointment/{id}', [SecretaryController::class, 'acceptReverse']);
     Route::delete('secretary/apointment/{id}', [SecretaryController::class, 'rejectReverse']);
+    Route::get('secretary/patient/{apointmentId}',[SecretaryController::class,'enterPatient']);
 
 
 });

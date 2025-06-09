@@ -2,12 +2,15 @@
 
 namespace App\Services;
 
+use App\Events\EnterPatient;
 use App\Jobs\RemoveMonthlyLeaves;
 use App\Models\Apointment;
 use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\MounthlyLeave;
 use App\Models\Patient;
+use App\Models\Preview;
+use App\Notifications\EnterPatient as NotificationsEnterPatient;
 use App\Notifications\Reverse;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
@@ -213,28 +216,51 @@ public function deleteReverse($id){
         ];
     }
 }
-public function appointments(){
-    try{
-         $validator = Validator::make(request()->all(), ['doctor_id'=>'required','apointment_date'=>'required']);
-          if ($validator->fails()) {
-                return [
-                    'status' => 400,
-                    'errors' => $validator->errors()->toArray()
-                ];
-            }
-$apointments=Apointment::where('apointment_date',request('apointment_date'))->where('doctor_id',request('doctor_id'))->get();
-if($apointments->isEmpty())
-    return ['status'=>404,'message'=>"No appointments for this doctor"];
-return ['status'=>200,'message'=>'This is appointments for this doctor','data'=>$apointments];
+public function appointments()
+{
+    try {
+        $validator = Validator::make(request()->all(), [
+            'doctor_id' => 'required|integer',
+            'apointment_date' => 'required|date',
+        ]);
 
-    }catch(\Exception $e){
-         return [
+        if ($validator->fails()) {
+            return [
+                'status' => 400,
+                'errors' => $validator->errors()->toArray()
+            ];
+        }
+
+        $date = date('Y-m-d', strtotime(request('apointment_date')));
+
+        $appointments = Apointment::whereDate('apointment_date', $date)
+            ->where('doctor_id', request('doctor_id'))
+            ->get();
+
+        if ($appointments->isEmpty()) {
+            return [
+                'status' => 404,
+                'message' => 'No appointments found for this doctor on the selected date.'
+            ];
+        }
+
+        return [
+            'status' => 200,
+            'message' => 'Appointments found.',
+            'data' => ['appointments' => $appointments]
+        ];
+
+    } catch (\Exception $e) {
+        return [
             'status' => 500,
             'message' => 'Something went wrong.',
-            'error' => $e->getMessage(),
+            'error' => $e->getMessage()
         ];
     }
 }
+
+
+
     public function addMonthlyLeave($doctorId)
     {
         try {
@@ -366,5 +392,39 @@ $patient->save();
 
         }
     }
+    public function enterPatient($id){
+        try{
+$apointment=Apointment::find($id);
+   if($apointment){
+  $existingPreview = Preview::where('patient_id', $apointment->patient_id)
+            ->where('doctor_id', $apointment->doctor_id)
+            ->whereDate('date', now()->toDateString())
+            ->exists();
+        if ($existingPreview) {
+            return ['status' => 400, 'message' => "Alreday send notification"];
+        }
+  Preview::create(['patient_id'=>$apointment->patient_id,
+'doctor_id'=>$apointment->doctor_id,
+'department_id'=>$apointment->department_id,
+'diagnoseis'=>"",
+'diagnoseis_type'=>false,
+'medicine'=>"",
+'status'=>"",
+'notes'=>"",
+'date'=>now()]);
+$apointment->doctor->notify(new NotificationsEnterPatient("That is your patient",$apointment->patient));
 
-}
+event(new EnterPatient("That is your patient",$apointment->doctor_id,$apointment->patient));
+return ['status'=>200,'message'=>"Enter patient done"];
+
+   }
+   return ['status'=>404,'message'=>"Appointment not found"];
+    }
+        catch(\Exception $e){
+         return [
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+
+        }
+}}
