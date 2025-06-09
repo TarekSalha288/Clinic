@@ -46,4 +46,8 @@ class EnterPatient implements ShouldBroadcast
             'timestamp' => now()->toDateTimeString()
         ];
     }
+    public function broadcastAs(): string
+{
+    return 'patient.entered'; // Listen for `.patient.entered` instead of full class path
+}
 }
