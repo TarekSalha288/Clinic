@@ -98,7 +98,9 @@ Route::group([
        Route::get('/secretary/search', [SecretaryController::class, 'search']);
        Route::post('secretary/rate',[SecretaryController::class,'relaseRate']);
 
-    Route::post('secretary/apointment', [SecretaryController::class, 'reserve']);
+    Route::post('secretary/apointment', [SecretaryController::class, 'reverse']);
+
+    Route::post('secretary/unapp/apointment', [SecretaryController::class, 'reverseUnApp']);
     Route::post('secretary/apointment/{id}', [SecretaryController::class, 'acceptReverse']);
     Route::delete('secretary/apointment/{id}', [SecretaryController::class, 'rejectReverse']);
     Route::get('secretary/patient/{apointmentId}',[SecretaryController::class,'enterPatient']);

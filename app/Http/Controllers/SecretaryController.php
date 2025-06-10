@@ -13,8 +13,18 @@ class SecretaryController extends Controller
     public function __construct(SecretaryService $SecretaryServece){
 $this->SecretaryServece=$SecretaryServece;
     }
-    public function reserve(){
-        $data=$this->SecretaryServece->reserve();
+    public function reverse(){
+        $data=$this->SecretaryServece->reverse();
+        return match ($data['status']){
+ 201 => $this->response(" Created Successfully", ['apointment' => $data['data']], 201),
+        400 => $this->response("Validation failed", $data['errors'], 400),
+         404=> $this->response($data['message'], null, 404),
+        500 => $this->response("Server error: " . $data['error'], null, 500),
+        default => $this->response("Unknown error", null, 520),
+        };
+    }
+    public function reverseUnApp(){
+        $data=$this->SecretaryServece->reverseUnApp();
         return match ($data['status']){
  201 => $this->response(" Created Successfully", ['apointment' => $data['data']], 201),
         400 => $this->response("Validation failed", $data['errors'], 400),

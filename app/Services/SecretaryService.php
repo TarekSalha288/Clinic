@@ -17,48 +17,10 @@ use Illuminate\Support\Facades\Validator;
 
 class SecretaryService
 {
- public function reserve()
+ public function reverseUnApp()
 {
     try {
-        $patient = Patient::find(request('patient_id'));
-            $doctor = Doctor::find(request('doctor_id'));
-            $requestData = request()->all();
 
-        if (!empty($requestData['patient_id'])){
-            if (!$patient) {
-                return [
-                    'status' => 404,
-                    'message' => 'Patient not found'
-                ];
-            }
-            if (!$doctor) {
-                return [
-                    'status' => 404,
-                    'message' => 'Doctor not found'
-                ];
-            }
-            $user_id=null;
-            if($patient->user){
-                $user_id=$patient->user->id;
-            }
-
-             $appointment = Apointment::create([
-                'patient_id' => $patient->id,
-                'user_id'=>$user_id,
-                'doctor_id' => request('doctor_id'),
-                'department_id' => $doctor->department->id,
-                'apointment_date' => request('appointment_date'),
-                'apoitment_status'=>'immediate',
-                'status'=>'waiting'
-            ]);
-
-            return [
-                'status' => 201,
-                'message' => 'Appointment added successfully',
-                'data' => $appointment
-            ];
-
-        } else {
             $validator = Validator::make(request()->all(), [
                 'birth_date' => 'required|date',
                 'gender' => 'required|string|in:male,female,other',
@@ -70,11 +32,12 @@ class SecretaryService
                 'previous_surgeries' => 'required|string|max:500',
                 'previous_illnesses' => 'required|string|max:500',
                 'medical_analysis' => 'required|string|max:500',
-
   'appointment_date'=>'required|date_format:Y-m-d H:i:s.u',
   'doctor_id'=>'required',
   'first_name'=>'required|string',
-  'last_name'=>'required|string'
+  'last_name'=>'required|string',
+
+
             ]);
 
             if ($validator->fails()) {
@@ -84,6 +47,7 @@ class SecretaryService
                 ];
             }
 
+ $doctor = Doctor::find(request('doctor_id'));
             $patient = Patient::create([
                 'birth_date' => request('birth_date'),
                 'first_name'=>request('first_name'),
@@ -115,7 +79,7 @@ class SecretaryService
                 'message' => 'Appointment added successfully',
                 'data' => $appointment
             ];
-        }
+
     } catch (\Exception $e) {
         return [
             'status' => 500,
@@ -123,7 +87,57 @@ class SecretaryService
         ];
     }
 }
+public function reverse(){
+    try{
+        $validator=Validator::make(request()->all(),[
+            'doctor_id'=>'required',
+            'patient_id'=>'required',
+            'apointment_date'=>'required'
+        ]);
+         if ($validator->fails()) {
+                return [
+                    'status' => 400,
+                    'errors' => $validator->errors()->toArray()
+                ];
+            }
+ $patient = Patient::find(request('patient_id'));
+            $doctor = Doctor::find(request('doctor_id'));
 
+            if (!$patient) {
+                return [
+                    'status' => 404,
+                    'message' => 'Patient not found'
+                ];
+            }
+            if (!$doctor) {
+                return [
+                    'status' => 404,
+                    'message' => 'Doctor not found'
+                ];
+            }
+             $appointment = Apointment::create([
+                'patient_id' => $patient->id,
+                'doctor_id' => request('doctor_id'),
+                'department_id' => $doctor->department->id,
+                'apointment_date' => request('apointment_date'),
+                'apoitment_status'=>'immediate',
+                'status'=>'waiting'
+            ]);
+
+            return [
+                'status' => 201,
+                'message' => 'Appointment added successfully',
+                'data' => $appointment
+            ];
+
+
+    }catch(\Exception $e){
+          return [
+            'status' => 500,
+            'error' => $e->getMessage()
+        ];
+    }
+}
 
 public function acceptReverse($id)
 {

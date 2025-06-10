@@ -53,7 +53,7 @@ class UserService
     public function getDepartments()
     {
         try {
-            $departments = Department::all();
+            $departments = Department::with('doctors.user')->get();
             if ($departments)
                 return $departments;
             return null;
@@ -64,7 +64,7 @@ class UserService
     public function getDepartment($id)
     {
         try {
-            $department = Department::find($id);
+            $department = Department::with('doctors.user')->first();
             if ($department)
                 return $department;
             return null;
