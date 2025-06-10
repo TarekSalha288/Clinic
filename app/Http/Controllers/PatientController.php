@@ -95,4 +95,26 @@ class PatientController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function updateAppointment(BookAppointmentRequest $request, $appointment_id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->updateApointment($request, $appointment_id);
+            return Response::Success($data['appointment'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function deleteAppointment($appointment_id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->deleteAppointment($appointment_id);
+            return Response::Success($data['appointment'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
 }

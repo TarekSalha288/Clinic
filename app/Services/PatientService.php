@@ -172,5 +172,63 @@ class PatientService
         }
         return ['message' => $message, 'appointment' => $appointment ?? null, 'code' => $code];
     }
+    public function updateApointment($request, $appointment_id)
+    {
+        $appointment = Apointment::find($appointment_id);
+        $patient = auth()->user()->patient;
+        $son_id = $request->son_id ?? null;
+        $son = Son::find($son_id);
+        if ($son && ($son->parent_id !== auth()->user()->id)) {
+            $message = "patient don't have this son";
+            $code = 404;
+            return ['message' => $message, 'appointment' => null, 'code' => $code];
+        }
+        if ($appointment) {
+            if ($appointment->status === "waiting") {
+                $updateData = [];
+                if ($request->has('apointment_date') && $request->apointment_date !== null) {
+                    $updateData['apointment_date'] = $request->apointment_date;
+                }
+                if ($son && $son_id !== null) {
+                    $updateData['patient_id'] = $son->patient_id;
+                } else {
+                    $updateData['patient_id'] = $patient->id;
+                }
+                $appointment->update($updateData);
+                if ($appointment) {
+                    $message = "apointment updated successfully";
+                    $code = 200;
+                } else {
+                    $message = "apointment updated failed";
+                    $code = 400;
+                }
+            } else {
+                $message = "this appointment accepted you cant update it";
+                $code = 400;
+            }
+        } else {
+            $message = "appointment not found";
+            $code = 404;
+        }
+        return ['message' => $message, 'appointment' => $appointment, 'code' => $code];
+    }
+    public function deleteAppointment($appointment_id)
+    {
+        $appointment = Apointment::find($appointment_id);
+        if ($appointment) {
+            $checkDelete = $appointment->delete();
+            if ($checkDelete) {
+                $message = "Appointment deleted successfully";
+                $code = 200;
+            } else {
+                $message = "Appointment deleted failed";
+                $code = 400;
+            }
+        } else {
+            $message = "Appointment not found";
+            $code = 404;
+        }
+        return ['message' => $message, 'appointment' => $appointment, 'code' => $code];
+    }
 }
 

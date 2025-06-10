@@ -82,6 +82,8 @@ Route::group([
     Route::delete('/deleteArticleFav/{id}', [PatientController::class, 'deleteArticleFav']);
     Route::get('/getArticlesFav', [PatientController::class, 'getArticlesFav']);
     Route::post('/bookAppointment/{doctor_id}', [PatientController::class, 'bookAppointment']);
+    Route::put('/updateAppointment/{appointment_id}', [PatientController::class, 'updateAppointment']);
+    Route::delete('/deleteAppointment/{appointment_id}', [PatientController::class, 'deleteAppointment']);
 });
 
 
