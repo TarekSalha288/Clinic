@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\Apointment;
+use App\Models\Doctor;
 use App\Models\FavoritePost;
 use App\Models\Patient;
 use App\Models\Post;
 use App\Models\Son;
+use function PHPUnit\Framework\isNull;
 
 class PatientService
 {
@@ -129,7 +132,45 @@ class PatientService
             $code = 404;
         }
         return ['fav' => $formatedArticles, 'message' => $message, 'code' => $code];
-
+    }
+    public function bookAppointment($request, $doctor_id)
+    {
+        $doctor = Doctor::find($doctor_id);
+        $patient = auth()->user()->patient;
+        $son_id = $request->son_id ?? null;
+        $son = Son::find($son_id);
+        if ($son && ($son->parent_id !== auth()->user()->id)) {
+            $message = "patient don't have this son";
+            $code = 404;
+            return ['message' => $message, 'appointment' => null, 'code' => $code];
+        }
+        if ($doctor && $patient) {
+            $department = $doctor->department;
+            if ($department) {
+                $appointment = Apointment::create([
+                    'patient_id' => $son_id == null ? $patient->id : $son->patient_id,
+                    'doctor_id' => $doctor_id,
+                    'department_id' => $department->id,
+                    'apointment_date' => $request->appointment_date,
+                    'apoitment_status' => "app",
+                    'status' => "waiting"
+                ]);
+            } else {
+                $code = 404;
+                $message = "department not found";
+            }
+            if ($appointment) {
+                $code = 200;
+                $message = "appointment created successfully";
+            } else {
+                $code = 400;
+                $message = "appointment created failed";
+            }
+        } else {
+            $code = 404;
+            $message = "doctor or patient not found";
+        }
+        return ['message' => $message, 'appointment' => $appointment ?? null, 'code' => $code];
     }
 }
 

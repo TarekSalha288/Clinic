@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AddChildRequest;
+use App\Http\Requests\BookAppointmentRequest;
 use App\Http\Requests\PatientProfileRequest;
 use App\Http\Responses\Response;
 use App\Services\PatientService;
@@ -78,6 +79,17 @@ class PatientController extends Controller
         try {
             $data = $this->patientService->getFavArticles();
             return Response::Success($data['fav'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function bookAppointment(BookAppointmentRequest $request, $doctor_id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->bookAppointment($request, $doctor_id);
+            return Response::Success($data['appointment'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);
