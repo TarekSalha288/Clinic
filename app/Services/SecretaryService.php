@@ -273,7 +273,17 @@ public function appointments()
         ];
     }
 }
+public function monthlyLeaves(){
+    try{
+$all=MounthlyLeave::all();
+    if($all->isEmpty())
+    return ['status'=>400,'message'=>'No monthly leaves'];
+return ['status'=>200,'message'=>'That is all monthly leaves','data'=>$all];
+    }catch(\Exception $e){
+        return ['status'=>500,'errors'=>$e->getMessage()];
+    }
 
+}
 
 
 public function addMonthlyLeaves()
