@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Events\EnterPatient;
 use App\Jobs\RemoveMonthlyLeaves;
 use App\Models\Apointment;
+use App\Models\Day;
 use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\MounthlyLeave;
@@ -275,55 +276,77 @@ public function appointments()
 
 
 
-    public function addMonthlyLeave($doctorId)
-    {
-        try {
-            $doctor = Doctor::with('department')->find($doctorId);
+public function addMonthlyLeaves()
+{
+    try {
+        $requests = request()->json()->all();
+        $createdLeaves = [];
+        $errors = [];
+
+        foreach ($requests as $index => $request) {
+            if (!isset($request['doctor_id']) || !isset($request['day_id'])) {
+                $errors[] = [
+                    'index' => $index,
+                    'message' => "Missing doctor_id or day_id",
+                    'request' => $request
+                ];
+                continue;
+            }
+            $doctor = Doctor::with('department')->find($request['doctor_id']);
+            $day = Day::find($request['day_id']);
+            if (!$day) {
+                $errors[] = [
+                    'index' => $index,
+                    'message' => "Day Not Found (ID: {$request['day_id']})",
+                    'request' => $request
+                ];
+                continue;
+            }
             if (!$doctor) {
-                return [
-                    'status' => 404,
-                    'message' => 'Doctor not found'
+                $errors[] = [
+                    'index' => $index,
+                    'message' => "Doctor Not Found (ID: {$request['doctor_id']})",
+                    'request' => $request
                 ];
+                continue;
             }
-            $dayId = request('day_id');
-            if (!$dayId) {
-                return [
-                    'status' => 400,
-                    'message' => 'Missing day_id'
-                ];
-            }
-            $departmentDoctorIds = Doctor::where('department_id', $doctor->department->id)
-                ->pluck('id');
-
-            $exists = MounthlyLeave::where('day_id', $dayId)
-                ->whereIn('doctor_id', $departmentDoctorIds)
+            $doctor=Doctor::where('department_id', $doctor->department_id)->pluck('id');
+            $dayAvailable = !MounthlyLeave::where('day_id', $request['day_id'])
+                ->whereIn('doctor_id',$doctor)
                 ->exists();
-
-            if ($exists) {
-                return [
-                    'status' => 409,
-                    'message' => 'That day is not available for this department'
+            if ($dayAvailable) {
+                $createdLeaves[] = MounthlyLeave::create([
+                    'doctor_id' => $request['doctor_id'],
+                    'day_id' => $request['day_id']
+                ]);
+            } else {
+                $doctor=Doctor::find($request['doctor_id']);
+                $doctorName=$doctor->user->first_name." ".$doctor->user->last_name;
+                $dayName=$day->available_days;
+                $errors[] = [
+                    'index' => $index,
+                    'message' => "Doctor {$doctorName}  can't take  Day {$dayName} because it is already taken by another doctor in the same department",
+                    'request' => $request
                 ];
             }
-
-            $leave = MounthlyLeave::create([
-                'day_id' => $dayId,
-                'doctor_id' => $doctorId
-            ]);
-
-            return [
-                'status' => 201,
-                'message' => 'Leave added successfully',
-                'data' => $leave
-            ];
-        } catch (\Exception $e) {
-            return [
-                'status' => 500,
-                'message' => 'Something went wrong',
-                'error' => $e->getMessage()
-            ];
         }
+
+        return [
+            'status' => (count($errors) > 0 && count($createdLeaves) > 0) ? 207 : // Multi-status
+             (count($errors) > 0 ? 400 : 201),
+            'message' => count($createdLeaves) . ' leaves created, ' . count($errors) . ' errors',
+            'data' => $createdLeaves,
+            'errors' => $errors
+        ];
+
+    } catch (\Exception $e) {
+        return [
+            'status' => 500,
+            'message' => 'Server Error',
+            'errors' => $e->getMessage()
+        ];
     }
+}
  public function search()
 {
     try {

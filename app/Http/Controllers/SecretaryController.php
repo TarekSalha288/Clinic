@@ -85,18 +85,50 @@ $this->SecretaryServece=$SecretaryServece;
             500 => $this->response("Server error: " . $data['error'], null, 500),
             default => $this->response("Unknown error", null, 520)
     };}
-    public function addMounthlyLeave($doctorId){
-$data=$this->SecretaryServece->addMonthlyLeave($doctorId);
-  return match ($data['status']) {
-        201 => $this->response(" Created Successfully", ['secretary' => $data['data']], 201),
-        400 => $this->response("Validation failed", $data['errors'], 400),
-        409 => $this->response($data['message'], null, 409),
-         404=> $this->response($data['message'], null, 404),
-        500 => $this->response("Server error: " . $data['error'], null, 500),
-        default => $this->response("Unknown error", null, 520),
+public function addMounthlyLeaves()
+{
+    $data = $this->SecretaryServece->addMonthlyLeaves();
+    return match ($data['status']) {
+        201 => $this->response(
+            $data['message'],
+            ['leaves' => $data['data']],
+            201
+        ),
+        207 => $this->response(//Multi status
+            $data['message'],
+            [
+                'leaves' => $data['data'],
+                'errors' => $data['errors']
+            ],
+            207
+        ),
+        400 => $this->response(
+            "Validation failed",
+            ['errors' => $data['errors']],
+            400
+        ),
+        404 => $this->response(
+            $data['message'],
+            ['errors' => $data['errors'] ?? null],
+            404
+        ),
+        409 => $this->response(
+            $data['message'],
+            ['errors' => $data['errors'] ?? null],
+            409
+        ),
+        500 => $this->response(
+            "Server error: " . ($data['errors'] ?? $data['message']),
+            null,
+            500
+        ),
+        default => $this->response(
+            "Unknown error",
+            null,
+            520
+        ),
     };
-
-    }
+}
 public function removeMonthlyleaves(){
    $data= $this->SecretaryServece->removeMonthlyleaves();
    return match($data['status']){

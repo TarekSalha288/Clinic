@@ -87,7 +87,7 @@ Route::group([
 Route::group([
     'middleware' => [TwoFactor::class, SecretaryMiddleware::class, 'api', 'auth']
 ], function ($router) {
-    Route::post('secretary/leave/{id}', [SecretaryController::class, 'addMounthlyLeave']);
+    Route::post('secretary/leave/', [SecretaryController::class, 'addMounthlyLeaves']);
     Route::delete('secretary/leave', [SecretaryController::class, 'removeMonthlyLeaves']);
 
     Route::post('secretary/apointment',[SecretaryController::class,'reserve']);
