@@ -16,6 +16,11 @@ class Apointment extends Model
         return $query->where('status', 'accepted');
     }
 
+    public function scopeWaiting($query)
+    {
+        return $query->where('status', 'waiting');
+    }
+
     public function scopeToday(Builder $query): Builder
     {
         return $query->whereDate('apointment_date', Carbon::today());
@@ -25,15 +30,22 @@ class Apointment extends Model
     {
         return $query->where('doctor_id', $doctorId);
     }
-     public function department():BelongsTo
+    public function scopeOfPatient($query, $patientId)
+    {
+        return $query->where('patient_id', $patientId);
+    }
+
+
+    public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
     }
-     public function doctor():BelongsTo
+    public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
     }
-    public function patient():BelongsTo{
+    public function patient(): BelongsTo
+    {
         return $this->belongsTo(Patient::class);
     }
 

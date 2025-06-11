@@ -230,5 +230,32 @@ class PatientService
         }
         return ['message' => $message, 'appointment' => $appointment, 'code' => $code];
     }
+    public function getAppointments()
+    {
+        $user = auth()->user();
+        $patient = $user->patient;
+        $sons = Son::where('parent_id', $user->id)->get();
+        $formatedAppointments = [];
+        $acceptedAppointmentsForPatient = Apointment::ofPatient($patient->id)->accepted()->get();
+        $waitingAppointmentsForPatient = Apointment::ofPatient($patient->id)->waiting()->get();
+        $formatedAppointments['accepted_patient'] = $acceptedAppointmentsForPatient ?? null;
+        $formatedAppointments['waiting_patient'] = $waitingAppointmentsForPatient ?? null;
+        $acceptedAppointmentsForPatientSon = [];
+        $waitingAppointmentsForPatientSon = [];
+        if ($sons) {
+            foreach ($sons as $son) {
+                $acceptedAppointmentsForPatientSon = Apointment::ofPatient($son->patient_id)->accepted()->get();
+                $waitingAppointmentsForPatientSon = Apointment::ofPatient($son->patient_id)->waiting()->get();
+            }
+            $formatedAppointments['accepted_sons'] = $acceptedAppointmentsForPatientSon ?? null;
+            $formatedAppointments['waiting_sons'] = $waitingAppointmentsForPatientSon ?? null;
+        }
+        if ($formatedAppointments) {
+            $message = "appointemts return successfully";
+        } else {
+            $message = "appointemts return failed";
+        }
+        return ['message' => $message, 'appointments' => $formatedAppointments];
+    }
 }
 

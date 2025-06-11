@@ -117,4 +117,15 @@ class PatientController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function getAppointments()
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->getAppointments();
+            return Response::Success($data['appointments'], $data['message']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
 }
