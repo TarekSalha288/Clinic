@@ -67,7 +67,7 @@ class PatientService
 
     public function getArticles()
     {
-        $articles = Post::all();
+        $articles = Post::paginate(5);
         if ($articles) {
             $message = "articles return successfully";
         } else {

@@ -179,7 +179,7 @@ class DoctorService
     {
         $user = auth()->user();
         $doctor = $user->doctor;
-        $articles = $doctor->posts;
+        $articles = $doctor->posts()->paginate(5);
         if ($articles) {
             $articles = $this->addDoctorInfo($articles, $doctor, $user);
             $message = 'Articles return successfully';
