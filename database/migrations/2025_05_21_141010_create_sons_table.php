@@ -11,18 +11,18 @@ return new class extends Migration {
 
 
             $table->foreignId('parent_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('cascade')
-                  ;
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade')
+            ;
 
             // Patient relationship - using the same method
             $table->unsignedInteger('patient_id');
             $table->foreign('patient_id')
-                  ->references('id')
-                  ->on('patients')
-                  ->onDelete('cascade')
-                  ;
+                ->references('id')
+                ->on('patients')
+                ->onDelete('cascade')
+            ;
 
             $table->string('first_name');
             $table->string('last_name');

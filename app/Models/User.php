@@ -64,7 +64,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $this->timestamps = false;
         $this->code = rand(100000, 999999);
-        $this->expire_at = now()->addMinute();
+        $this->expire_at = now()->addMinutes(5);
         $this->save();
     }
     public function resetTwoFactorCode()
@@ -78,7 +78,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(Doctor::class);
     }
-     public function patient():HasOne
+    public function patient(): HasOne
     {
         return $this->hasOne(Patient::class);
     }

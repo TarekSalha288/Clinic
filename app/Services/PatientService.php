@@ -54,15 +54,16 @@ class PatientService
             'permanent_medications' => $request->permanent_medications,
             'previous_surgeries' => $request->previous_surgeries,
             'previous_illnesses' => $request->previous_illnesses,
-            'medical_analysis' => $request->medical_analysis,
             'honest_score' => 100
         ]);
         if ($patient) {
             $message = 'patient profile added successfullt';
+            $code = 200;
         } else {
             $message = 'patient profile not added to the system';
+            $code = 400;
         }
-        return ['message' => $message, 'patient' => $patient];
+        return ['message' => $message, 'patient' => $patient, 'code' => $code];
     }
     public function addChild($request)
     {

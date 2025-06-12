@@ -27,7 +27,6 @@ return new class extends Migration {
             $table->string('permanent_medications')->nullable();
             $table->string('previous_surgeries')->nullable();
             $table->string('previous_illnesses')->nullable();
-            $table->string('medical_analysis')->nullable();
             $table->double('honest_score')->default(100);
             $table->timestamps();
         });

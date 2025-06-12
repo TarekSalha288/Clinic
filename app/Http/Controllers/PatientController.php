@@ -21,7 +21,7 @@ class PatientController extends Controller
         $data = [];
         try {
             $data = $this->patientService->postPatientInformation($request);
-            return Response::Success($data['patient'], $data['message']);
+            return Response::Success($data['patient'], $data['message'], $data['code']);
 
         } catch (Throwable $th) {
             $message = $th->getMessage();

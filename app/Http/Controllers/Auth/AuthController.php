@@ -45,6 +45,7 @@ class AuthController extends Controller
         $user->last_name = request()->last_name;
         $user->email = request()->email;
         $user->phone = request()->phone;
+        $user->fcm_token = request()->fcm_token;
         $user->password = bcrypt(request()->password);
         $user->save();
 
@@ -56,7 +57,7 @@ class AuthController extends Controller
                     'user_id' => $user->id
                 ]);
             if (!$patient) {
-                return response()->json(['The patient not found you enter uncorect ID'], 404);
+                return response()->json(['message' => 'The patient not found you enter uncorect ID'], 404);
             }
         }
 
@@ -71,8 +72,8 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         $json = $this->respondWithToken($token)->getContent();
-        $user->fcm_token = $token;
-        $user->save();
+        // $user->fcm_token = $token;
+        // $user->save();
         $array = json_decode($json, true);
         return response()->json(['token' => $array, 'user' => $user], 200);
 
