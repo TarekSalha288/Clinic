@@ -9,9 +9,37 @@ use App\Models\Patient;
 use App\Models\Post;
 use App\Models\Son;
 use function PHPUnit\Framework\isNull;
+use function PHPUnit\Framework\returnArgument;
 
 class PatientService
 {
+    // some function for formate the response
+    private function addPatientInfo($array, $patient)
+    {
+        $patientInfo = [
+            'id' => $patient->id,
+            'gender' => $patient->gender,
+            'age' => $patient->age,
+            'birth_date' => $patient->birth_date,
+        ];
+        $array['patient_info'] = $patientInfo;
+        return $array;
+    }
+    public function addFavToArticles($articles, $patient)
+    {
+        $formatedArticles = [];
+        foreach ($articles as $article) {
+            $flagFav = FavoritePost::where('post_id', $article->id)->where('patient_id', $patient->id)->get();
+            if ($flagFav->isNotEmpty()) {
+                $article['fav'] = true;
+            } else {
+                $article['fav'] = false;
+            }
+            $formatedArticles = $article;
+        }
+        return collect($formatedArticles);
+    }
+    // ____________________________________________
     public function postPatientInformation($request)
     {
         $user_id = auth()->user()->id;
@@ -57,6 +85,7 @@ class PatientService
             'first_name' => $request->first_name,
             'last_name' => $request->last_name
         ]);
+        $this->addPatientInfo($son, $patient);
         if ($patient && $son) {
             $message = 'son profile added successfullt';
         } else {
@@ -67,7 +96,9 @@ class PatientService
 
     public function getArticles()
     {
+        $patient = auth()->user()->patient;
         $articles = Post::paginate(5);
+        $this->addFavToArticles($articles, $patient);
         if ($articles) {
             $message = "articles return successfully";
         } else {
@@ -256,6 +287,24 @@ class PatientService
             $message = "appointemts return failed";
         }
         return ['message' => $message, 'appointments' => $formatedAppointments];
+    }
+    public function getSons()
+    {
+        $sons = Son::where('parent_id', auth()->user()->id)->get();
+        if ($sons) {
+            $formatedSonArray = [];
+            foreach ($sons as $son) {
+                $patient = Patient::find($son->patient_id);
+                $this->addPatientInfo($son, $patient);
+                $formatedSonArray[] = $son;
+            }
+            $message = "sons return successfully";
+            $code = 200;
+        } else {
+            $message = "this patient dont have any sons in the application";
+            $code = 404;
+        }
+        return ['message' => $message, 'sons' => $formatedSonArray, 'code' => $code];
     }
 }
 

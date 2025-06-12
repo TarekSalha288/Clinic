@@ -128,4 +128,15 @@ class PatientController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function getChilds()
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->getSons();
+            return Response::Success($data['sons'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
 }
