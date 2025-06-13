@@ -33,7 +33,7 @@ class SecretaryService
                 'previous_surgeries' => 'required|string|max:500',
                 'previous_illnesses' => 'required|string|max:500',
                 'medical_analysis' => 'required|string|max:500',
-  'appointment_date'=>'required|date_format:Y-m-d H:i:s.u',
+  'appointment_date'=>'required',
   'doctor_id'=>'required',
   'first_name'=>'required|string',
   'last_name'=>'required|string',
