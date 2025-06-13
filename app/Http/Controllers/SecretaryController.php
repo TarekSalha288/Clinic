@@ -53,9 +53,9 @@ $this->SecretaryServece=$SecretaryServece;
         default => $this->response("Unknown error", null, 520),
          };
     }
-  public function appointments()
+  public function appointments($doctor_id , $appointment_date)
 {
-    $data = $this->SecretaryServece->appointments();
+    $data = $this->SecretaryServece->appointments($doctor_id , $appointment_date);
 
     return match ($data['status']) {
         200 => $this->response($data['message'], $data['data'], 200),

@@ -231,33 +231,16 @@ public function deleteReverse($id){
         ];
     }
 }
-public function appointments()
+public function appointments($doctor_id , $appointment_date)
 {
     try {
-        $validator = Validator::make(request()->all(), [
-            'doctor_id' => 'required|integer',
-            'apointment_date' => 'required|date',
-        ]);
 
-        if ($validator->fails()) {
-            return [
-                'status' => 400,
-                'errors' => $validator->errors()->toArray()
-            ];
-        }
+        $date = date('Y-m-d', strtotime($appointment_date));
 
-        $date = date('Y-m-d', strtotime(request('apointment_date')));
-
-        $appointments = Apointment::whereDate('apointment_date', $date)
-            ->where('doctor_id', request('doctor_id'))
+        $appointments = Apointment::with('patient')->whereDate('apointment_date', $date)
+            ->where('doctor_id', $doctor_id )
             ->get();
 
-        if ($appointments->isEmpty()) {
-            return [
-                'status' => 404,
-                'message' => 'No appointments found for this doctor on the selected date.'
-            ];
-        }
 
         return [
             'status' => 200,

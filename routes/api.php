@@ -97,23 +97,15 @@ Route::group([
     Route::post('secretary/leave/', [SecretaryController::class, 'addMounthlyLeaves']);
     Route::delete('secretary/leave', [SecretaryController::class, 'removeMonthlyLeaves']);
     Route::get('secretary/leave', [SecretaryController::class, 'monthlyLeaves']);
-
-    Route::post('secretary/apointment', [SecretaryController::class, 'reserve']);
-    Route::post('secretary/apointment/{id}', [SecretaryController::class, 'acceptReverse']);
-    Route::delete('secretary/apointment/{id}', [SecretaryController::class, 'rejectReverse']);
-    Route::get('secretary/apointment', [SecretaryController::class, 'appointments']);
-    Route::get('secretary/apointments', [SecretaryController::class, 'apointments']);
+    Route::post('secretary/appointment/{id}', [SecretaryController::class, 'acceptReverse']);
+    Route::delete('secretary/appointment/{id}', [SecretaryController::class, 'rejectReverse']);
+    Route::get('secretary/appointment/{doctor_id}/{appointment_date}', [SecretaryController::class, 'appointments']);
+    Route::get('secretary/appointments', [SecretaryController::class, 'apointments']);
     Route::get('/secretary/search', [SecretaryController::class, 'search']);
     Route::post('secretary/rate', [SecretaryController::class, 'relaseRate']);
-
-    Route::post('secretary/apointment', [SecretaryController::class, 'reverse']);
-
-    Route::post('secretary/unapp/apointment', [SecretaryController::class, 'reverseUnApp']);
-    Route::post('secretary/apointment/{id}', [SecretaryController::class, 'acceptReverse']);
-    Route::delete('secretary/apointment/{id}', [SecretaryController::class, 'rejectReverse']);
+    Route::post('secretary/appointment', [SecretaryController::class, 'reverse']);
+    Route::post('secretary/unapp/appointment', [SecretaryController::class, 'reverseUnApp']);
     Route::get('secretary/patient/{apointmentId}', [SecretaryController::class, 'enterPatient']);
-
-
 });
 //////Any Body Can Access
 Route::group(['middleware' => [TwoFactor::class, 'api', 'auth']], function ($router) {
