@@ -132,8 +132,30 @@ class PatientController extends Controller
     {
         $data = [];
         try {
-            $data = $this->patientService->getSons();
+            $data = $this->patientService->getChilds();
             return Response::Success($data['sons'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function updateChild(AddChildRequest $request, $child_id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->updateChild($request, $child_id);
+            return Response::Success($data['son'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function deleteChild($child_id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->deleteChild($child_id);
+            return Response::Success($data['son'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);

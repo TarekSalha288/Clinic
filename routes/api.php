@@ -77,6 +77,8 @@ Route::group([
 ], function ($router) {
     Route::post('/pateintProfile', [PatientController::class, 'postPatientProfile']);
     Route::post('/addChild', [PatientController::class, 'addChild']);
+    Route::put('/updateChild/{child_id}', [PatientController::class, 'updateChild']);
+    Route::delete('/deleteChild/{child_id}', [PatientController::class, 'deleteChild']);
     Route::get('/getChilds', [PatientController::class, 'getChilds']);
     Route::get('/getArticlesApp', [PatientController::class, 'getArticles']);
     Route::post('/addArticleFav/{id}', [PatientController::class, 'addArticleFav']);

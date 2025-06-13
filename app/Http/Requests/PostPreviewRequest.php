@@ -25,10 +25,10 @@ class PostPreviewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'diagnoseis' => 'required',
-            'diagnoseis_type' => 'required',
-            'medicine' => 'required',
-            'notes' => 'required',
+            'diagnoseis' => ['required', 'string'],
+            'diagnoseis_type' => ['required', 'boolean'],
+            'medicine' => ['required', 'string'],
+            'notes' => ['required', 'string', 'max:1000'],
             'status' => 'required'
         ];
     }

@@ -78,7 +78,6 @@ class PatientService
             'permanent_medications' => $request->permanent_medications,
             'previous_surgeries' => $request->previous_surgeries,
             'previous_illnesses' => $request->previous_illnesses,
-            'medical_analysis' => $request->medical_analysis,
         ]);
         $son = Son::create([
             'patient_id' => $patient->id,
@@ -289,7 +288,7 @@ class PatientService
         }
         return ['message' => $message, 'appointments' => $formatedAppointments];
     }
-    public function getSons()
+    public function getChilds()
     {
         $sons = Son::where('parent_id', auth()->user()->id)->get();
         if ($sons) {
@@ -306,6 +305,60 @@ class PatientService
             $code = 404;
         }
         return ['message' => $message, 'sons' => $formatedSonArray, 'code' => $code];
+    }
+    public function updateChild($request, $id)
+    {
+        $son = Son::find($id);
+        if (!$son) {
+            return ['message' => "son not found", 'son' => null, 'code' => 404];
+        }
+        $patientSonProfile = Patient::find($son->patient_id);
+        if ($patientSonProfile) {
+            $updatePatientResult = $patientSonProfile->update([
+                'birth_date' => $request->birth_date,
+                'gender' => $request->gender,
+                'age' => $request->age,
+                'blood_type' => $request->blood_type,
+                'chronic_diseases' => $request->chronic_diseases,
+                'medication_allergies' => $request->medication_allergies,
+                'permanent_medications' => $request->permanent_medications,
+                'previous_surgeries' => $request->previous_surgeries,
+                'previous_illnesses' => $request->previous_illnesses,
+            ]);
+        }
+        if ($son) {
+            $updateSonResult = $son->update([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name
+            ]);
+        }
+        $this->addPatientInfo($son, $patientSonProfile);
+        if ($updatePatientResult && $updateSonResult) {
+            $message = "son profile update successfully";
+            $code = 200;
+        } else {
+            $message = "son profile update faild";
+            $code = 400;
+        }
+        return ['message' => $message, 'son' => $son, 'code' => $code];
+    }
+    public function deleteChild($id)
+    {
+        $son = Son::find($id);
+        if ($son) {
+            $deletedCheck = $son->delete();
+            if ($deletedCheck) {
+                $message = "Son deleted successfully";
+                $code = 200;
+            } else {
+                $message = "Son deleted failed";
+                $code = 400;
+            }
+        } else {
+            $message = "Son not found";
+            $code = 404;
+        }
+        return ['message' => $message, 'son' => $son, 'code' => $code];
     }
 }
 

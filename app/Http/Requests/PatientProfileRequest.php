@@ -25,10 +25,10 @@ class PatientProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'birth_date' => 'required',
-            'gender' => 'required',
-            'age' => 'required',
-            'blood_type' => 'required',
+            'birth_date' => ['required', 'date', 'before:today'],
+            'gender' => ['required', 'in:male,female'],
+            'age' => ['required', 'integer', 'min:0', 'max:150'],
+            'blood_type' => ['required', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
         ];
     }
     protected function failedValidation(Validator $validator)
