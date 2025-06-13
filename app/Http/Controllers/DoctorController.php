@@ -26,7 +26,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->postArtical($request);
-            return Response::Success($data['post'], $data['message']);
+            return Response::Success($data['post'], $data['message'], $data['code']);
 
         } catch (Throwable $th) {
             $message = $th->getMessage();
@@ -38,7 +38,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->uploadImage($request, 'posts');
-            return Response::Success($data['path'], $data['message']);
+            return Response::Success($data['path'], $data['message'], $data['code']);
 
         } catch (Throwable $th) {
             $message = $th->getMessage();
@@ -51,7 +51,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->uploadImage($request, 'Profile_Photo');
-            return Response::Success($data['path'], $data['message']);
+            return Response::Success($data['path'], $data['message'], $data['code']);
 
         } catch (Throwable $th) {
             $message = $th->getMessage();
@@ -63,7 +63,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->getProfileImage();
-            return Response::Success($data['path'], $data['message']);
+            return Response::Success($data['path'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);
@@ -74,7 +74,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->deleteProfileImage();
-            return Response::Success($data['path'], $data['message']);
+            return Response::Success($data['path'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);
@@ -85,7 +85,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->updateProfile($request);
-            return Response::Success($data['user'], $data['message']);
+            return Response::Success($data['user'], $data['message'], $data['code']);
 
         } catch (Throwable $th) {
             $message = $th->getMessage();
@@ -97,7 +97,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->updateArticle($request, $id);
-            return Response::Success($data['article'], $data['message']);
+            return Response::Success($data['article'], $data['message'], $data['code']);
 
         } catch (Throwable $th) {
             $message = $th->getMessage();
@@ -109,7 +109,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->deleteArticle($id);
-            return Response::Success($data['article'], $data['message']);
+            return Response::Success($data['article'], $data['message'], $data['code']);
 
         } catch (Throwable $th) {
             $message = $th->getMessage();
@@ -121,7 +121,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->getArticles();
-            return Response::Success($data['articles'], $data['message']);
+            return Response::Success($data['articles'], $data['message'], $data['code']);
 
         } catch (Throwable $th) {
             $message = $th->getMessage();
@@ -133,7 +133,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->getArticleById($id);
-            return Response::Success($data['article'], $data['message']);
+            return Response::Success($data['article'], $data['message'], $data['code']);
 
         } catch (Throwable $th) {
             $message = $th->getMessage();
@@ -145,7 +145,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->getApointments();
-            return Response::Success($data['apointments'], $data['message']);
+            return Response::Success($data['apointments'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);
@@ -156,7 +156,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->postPreview($request, $patient_id);
-            return Response::Success($data['preview'], $data['message']);
+            return Response::Success($data['preview'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);
@@ -167,7 +167,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->updatePreview($request, $preview_id);
-            return Response::Success($data['preview'], $data['message']);
+            return Response::Success($data['preview'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);
@@ -189,7 +189,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->getPreviews();
-            return Response::Success($data['previews'], $data['message']);
+            return Response::Success($data['previews'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);

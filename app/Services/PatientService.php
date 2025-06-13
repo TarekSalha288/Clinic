@@ -13,7 +13,7 @@ use function PHPUnit\Framework\returnArgument;
 
 class PatientService
 {
-    // some function for formate the response
+    // some functions for formate the response
     private function addPatientInfo($array, $patient)
     {
         $patientInfo = [
@@ -359,6 +359,10 @@ class PatientService
             $code = 404;
         }
         return ['message' => $message, 'son' => $son, 'code' => $code];
+    }
+    public function getPreviews()
+    {
+
     }
 }
 
