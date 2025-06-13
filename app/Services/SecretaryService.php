@@ -72,7 +72,7 @@ class SecretaryService
                 'department_id' => $doctor->department->id,
                 'apointment_date' => request('appointment_date'),
                 'apoitment_status'=>'unapp',
-                'status'=>'waiting'
+                'status'=>'accepted'
             ]);
 
             return [
@@ -122,7 +122,7 @@ public function reverse(){
                 'department_id' => $doctor->department->id,
                 'apointment_date' => request('apointment_date'),
                 'apoitment_status'=>'immediate',
-                'status'=>'waiting'
+                'status'=>'accepted'
             ]);
 
             return [
