@@ -18,68 +18,69 @@ use Illuminate\Support\Facades\Validator;
 
 class SecretaryService
 {
- public function reverseUnApp()
+public function reverseUnApp()
 {
     try {
+        $validator = Validator::make(request()->all(), [
+            'birth_date' => 'required|date',
+            'gender' => 'required|string|in:male,female,other',
+            'age' => 'required|integer|min:0|max:120',
+            'blood_type' => 'required|string|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
+            'chronic_diseases' => 'required|string|max:500',
+            'medication_allergies' => 'required|string|max:500',
+            'permanent_medications' => 'required|string|max:500',
+            'previous_surgeries' => 'required|string|max:500',
+            'previous_illnesses' => 'required|string|max:500',
+            'medical_analysis' => 'required|string|max:500',
+            'appointment_date' => 'required',
+            'doctor_id' => 'required',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+        ]);
 
-            $validator = Validator::make(request()->all(), [
-                'birth_date' => 'required|date',
-                'gender' => 'required|string|in:male,female,other',
-                'age' => 'required|integer|min:0|max:120',
-                'blood_type' => 'required|string|in:A+,A-,B+,B-,AB+,AB-,O+,O-',//
-                'chronic_diseases' => 'required|string|max:500',
-                'medication_allergies' => 'required|string|max:500',
-                'permanent_medications' => 'required|string|max:500',
-                'previous_surgeries' => 'required|string|max:500',
-                'previous_illnesses' => 'required|string|max:500',
-                'medical_analysis' => 'required|string|max:500',
-  'appointment_date'=>'required',
-  'doctor_id'=>'required',
-  'first_name'=>'required|string',
-  'last_name'=>'required|string',
-
-
-            ]);
-
-            if ($validator->fails()) {
-                return [
-                    'status' => 400,
-                    'errors' => $validator->errors()->toArray()
-                ];
-            }
-
- $doctor = Doctor::find(request('doctor_id'));
-            $patient = Patient::create([
-                'birth_date' => request('birth_date'),
-                'first_name'=>request('first_name'),
-                'last_name'=>request('last_name'),
-                'phone'=>request('phone'),
-                'gender' => request('gender'),
-                'age' => request('age'),
-                'blood_type' => request('blood_type'),
-                'chronic_diseases' => request('chronic_diseases'),
-                'medication_allergies' => request('medication_allergies'),
-                'permanent_medications' => request('permanent_medications'),
-                'previous_surgeries' => request('previous_surgeries'),
-                'previous_illnesses' => request('previous_illnesses'),
-                'medical_analysis' => request('medical_analysis'),
-                'honest_score' => 5.0
-            ]);
-
-            $appointment = Apointment::create([
-                'patient_id' => $patient->id,
-                'doctor_id' => request('doctor_id'),
-                'department_id' => $doctor->department->id,
-                'apointment_date' => request('appointment_date'),
-                'apoitment_status'=>'unapp',
-                'status'=>'accepted'
-            ]);
-
+        if ($validator->fails()) {
             return [
-                'status' => 201,
-                'message' => 'Appointment added successfully',
-                'data' => $appointment
+                'status' => 400,
+                'errors' => $validator->errors()->toArray()
             ];
+        }
+
+        $doctor = Doctor::find(request('doctor_id'));
+
+
+        $patient = Patient::create([
+            'birth_date' => request('birth_date'),
+            'first_name' => Patient::encryptField(request('first_name')),
+            'last_name' => Patient::encryptField(request('last_name')),
+            'phone' => Patient::encryptField(request('phone')),
+            'gender' => Patient::encryptField(request('gender')),
+            'age' => request('age'),
+            'blood_type' => Patient::encryptField(request('blood_type')),
+            'chronic_diseases' => Patient::encryptField(request('chronic_diseases')),
+            'medication_allergies' => Patient::encryptField(request('medication_allergies')),
+            'permanent_medications' => Patient::encryptField(request('permanent_medications')),
+            'previous_surgeries' => Patient::encryptField(request('previous_surgeries')),
+            'previous_illnesses' => Patient::encryptField(request('previous_illnesses')),
+            'medical_analysis' => Patient::encryptField(request('medical_analysis')),
+            'honest_score' => 5.0
+        ]);
+        $appointment = Apointment::create([
+            'patient_id' => $patient->id,
+            'doctor_id' => request('doctor_id'),
+            'department_id' => $doctor->department->id,
+            'apointment_date' => request('appointment_date'),
+            'apoitment_status' => 'unapp',
+            'status' => 'accepted'
+        ]);
+
+        return [
+            'status' => 201,
+            'message' => 'Appointment added successfully',
+            'data' => [
+                'appointment' => $appointment,
+                'patient' => $patient->makeHidden(array_merge($patient->getEncryptableFields(), ['created_at', 'updated_at']))
+            ]
+        ];
 
     } catch (\Exception $e) {
         return [
