@@ -315,12 +315,12 @@ class DoctorService
             'patient_id' => $patient_id,
             'doctor_id' => $doctor->id,
             'department_id' => $doctor->department_id,
-            'diagnoseis' => $request->diagnoseis,
+            'diagnoseis' => Patient::encryptField($request->diagnoseis),
             'diagnoseis_type' => $request->diagnoseis_type,
-            'medicine' => $request->medicine,
-            'notes' => $request->notes,
+            'medicine' => Patient::encryptField($request->medicine),
+            'notes' => Patient::encryptField($request->notes),
             'date' => Carbon::today(),
-            'status' => $request->status
+            'status' => Patient::encryptField($request->status)
         ]);
         if ($preview) {
             $message = "preview added successfully";
@@ -336,11 +336,11 @@ class DoctorService
         $preview = Preview::find($preview_id);
         if ($preview) {
             $updatePreview = $preview->update([
-                'diagnoseis' => $request->diagnoseis,
+                'diagnoseis' => Patient::encryptField($request->diagnoseis),
                 'diagnoseis_type' => $request->diagnoseis_type,
-                'medicine' => $request->medicine,
-                'notes' => $request->notes,
-                'status' => $request->status
+                'medicine' => Patient::encryptField($request->medicine),
+                'notes' => Patient::encryptField($request->notes),
+                'status' => Patient::encryptField($request->status)
             ]);
             $preview->save();
             if ($updatePreview) {
@@ -390,6 +390,7 @@ class DoctorService
             $message = "previews return failed";
             $code = 400;
         }
+
         return ['message' => $message, 'previews' => $previews, 'code' => $code];
     }
 }

@@ -33,7 +33,7 @@ class PatientController extends Controller
         $data = [];
         try {
             $data = $this->patientService->addChild($request);
-            return Response::Success($data['son'], $data['message']);
+            return Response::Success($data['son'], $data['message'], $data['code']);
 
         } catch (Throwable $th) {
             $message = $th->getMessage();

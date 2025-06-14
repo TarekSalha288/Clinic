@@ -18,8 +18,8 @@ class PatientService
     {
         $patientInfo = [
             'id' => $patient->id,
-            'gender' => $patient->gender,
             'age' => $patient->age,
+            'gender' => $patient->gender,
             'birth_date' => $patient->birth_date,
         ];
         $array['patient_info'] = $patientInfo;
@@ -46,14 +46,14 @@ class PatientService
         $patient = Patient::create([
             'user_id' => $user_id,
             'birth_date' => $request->birth_date,
-            'gender' => $request->gender,
             'age' => $request->age,
-            'blood_type' => $request->blood_type,
-            'chronic_diseases' => $request->chronic_diseases,
-            'medication_allergies' => $request->medication_allergies,
-            'permanent_medications' => $request->permanent_medications,
-            'previous_surgeries' => $request->previous_surgeries,
-            'previous_illnesses' => $request->previous_illnesses,
+            'gender' => Patient::encryptField($request->gender),
+            'blood_type' => Patient::encryptField($request->blood_type),
+            'chronic_diseases' => Patient::encryptField($request->chronic_diseases),
+            'medication_allergies' => Patient::encryptField($request->medication_allergies),
+            'permanent_medications' => Patient::encryptField($request->permanent_medications),
+            'previous_surgeries' => Patient::encryptField($request->previous_surgeries),
+            'previous_illnesses' => Patient::encryptField($request->previous_illnesses),
             'honest_score' => 100
         ]);
         if ($patient) {
@@ -70,14 +70,14 @@ class PatientService
         $user_id = auth()->user()->id;
         $patient = Patient::create([
             'birth_date' => $request->birth_date,
-            'gender' => $request->gender,
             'age' => $request->age,
-            'blood_type' => $request->blood_type,
-            'chronic_diseases' => $request->chronic_diseases,
-            'medication_allergies' => $request->medication_allergies,
-            'permanent_medications' => $request->permanent_medications,
-            'previous_surgeries' => $request->previous_surgeries,
-            'previous_illnesses' => $request->previous_illnesses,
+            'gender' => Patient::encryptField($request->gender),
+            'blood_type' => Patient::encryptField($request->blood_type),
+            'chronic_diseases' => Patient::encryptField($request->chronic_diseases),
+            'medication_allergies' => Patient::encryptField($request->medication_allergies),
+            'permanent_medications' => Patient::encryptField($request->permanent_medications),
+            'previous_surgeries' => Patient::encryptField($request->previous_surgeries),
+            'previous_illnesses' => Patient::encryptField($request->previous_illnesses),
         ]);
         $son = Son::create([
             'patient_id' => $patient->id,
@@ -87,11 +87,13 @@ class PatientService
         ]);
         $this->addPatientInfo($son, $patient);
         if ($patient && $son) {
+            $code = 200;
             $message = 'son profile added successfullt';
         } else {
             $message = 'son profile not added to the system';
+            $code = 400;
         }
-        return ['message' => $message, 'son' => $son];
+        return ['message' => $message, 'son' => $son, 'code' => $code];
     }
 
     public function getArticles()
@@ -316,14 +318,14 @@ class PatientService
         if ($patientSonProfile) {
             $updatePatientResult = $patientSonProfile->update([
                 'birth_date' => $request->birth_date,
-                'gender' => $request->gender,
                 'age' => $request->age,
-                'blood_type' => $request->blood_type,
-                'chronic_diseases' => $request->chronic_diseases,
-                'medication_allergies' => $request->medication_allergies,
-                'permanent_medications' => $request->permanent_medications,
-                'previous_surgeries' => $request->previous_surgeries,
-                'previous_illnesses' => $request->previous_illnesses,
+                'gender' => Patient::encryptField($request->gender),
+                'blood_type' => Patient::encryptField($request->blood_type),
+                'chronic_diseases' => Patient::encryptField($request->chronic_diseases),
+                'medication_allergies' => Patient::encryptField($request->medication_allergies),
+                'permanent_medications' => Patient::encryptField($request->permanent_medications),
+                'previous_surgeries' => Patient::encryptField($request->previous_surgeries),
+                'previous_illnesses' => Patient::encryptField($request->previous_illnesses),
             ]);
         }
         if ($son) {
