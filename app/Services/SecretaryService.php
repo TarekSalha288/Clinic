@@ -31,7 +31,6 @@ public function reverseUnApp()
             'permanent_medications' => 'required|string|max:500',
             'previous_surgeries' => 'required|string|max:500',
             'previous_illnesses' => 'required|string|max:500',
-            'medical_analysis' => 'required|string|max:500',
             'appointment_date' => 'required',
             'doctor_id' => 'required',
             'first_name' => 'required|string',
@@ -53,7 +52,7 @@ public function reverseUnApp()
             'first_name' => Patient::encryptField(request('first_name')),
             'last_name' => Patient::encryptField(request('last_name')),
             'phone' => Patient::encryptField(request('phone')),
-            'gender' => Patient::encryptField(request('gender')),
+            'gender' => request('gender'),
             'age' => request('age'),
             'blood_type' => Patient::encryptField(request('blood_type')),
             'chronic_diseases' => Patient::encryptField(request('chronic_diseases')),
@@ -61,7 +60,6 @@ public function reverseUnApp()
             'permanent_medications' => Patient::encryptField(request('permanent_medications')),
             'previous_surgeries' => Patient::encryptField(request('previous_surgeries')),
             'previous_illnesses' => Patient::encryptField(request('previous_illnesses')),
-            'medical_analysis' => Patient::encryptField(request('medical_analysis')),
             'honest_score' => 5.0
         ]);
         $appointment = Apointment::create([

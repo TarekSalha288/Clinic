@@ -15,9 +15,7 @@ class Patient extends Model
     protected $encryptable = [
         'first_name',
         'last_name',
-
         'phone',
-        'gender',
         'blood_type',
         'chronic_diseases',
         'medication_allergies',
@@ -96,10 +94,6 @@ class Patient extends Model
         return self::decryptField($value);
     }
     public function getPhoneAttribute($value)
-    {
-        return self::decryptField($value);
-    }
-    public function getGenderAttribute($value)
     {
         return self::decryptField($value);
     }
