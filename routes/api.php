@@ -121,8 +121,5 @@ Route::group(['middleware' => [TwoFactor::class, 'api', 'auth']], function ($rou
 
     Route::get('/doctor/{dayId}/{departmentId}', [UserController::class, 'getDoctorsInDayAndDepartment']);
     Route::get('/doctors/{dayId}', [UserController::class, 'getDoctorsAndDepartment']);
-
-    Route::get('/doctor/{dayId}/{departmentId}', [UserController::class, 'getDoctorsInDay']);
-
     Route::get('/search', [UserController::class, 'search']);
 });

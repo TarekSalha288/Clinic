@@ -17,20 +17,20 @@ class UserService
             $docInfo = [];
             if ($doctor) {
                 $apointments = Apointment::where('doctor_id', $doctor->id)->get();
-                foreach ($apointments as $apointment)
 
-                    $docInfo = [
+                        $docInfo = [
                         'department' => $doctor->department,
                         'days' => $doctor->days,
                         'user' => $doctor->user,
-                        'apointments' => ['apointments' => $apointments, 'patients' => $doctor->apointments],
+                        'apointments' => ['apointments' => $apointments, 'patients' => $doctor->patients],
                     ];
-                return $docInfo;
+
+                return ['status'=>200,'data'=>$docInfo,'message'=>'That is doctor info'];
             }
 
-            return null;
+            return ['status'=>404,'data'=>null,'message'=>'Doctor not found'];
         } catch (\Exception $e) {
-            throw $e;
+            return ['status'=>500,'errors'=>$e->getMessage()];
         }
     }
     public function getDoctors()
@@ -42,12 +42,12 @@ class UserService
                     $doctor->department;
                     $doctor->user;
                 }
-                return $doctors;
+                return ['status'=>200,'message'=>"That is all doctor",'data'=>$doctors];
             }
 
-            return null;
+              return ['status'=>404,'message'=>"No doctors yet",'data'=>null];;
         } catch (\Exception $e) {
-            throw $e;
+            return ['status'=>500,'errors'=>$e->getMessage()] ;
         }
     }
     public function getDepartments()
@@ -55,10 +55,10 @@ class UserService
         try {
             $departments = Department::with('doctors.user')->get();
             if ($departments)
-                return $departments;
-            return null;
+                return ['status'=>200,'message'=>'That is all departments','data'=>$departments];
+            return ['status'=>404,'message'=>'No departments yet','data'=>null];
         } catch (\Exception $e) {
-            throw $e;
+            return ['status'=>500,'errors'=>$e->getMessage()];
         }
     }
     public function getDepartment($id)
@@ -66,10 +66,10 @@ class UserService
         try {
             $department = Department::with('doctors.user')->first();
             if ($department)
-                return $department;
-            return null;
+               return ['status'=>200,'message'=>'That is department','data'=>$department];
+            return ['status'=>404,'message'=>'No department found','data'=>null];
         } catch (\Exception $e) {
-            throw $e;
+            return ['status'=>500,'errors'=>$e->getMessage()] ;
         }
     }
     public function getLeaves($doctorId)
@@ -78,21 +78,22 @@ class UserService
             $doctor = Doctor::find($doctorId);
             if ($doctor) {
                 $leaves = $doctor->days;
+                if(!$leaves->isEmpty())
                 return ['status' => 200, 'data' => $leaves];
+            return ['status'=>404,'message'=>'No leaves foound for this doctor'];
             }
-            return ['status' => 404];
+            return ['status' => 404,'message'=>'Doctor not found'];
         } catch (\Exception $e) {
             return [
                 'status' => 500,
-                'message' => 'Something went wrong',
-                'error' => $e->getMessage()
+                'errors' => $e->getMessage()
             ];
         }
     }
     public function getDoctorsByDepartment($departmentId)
     {
         try {
-            $department = Department::find($departmentId);
+            $department = Department::with(['doctors.user'])->find($departmentId);
             if (!$department)
                 return ['status' => 404];
             $doctors = $department->doctors;
@@ -102,8 +103,7 @@ class UserService
         } catch (\Exception $e) {
             return [
                 'status' => 500,
-                'message' => 'Something went wrong',
-                'error' => $e->getMessage()
+                'errors' => $e->getMessage()
             ];
         }
     }
@@ -122,8 +122,7 @@ class UserService
         } catch (\Exception $e) {
             return [
                 'status' => 500,
-                'message' => 'Something went wrong',
-                'error' => $e->getMessage()
+                'errors' => $e->getMessage()
             ];
         }
     }
@@ -156,14 +155,16 @@ class UserService
         } catch (\Exception $e) {
             return [
                 'status' => 500,
-                'message' => 'Something went wrong',
-                'error' => $e->getMessage()
+                'errors' => $e->getMessage()
             ];
         }
     }
 public function getDoctorsAndDepartment($dayId)
 {
     try {
+       $day= Day::find($dayId);
+        if(!$day)
+        return ['status'=>404,'message'=>"This day is not found"];
         $departments = Department::with(['doctors' => function ($query) use ($dayId) {
             $query->whereHas('days', function ($q) use ($dayId) {
                 $q->where('day_id', $dayId);
@@ -183,8 +184,7 @@ public function getDoctorsAndDepartment($dayId)
     } catch (\Exception $e) {
         return [
             'status' => 500,
-            'message' => 'Something went wrong',
-            'error' => $e->getMessage()
+            'errors' => $e->getMessage()
         ];
     }
 }

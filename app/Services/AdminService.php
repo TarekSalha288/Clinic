@@ -6,13 +6,14 @@ use App\Mail\TwoFactorMail;
 use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\User;
+use App\UploadImageTrait;
 use Exception;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class AdminService
 {
-
+use UploadImageTrait;
 
 public function createSecretary()
 {
@@ -112,7 +113,11 @@ $user = User::where('role','secretary')->first();
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
+$department = Department::where('name', request('department'))->first();
 
+        if(!$department) {
+            return response()->json(['error' => 'Department not found'], 404);
+        }
         $user = User::create([
             'email' => request('email'),
             'first_name' => request('first_name'),
@@ -122,11 +127,7 @@ $user = User::where('role','secretary')->first();
             'role'=>'doctor',
         ]);
 
-        $department = Department::where('name', request('department'))->first();
 
-        if(!$department) {
-            return response()->json(['error' => 'Department not found'], 404);
-        }
 
         $doctor = Doctor::create([
             'user_id' => $user->id,
@@ -159,15 +160,21 @@ $user = User::where('role','secretary')->first();
           $validator = Validator::make(request()->all(), [
                 'name' => 'required|unique:departments',
                 'description'=>'required',
+                'image'=>'required|image'
             ]);
 
             if ($validator->fails()) {
                 return response()->json($validator->errors()->toJson(), 400);
             }
+
             $department=Department::create([
                 'name'=>request('name'),
                 'description'=>request('description'),
+                'image'=>''
             ]);
+             $url=$this->ImageUpload(request(),$department->id,'departments');
+             $department->update(['image'=>$url]);
+             $department->save();
             return $department;
       } catch (\Exception $e) {
           throw $e;

@@ -18,42 +18,53 @@ class UserController extends Controller
     }
     public function getDoctor($id)
     {
-        $doctor = $this->userService->getDoctor($id);
-        if ($doctor == null) {
-            return $this->response("Doctor not found", ['doctor' => null], 404);
-        }
-        return $this->response("That is doctor", ['doctor' => $doctor], 200);
+        $data = $this->userService->getDoctor($id);
+           return match ($data['status']){
+            200 => $this->response($data['message'], ['doctor' => $data['data']], 200),
+              404=> $this->response($data['message'], null, 404),
+        500 => $this->response("Server error: " . $data['error'], null, 500),
+        default => $this->response("Unknown error", null, 520),
+         };
     }
     public function getDoctors()
     {
-        $doctors = $this->userService->getDoctors();
-        if ($doctors == null) {
-            return $this->response("No doctors yet", ['doctors' => null], 200);
-        }
-        return $this->response("That is all doctors", ['doctors' => $doctors], 200);
+        $data = $this->userService->getDoctors();
+         return match ($data['status']) {
+            200 => $this->response("That is all doctors", ['doctors' => $data['data']], 200),
+            404 => $this->response("No doctors found", null, 404),
+            422 => $this->response("Validation error: missing search query", null, 422),
+            500 => $this->response("Server error: " . $data['error'], null, 500),
+            default => $this->response("Unknown error", null, 520),
+        };
     }
     public function getDepartment($id)
     {
-        $department = $this->userService->getDepartment($id);
-        if ($department == null) {
-            return $this->response("Department not found", ['department' => null], 404);
-        }
-        return $this->response("That is Department {$department->name}", ['department' => $department], 200);
+        $data = $this->userService->getDepartment($id);
+         return match ($data['status']) {
+            200 => $this->response("That is  department", ['department' => $data['data']], 200),
+            404 => $this->response("No department found", null, 404),
+            422 => $this->response("Validation error: missing search query", null, 422),
+            500 => $this->response("Server error: " . $data['error'], null, 500),
+            default => $this->response("Unknown error", null, 520),
+        };
     }
     public function getDepartments()
     {
-        $departments = $this->userService->getDepartments();
-        if ($departments == null) {
-            return $this->response("No departments yet", ['departments' => null], 200);
-        }
-        return $this->response("That is all departments", ['departments' => $departments], 200);
+        $data=$this->userService->getDepartments();
+          return match ($data['status']) {
+            200 => $this->response("That is all departments", ['departments' => $data['data']], 200),
+            404 => $this->response("No departments found", null, 404),
+            422 => $this->response("Validation error: missing search query", null, 422),
+            500 => $this->response("Server error: " . $data['error'], null, 500),
+            default => $this->response("Unknown error", null, 520),
+        };
     }
     public function getLeaves($doctorId)
     {
         $data = $this->userService->getLeaves($doctorId);
         return match ($data['status']) {
             200 => $this->response("That is monthly leaves of doctor : ", ['leaves' => $data['data']], 200),
-            404 => $this->response("Doctor not found", null, 404),
+            404 => $this->response($data['message'], null, 404),
             500 => $this->response("Server error: " . $data['error'], null, 500),
             default => $this->response("Unknown error", null, 520),
         };
@@ -84,7 +95,7 @@ class UserController extends Controller
            $data = $this->userService->getDoctorsAndDepartment($dayId);
         return match ($data['status']) {
             200 => $this->response("That is doctors of this day: ",  $data['data'], 200),
-            404 => $this->response("Day  not found", null, 404),
+            404 => $this->response($data['message'], null, 404),
             400 => $this->response($data['message'], null, 400),
             500 => $this->response("Server error: " . $data['error'], null, 500),
             default => $this->response("Unknown error", null, 520),
