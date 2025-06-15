@@ -4,17 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AddChildRequest;
 use App\Http\Requests\BookAppointmentRequest;
+use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\PatientProfileRequest;
 use App\Http\Responses\Response;
 use App\Services\PatientService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Throwable;
 class PatientController extends Controller
 {
     private PatientService $patientService;
-    public function __construct(PatientService $patientService)
+    private UserService $userService;
+    public function __construct(PatientService $patientService, UserService $userService)
     {
         $this->patientService = $patientService;
+        $this->userService = $userService;
     }
     public function postPatientProfile(PatientProfileRequest $request)
     {
@@ -178,6 +182,18 @@ class PatientController extends Controller
         try {
             $data = $this->patientService->updatePatientProfile($request);
             return Response::Success($data['patient'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function uploadImagesForProfile(ImageUploadRequest $request)
+    {
+        $data = [];
+        try {
+            $data = $this->userService->uploadImage($request, 'Patient_Profile_Photo');
+            return Response::Success($data['path'], $data['message'], $data['code']);
+
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);
