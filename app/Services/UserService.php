@@ -7,12 +7,9 @@ use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\Day;
 use App\Models\User;
-use Illuminate\Support\Facades\Storage;
-use App\UploadImageTrait;
 
 class UserService
 {
-    use UploadImageTrait;
     public function getDoctor($id)
     {
         try {
@@ -165,27 +162,29 @@ class UserService
 public function getDoctorsAndDepartment($dayId)
 {
     try {
+       $day= Day::find($dayId);
+        if(!$day)
+        return ['status'=>404,'message'=>"This day is not found"];
         $departments = Department::with(['doctors' => function ($query) use ($dayId) {
             $query->whereHas('days', function ($q) use ($dayId) {
                 $q->where('day_id', $dayId);
             })->with('user');
         }])->get();
 
-            if ($departments->isEmpty()) {
-                return ['status' => 404, 'message' => 'No departments found'];
-            }
+        if ($departments->isEmpty()) {
+            return ['status' => 404, 'message' => 'No departments found'];
+        }
 
-            return [
-                'status' => 200,
-                'message' => 'That is departments with doctors of this day',
-                'data' => $departments
-            ];
+        return [
+            'status' => 200,
+            'message' => 'That is departments with doctors of this day',
+            'data' => $departments
+        ];
 
     } catch (\Exception $e) {
         return [
             'status' => 500,
-            'message' => 'Something went wrong',
-            'error' => $e->getMessage()
+            'errors' => $e->getMessage()
         ];
     }
 }
