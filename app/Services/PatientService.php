@@ -7,6 +7,7 @@ use App\Models\Doctor;
 use App\Models\FavoritePost;
 use App\Models\Patient;
 use App\Models\Post;
+use App\Models\Preview;
 use App\Models\Son;
 use function PHPUnit\Framework\isNull;
 use function PHPUnit\Framework\returnArgument;
@@ -47,7 +48,7 @@ class PatientService
             'user_id' => $user_id,
             'birth_date' => $request->birth_date,
             'age' => $request->age,
-            'gender' => Patient::encryptField($request->gender),
+            'gender' => $request->gender,
             'blood_type' => Patient::encryptField($request->blood_type),
             'chronic_diseases' => Patient::encryptField($request->chronic_diseases),
             'medication_allergies' => Patient::encryptField($request->medication_allergies),
@@ -364,7 +365,55 @@ class PatientService
     }
     public function getPreviews()
     {
-
+        $patient = auth()->user()->patient;
+        if (!$patient) {
+            return ['message' => 'patient not found', 'previews' => null, 'code' => 404];
+        }
+        $completePreviews = Preview::forPatient($patient->id)
+            ->diagnoseisType(1)
+            ->get();
+        $partlyPreviews = Preview::forPatient($patient->id)
+            ->diagnoseisType(0)
+            ->get();
+        if ($completePreviews || $partlyPreviews) {
+            $formatedPreviews = [];
+            $formatedPreviews['completePreviews'] = $completePreviews;
+            $formatedPreviews['partlyPreviews'] = $partlyPreviews;
+            $message = "preview return successfully";
+            $code = 200;
+        } else {
+            $message = "no previews yet";
+            $message = 400;
+        }
+        return ['message' => $message, 'previews' => $formatedPreviews, 'code' => $code];
     }
+    public function updatePatientProfile($request)
+    {
+        $patient = auth()->user()->patient;
+        if (!$patient) {
+            return ['message' => 'patient not found', 'patient' => null, 'code' => 404];
+        }
+        $updatedStatus = $patient->update([
+            'birth_date' => $request->birth_date,
+            'age' => $request->age,
+            'gender' => $request->gender,
+            'blood_type' => Patient::encryptField($request->blood_type),
+            'chronic_diseases' => Patient::encryptField($request->chronic_diseases),
+            'medication_allergies' => Patient::encryptField($request->medication_allergies),
+            'permanent_medications' => Patient::encryptField($request->permanent_medications),
+            'previous_surgeries' => Patient::encryptField($request->previous_surgeries),
+            'previous_illnesses' => Patient::encryptField($request->previous_illnesses),
+            'honest_score' => 100
+        ]);
+        if ($updatedStatus) {
+            $message = "Patient profile updated successfully";
+            $code = 200;
+        } else {
+            $message = "!somthing went wrong the patient information not updated";
+            $code = 400;
+        }
+        return ['message' => $message, 'patient' => $patient, 'code' => $code];
+    }
+
 }
 

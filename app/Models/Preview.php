@@ -17,6 +17,15 @@ class Preview extends Model
         'date',
         'status',
     ];
+    public function scopeForPatient($query, $patientId)
+    {
+        return $query->where('patient_id', $patientId);
+    }
+
+    public function scopeDiagnoseisType($query, $type)
+    {
+        return $query->where('diagnoseis_type', $type);
+    }
     public static function encryptField($value)
     {
         if (empty($value))

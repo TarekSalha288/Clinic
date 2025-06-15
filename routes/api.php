@@ -76,6 +76,7 @@ Route::group([
     'middleware' => [TwoFactor::class, PatientMiddleware::class, 'api', 'auth']
 ], function ($router) {
     Route::post('/pateintProfile', [PatientController::class, 'postPatientProfile']);
+    Route::put('/updatePatientProfile', [PatientController::class, 'updatePatientProfile']);
     Route::post('/addChild', [PatientController::class, 'addChild']);
     Route::put('/updateChild/{child_id}', [PatientController::class, 'updateChild']);
     Route::delete('/deleteChild/{child_id}', [PatientController::class, 'deleteChild']);
@@ -88,6 +89,7 @@ Route::group([
     Route::put('/updateAppointment/{appointment_id}', [PatientController::class, 'updateAppointment']);
     Route::delete('/deleteAppointment/{appointemnt_id}', [PatientController::class, 'deleteAppointment']);
     Route::get('/getAppointments', [PatientController::class, 'getAppointments']);
+    Route::get('/getPreviews', [PatientController::class, 'getPreviews']);
 });
 
 

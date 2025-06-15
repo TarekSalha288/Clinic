@@ -161,4 +161,26 @@ class PatientController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function getPreviews()
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->getPreviews();
+            return Response::Success($data['previews'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function updatePatientProfile(PatientProfileRequest $request)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->updatePatientProfile($request);
+            return Response::Success($data['patient'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
 }
