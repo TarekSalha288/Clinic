@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Responses\Response;
 use App\Models\Preview;
 use App\Services\DoctorService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Throwable;
 use function PHPUnit\Framework\returnArgument;
@@ -16,9 +17,11 @@ use function PHPUnit\Framework\returnArgument;
 class DoctorController extends Controller
 {
     private DoctorService $doctorService;
-    public function __construct(DoctorService $doctorService)
+    private UserService $userService;
+    public function __construct(DoctorService $doctorService, UserService $userService)
     {
         $this->doctorService = $doctorService;
+        $this->userService = $userService;
     }
 
     public function postArticale(PostArticaleRequest $request)
@@ -37,7 +40,7 @@ class DoctorController extends Controller
     {
         $data = [];
         try {
-            $data = $this->doctorService->uploadImage($request, 'posts');
+            $data = $this->userService->uploadImage($request, 'posts');
             return Response::Success($data['path'], $data['message'], $data['code']);
 
         } catch (Throwable $th) {
@@ -50,7 +53,7 @@ class DoctorController extends Controller
     {
         $data = [];
         try {
-            $data = $this->doctorService->uploadImage($request, 'Profile_Photo');
+            $data = $this->userService->uploadImage($request, 'Doctor_Profile_Photo');
             return Response::Success($data['path'], $data['message'], $data['code']);
 
         } catch (Throwable $th) {
@@ -58,28 +61,7 @@ class DoctorController extends Controller
             return Response::Error($data, $message);
         }
     }
-    public function getProfileImage()
-    {
-        $data = [];
-        try {
-            $data = $this->doctorService->getProfileImage();
-            return Response::Success($data['path'], $data['message'], $data['code']);
-        } catch (Throwable $th) {
-            $message = $th->getMessage();
-            return Response::Error($data, $message);
-        }
-    }
-    public function deleteProfileImage()
-    {
-        $data = [];
-        try {
-            $data = $this->doctorService->deleteProfileImage();
-            return Response::Success($data['path'], $data['message'], $data['code']);
-        } catch (Throwable $th) {
-            $message = $th->getMessage();
-            return Response::Error($data, $message);
-        }
-    }
+
     public function updateProfile(UpdateProfileRequest $request)
     {
         $data = [];

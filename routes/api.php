@@ -62,8 +62,6 @@ Route::group([
     Route::get('/getAtricleById/{id}', [DoctorController::class, 'getArticleById']);
     Route::post('/imageUpload', [DoctorController::class, 'uploadImages']);
     Route::post('/imageProfileUpload', [DoctorController::class, 'uploadImagesForProfile']);
-    Route::get('/getProfileImage', [DoctorController::class, 'getProfileImage']);
-    Route::delete('/deleteProfileImage', [DoctorController::class, 'deleteProfileImage']);
     Route::put('/updateProfile', [DoctorController::class, 'updateProfile']);
     Route::get('/getApointments', [DoctorController::class, 'getApointments']);
     Route::post('/postPreview/{id}', [DoctorController::class, 'postPreview']);
@@ -90,6 +88,7 @@ Route::group([
     Route::delete('/deleteAppointment/{appointemnt_id}', [PatientController::class, 'deleteAppointment']);
     Route::get('/getAppointments', [PatientController::class, 'getAppointments']);
     Route::get('/getPreviews', [PatientController::class, 'getPreviews']);
+    Route::post('/uploadImagesForPatientProfile', [PatientController::class, 'uploadImagesForProfile']);
 });
 
 
@@ -125,4 +124,7 @@ Route::group(['middleware' => [TwoFactor::class, 'api', 'auth']], function ($rou
     Route::get('/doctor/{dayId}/{departmentId}', [UserController::class, 'getDoctorsInDay']);
 
     Route::get('/search', [UserController::class, 'search']);
+
+    Route::get('/getProfileImage', [UserController::class, 'getProfileImage']);
+    Route::delete('/deleteProfileImage', [UserController::class, 'deleteProfileImage']);
 });

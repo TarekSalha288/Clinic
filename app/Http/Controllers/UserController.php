@@ -80,10 +80,11 @@ class UserController extends Controller
             default => $this->response("Unknown error", null, 520),
         };
     }
-    public function getDoctorsAndDepartment($dayId){
-           $data = $this->userService->getDoctorsAndDepartment($dayId);
+    public function getDoctorsAndDepartment($dayId)
+    {
+        $data = $this->userService->getDoctorsAndDepartment($dayId);
         return match ($data['status']) {
-            200 => $this->response("That is doctors of this day: ",  $data['data'], 200),
+            200 => $this->response("That is doctors of this day: ", $data['data'], 200),
             404 => $this->response("Day  not found", null, 404),
             400 => $this->response($data['message'], null, 400),
             500 => $this->response("Server error: " . $data['error'], null, 500),
@@ -100,6 +101,28 @@ class UserController extends Controller
             500 => $this->response("Server error: " . $data['error'], null, 500),
             default => $this->response("Unknown error", null, 520),
         };
+    }
+    public function getProfileImage()
+    {
+        $data = [];
+        try {
+            $data = $this->userService->getProfileImage();
+            return Response::Success($data['path'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function deleteProfileImage()
+    {
+        $data = [];
+        try {
+            $data = $this->userService->deleteProfileImage();
+            return Response::Success($data['path'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
     }
 
 }
