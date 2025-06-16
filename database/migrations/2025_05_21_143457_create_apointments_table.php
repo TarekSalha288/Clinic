@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->dateTime('apointment_date');
             $table->string('apoitment_status');// app || unapp
             $table->string('status');// waiting || accepted || rejected
+            $table->boolean('enter')->default(0);
             $table->timestamps();
         });
     }
