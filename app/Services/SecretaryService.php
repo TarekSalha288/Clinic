@@ -433,6 +433,9 @@ $apointment=Apointment::find($id);
         if ($existingPreview) {
             return ['status' => 400, 'message' => "Alreday send notification"];
         }
+          $existingEnter=Apointment::where('enter',true)->where('doctor_id',$apointment->doctor_id)->exists();
+            if($existingEnter)
+                 return ['status' => 400, 'message' => "Alreday have a patient now"];
     $apointment->update(['enter'=>true]);
     $apointment->save();
   Preview::create(['patient_id'=>$apointment->patient_id,
