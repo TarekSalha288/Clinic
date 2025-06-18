@@ -91,6 +91,8 @@ Route::group([
     Route::post('/uploadImagesForPatientProfile', [PatientController::class, 'uploadImagesForProfile']);
     Route::put('/updateProfileInfo', [PatientController::class, 'updateProfileInfo']);
     Route::put('/updatePassword', [PatientController::class, 'updatePassword']);
+    Route::post('/postMedicalAnalysis/{preview_id}', [PatientController::class, 'postMedicalAnalysis']);
+
 });
 
 

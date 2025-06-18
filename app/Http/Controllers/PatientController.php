@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AddChildRequest;
 use App\Http\Requests\BookAppointmentRequest;
+use App\Http\Requests\FileUploadRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\PatientProfileRequest;
 use App\Http\Requests\UpdateProfileRequest;
@@ -222,5 +223,15 @@ class PatientController extends Controller
             return Response::Error($data, $message);
         }
     }
-
+    public function postMedicalAnalysis(FileUploadRequest $request, $preview_id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->postMedicalAnalysis($request, $preview_id);
+            return Response::Success($data['filePath'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
 }

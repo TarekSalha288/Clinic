@@ -11,11 +11,14 @@ use App\Models\Post;
 use App\Models\Preview;
 use App\Models\Son;
 use Illuminate\Support\Facades\Mail;
+use App\UploadImageTrait;
+use App\Models\MedicalAnalysis;
 use function PHPUnit\Framework\isNull;
 use function PHPUnit\Framework\returnArgument;
 
 class PatientService
 {
+    use UploadImageTrait;
     // some functions for formate the response
     private function addPatientInfo($array, $patient)
     {
@@ -463,6 +466,37 @@ class PatientService
             $code = 400;
         }
         return ['message' => $message, 'password' => $user, 'code' => $code];
+    }
+    public function postMedicalAnalysis($request, $preview_id)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            $message = "user not found";
+            $code = 404;
+            return ['message' => $message, 'filePath' => null, 'code' => $code];
+        }
+        $preview = Preview::find($preview_id);
+        if ($preview->diagnoseis_type !== 0) {
+            $message = "diagnoseis type for this preview is completed you can't add a medical analysis";
+            $code = 400;
+            return ['message' => $message, 'filePath' => null, 'code' => $code];
+        }
+        $patient = auth()->user()->patient;
+        $user_id = $user->id;
+        $url = $this->ImageUpload($request, $user_id, 'Medical_analysis', 'file');
+        if ($url) {
+            MedicalAnalysis::create([
+                'patient_id' => $patient->id,
+                'preview_id' => $preview_id,
+                'medical_analysis_path' => $url
+            ]);
+            $message = "medical analysis uploaded successfully";
+            $code = 200;
+        } else {
+            $message = 'there is no file to upload';
+            $code = 400;
+        }
+        return ['message' => $message, 'filePath' => $url, 'code' => $code];
     }
 }
 
