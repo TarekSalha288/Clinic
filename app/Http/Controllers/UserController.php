@@ -19,17 +19,17 @@ class UserController extends Controller
     public function getDoctor($id)
     {
         $data = $this->userService->getDoctor($id);
-           return match ($data['status']){
+        return match ($data['status']) {
             200 => $this->response($data['message'], ['doctor' => $data['data']], 200),
-              404=> $this->response($data['message'], null, 404),
-        500 => $this->response("Server error: " . $data['error'], null, 500),
-        default => $this->response("Unknown error", null, 520),
-         };
+            404 => $this->response($data['message'], null, 404),
+            500 => $this->response("Server error: " . $data['error'], null, 500),
+            default => $this->response("Unknown error", null, 520),
+        };
     }
     public function getDoctors()
     {
         $data = $this->userService->getDoctors();
-         return match ($data['status']) {
+        return match ($data['status']) {
             200 => $this->response("That is all doctors", ['doctors' => $data['data']], 200),
             404 => $this->response("No doctors found", null, 404),
             422 => $this->response("Validation error: missing search query", null, 422),
@@ -40,7 +40,7 @@ class UserController extends Controller
     public function getDepartment($id)
     {
         $data = $this->userService->getDepartment($id);
-         return match ($data['status']) {
+        return match ($data['status']) {
             200 => $this->response("That is  department", ['department' => $data['data']], 200),
             404 => $this->response("No department found", null, 404),
             422 => $this->response("Validation error: missing search query", null, 422),
@@ -50,8 +50,8 @@ class UserController extends Controller
     }
     public function getDepartments()
     {
-        $data=$this->userService->getDepartments();
-          return match ($data['status']) {
+        $data = $this->userService->getDepartments();
+        return match ($data['status']) {
             200 => $this->response("That is all departments", ['departments' => $data['data']], 200),
             404 => $this->response("No departments found", null, 404),
             422 => $this->response("Validation error: missing search query", null, 422),
@@ -91,10 +91,11 @@ class UserController extends Controller
             default => $this->response("Unknown error", null, 520),
         };
     }
-    public function getDoctorsAndDepartment($dayId){
-           $data = $this->userService->getDoctorsAndDepartment($dayId);
+    public function getDoctorsAndDepartment($dayId)
+    {
+        $data = $this->userService->getDoctorsAndDepartment($dayId);
         return match ($data['status']) {
-            200 => $this->response("That is doctors of this day: ",  $data['data'], 200),
+            200 => $this->response("That is doctors of this day: ", $data['data'], 200),
             404 => $this->response($data['message'], null, 404),
             400 => $this->response($data['message'], null, 400),
             500 => $this->response("Server error: " . $data['error'], null, 500),
@@ -111,6 +112,28 @@ class UserController extends Controller
             500 => $this->response("Server error: " . $data['error'], null, 500),
             default => $this->response("Unknown error", null, 520),
         };
+    }
+    public function getProfileImage()
+    {
+        $data = [];
+        try {
+            $data = $this->userService->getProfileImage();
+            return Response::Success($data['path'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function deleteProfileImage()
+    {
+        $data = [];
+        try {
+            $data = $this->userService->deleteProfileImage();
+            return Response::Success($data['path'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
     }
 
 }

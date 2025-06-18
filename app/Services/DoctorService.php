@@ -63,7 +63,6 @@ class DoctorService
         return ['message' => $message, 'post' => $post, 'code' => $code];
     }
 
-
     public function updateProfile($request)
     {
         $user = User::find(auth()->user()->id);

@@ -89,6 +89,8 @@ Route::group([
     Route::get('/getAppointments', [PatientController::class, 'getAppointments']);
     Route::get('/getPreviews', [PatientController::class, 'getPreviews']);
     Route::post('/uploadImagesForPatientProfile', [PatientController::class, 'uploadImagesForProfile']);
+    Route::put('/updateProfileInfo', [PatientController::class, 'updateProfileInfo']);
+    Route::put('/updatePassword', [PatientController::class, 'updatePassword']);
 });
 
 

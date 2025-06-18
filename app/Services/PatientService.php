@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\TwoFactorMail;
 use App\Models\Apointment;
 use App\Models\Doctor;
 use App\Models\FavoritePost;
@@ -9,6 +10,7 @@ use App\Models\Patient;
 use App\Models\Post;
 use App\Models\Preview;
 use App\Models\Son;
+use Illuminate\Support\Facades\Mail;
 use function PHPUnit\Framework\isNull;
 use function PHPUnit\Framework\returnArgument;
 
@@ -414,6 +416,53 @@ class PatientService
         }
         return ['message' => $message, 'patient' => $patient, 'code' => $code];
     }
-
+    public function updateProfileInfo($request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            $message = "user not found";
+            $code = 404;
+            return ['message' => $message, 'patientInfo' => null, 'code' => $code];
+        }
+        $old_email = $user->email;
+        $updateStatus = $user->update([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+        ]);
+        if ($updateStatus) {
+            if ($request->email !== $old_email) {
+                $user->generateCode();
+                Mail::to($user->email)->send(new TwoFactorMail($user->code, $user->first_name));
+            }
+            $message = "profile updated successfully";
+            $code = 200;
+        } else {
+            $message = "profile updated failed";
+            $code = 400;
+        }
+        return ['message' => $message, 'patientInfo' => $user, 'code' => $code];
+    }
+    public function updatePassword($request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            $message = "user not found";
+            $code = 404;
+            return ['message' => $message, 'password' => null, 'code' => $code];
+        }
+        $updateStatus = $user->update([
+            'password' => $request->password
+        ]);
+        if ($updateStatus) {
+            $message = "password updated successfully";
+            $code = 200;
+        } else {
+            $message = "password updated failed";
+            $code = 400;
+        }
+        return ['message' => $message, 'password' => $user, 'code' => $code];
+    }
 }
 

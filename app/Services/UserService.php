@@ -7,9 +7,13 @@ use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\Day;
 use App\Models\User;
+use App\UploadImageTrait;
+use Illuminate\Support\Facades\Storage;
+
 
 class UserService
 {
+    use UploadImageTrait;
     public function getDoctor($id)
     {
         try {
@@ -18,19 +22,19 @@ class UserService
             if ($doctor) {
                 $apointments = Apointment::where('doctor_id', $doctor->id)->get();
 
-                        $docInfo = [
-                        'department' => $doctor->department,
-                        'days' => $doctor->days,
-                        'user' => $doctor->user,
-                        'apointments' => ['apointments' => $apointments, 'patients' => $doctor->patients],
-                    ];
+                $docInfo = [
+                    'department' => $doctor->department,
+                    'days' => $doctor->days,
+                    'user' => $doctor->user,
+                    'apointments' => ['apointments' => $apointments, 'patients' => $doctor->patients],
+                ];
 
-                return ['status'=>200,'data'=>$docInfo,'message'=>'That is doctor info'];
+                return ['status' => 200, 'data' => $docInfo, 'message' => 'That is doctor info'];
             }
 
-            return ['status'=>404,'data'=>null,'message'=>'Doctor not found'];
+            return ['status' => 404, 'data' => null, 'message' => 'Doctor not found'];
         } catch (\Exception $e) {
-            return ['status'=>500,'errors'=>$e->getMessage()];
+            return ['status' => 500, 'errors' => $e->getMessage()];
         }
     }
     public function getDoctors()
@@ -42,12 +46,13 @@ class UserService
                     $doctor->department;
                     $doctor->user;
                 }
-                return ['status'=>200,'message'=>"That is all doctor",'data'=>$doctors];
+                return ['status' => 200, 'message' => "That is all doctor", 'data' => $doctors];
             }
 
-              return ['status'=>404,'message'=>"No doctors yet",'data'=>null];;
+            return ['status' => 404, 'message' => "No doctors yet", 'data' => null];
+            ;
         } catch (\Exception $e) {
-            return ['status'=>500,'errors'=>$e->getMessage()] ;
+            return ['status' => 500, 'errors' => $e->getMessage()];
         }
     }
     public function getDepartments()
@@ -55,10 +60,10 @@ class UserService
         try {
             $departments = Department::with('doctors.user')->get();
             if ($departments)
-                return ['status'=>200,'message'=>'That is all departments','data'=>$departments];
-            return ['status'=>404,'message'=>'No departments yet','data'=>null];
+                return ['status' => 200, 'message' => 'That is all departments', 'data' => $departments];
+            return ['status' => 404, 'message' => 'No departments yet', 'data' => null];
         } catch (\Exception $e) {
-            return ['status'=>500,'errors'=>$e->getMessage()];
+            return ['status' => 500, 'errors' => $e->getMessage()];
         }
     }
     public function getDepartment($id)
@@ -66,10 +71,10 @@ class UserService
         try {
             $department = Department::with('doctors.user')->first();
             if ($department)
-               return ['status'=>200,'message'=>'That is department','data'=>$department];
-            return ['status'=>404,'message'=>'No department found','data'=>null];
+                return ['status' => 200, 'message' => 'That is department', 'data' => $department];
+            return ['status' => 404, 'message' => 'No department found', 'data' => null];
         } catch (\Exception $e) {
-            return ['status'=>500,'errors'=>$e->getMessage()] ;
+            return ['status' => 500, 'errors' => $e->getMessage()];
         }
     }
     public function getLeaves($doctorId)
@@ -78,11 +83,11 @@ class UserService
             $doctor = Doctor::find($doctorId);
             if ($doctor) {
                 $leaves = $doctor->days;
-                if(!$leaves->isEmpty())
-                return ['status' => 200, 'data' => $leaves];
-            return ['status'=>404,'message'=>'No leaves foound for this doctor'];
+                if (!$leaves->isEmpty())
+                    return ['status' => 200, 'data' => $leaves];
+                return ['status' => 404, 'message' => 'No leaves foound for this doctor'];
             }
-            return ['status' => 404,'message'=>'Doctor not found'];
+            return ['status' => 404, 'message' => 'Doctor not found'];
         } catch (\Exception $e) {
             return [
                 'status' => 500,
@@ -159,35 +164,106 @@ class UserService
             ];
         }
     }
-public function getDoctorsAndDepartment($dayId)
-{
-    try {
-       $day= Day::find($dayId);
-        if(!$day)
-        return ['status'=>404,'message'=>"This day is not found"];
-        $departments = Department::with(['doctors' => function ($query) use ($dayId) {
-            $query->whereHas('days', function ($q) use ($dayId) {
-                $q->where('day_id', $dayId);
-            })->with('user');
-        }])->get();
+    public function getDoctorsAndDepartment($dayId)
+    {
+        try {
+            $day = Day::find($dayId);
+            if (!$day)
+                return ['status' => 404, 'message' => "This day is not found"];
+            $departments = Department::with([
+                'doctors' => function ($query) use ($dayId) {
+                    $query->whereHas('days', function ($q) use ($dayId) {
+                        $q->where('day_id', $dayId);
+                    })->with('user');
+                }
+            ])->get();
 
-        if ($departments->isEmpty()) {
-            return ['status' => 404, 'message' => 'No departments found'];
+            if ($departments->isEmpty()) {
+                return ['status' => 404, 'message' => 'No departments found'];
+            }
+
+            return [
+                'status' => 200,
+                'message' => 'That is departments with doctors of this day',
+                'data' => $departments
+            ];
+
+        } catch (\Exception $e) {
+            return [
+                'status' => 500,
+                'errors' => $e->getMessage()
+            ];
         }
-
-        return [
-            'status' => 200,
-            'message' => 'That is departments with doctors of this day',
-            'data' => $departments
-        ];
-
-    } catch (\Exception $e) {
-        return [
-            'status' => 500,
-            'errors' => $e->getMessage()
-        ];
     }
-}
+    public function uploadImage($request, $folderName)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            $message = "user not found";
+            $code = 404;
+            return ['message' => $message, 'path' => null, 'code' => $code];
+        }
+        $user_id = $user->id;
+        $url = $this->ImageUpload($request, $user_id, $folderName);
+        if ($url) {
+            if ($folderName === "Profile_Photo") {
+                $user->img_path = $url;
+                $user->save();
+            }
+            $message = "image uploaded successfully";
+            $code = 200;
+        } else {
+            $message = 'there is no file to upload';
+            $code = 400;
+        }
+        return ['message' => $message, 'path' => $url, 'code' => $code];
+    }
+    public function getProfileImage()
+    {
+        $user = auth()->user();
+        if (!$user) {
+            $message = "user not found";
+            $code = 404;
+            return ['message' => $message, 'path' => null, 'code' => $code];
+        }
+        if ($user) {
+            $path = $user->img_path;
+            if ($path) {
+                $message = 'image uploaded successfully';
+                $code = 200;
+            } else {
+                $message = 'you dont uploaded image yet';
+                $code = 400;
+            }
+        } else {
+            $message = 'user not found';
+            $code = 404;
+        }
+        return ['message' => $message, 'path' => $path, 'code' => $code];
+    }
+    public function deleteProfileImage()
+    {
+        $user = auth()->user();
+        if (!$user) {
+            $message = "user not found";
+            $code = 404;
+            return ['message' => $message, 'path' => null, 'code' => $code];
+        }
+        $img_path = $user->img_path;
+        if ($img_path) {
+            $storagePath = str_replace('/storage/', '', $img_path);
+            if (Storage::disk('public')->exists($storagePath))
+                Storage::disk('public')->delete($storagePath);
+            $user->img_path = null;
+            $user->save();
+            $message = "image deleted succussfully";
+            $code = 200;
+        } else {
+            $message = 'image deleted failed';
+            $code = 400;
+        }
+        return ['message' => $message, 'path' => $img_path, 'code' => $code];
+    }
 
 
 

@@ -25,13 +25,28 @@ class UpdateProfileRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'email' => 'required|email|unique:users,email,' . Auth::id(),
-            'phone' => 'required|unique:users,phone,' . Auth::id() . '|regex:/^\+963\d{9}$/',
-            'password' => 'required|confirmed|min:8',
-        ];
+        $validate = $this->input('validate');
+
+        if ($validate === '1') {
+            return [
+                'first_name' => 'required',
+                'last_name' => 'required',
+                'email' => 'required|email|unique:users,email,' . Auth::id(),
+                'phone' => 'required|unique:users,phone,' . Auth::id() . '|regex:/^\+963\d{9}$/',
+            ];
+        } elseif ($validate === '0') {
+            return [
+                'password' => 'required|confirmed|min:8',
+            ];
+        } else {
+            return [
+                'first_name' => 'required',
+                'last_name' => 'required',
+                'email' => 'required|email|unique:users,email,' . Auth::id(),
+                'phone' => 'required|unique:users,phone,' . Auth::id() . '|regex:/^\+963\d{9}$/',
+                'password' => 'required|confirmed|min:8',
+            ];
+        }
     }
     protected function failedValidation(Validator $validator)
     {

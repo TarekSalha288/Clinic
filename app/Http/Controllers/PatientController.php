@@ -6,6 +6,7 @@ use App\Http\Requests\AddChildRequest;
 use App\Http\Requests\BookAppointmentRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\PatientProfileRequest;
+use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Responses\Response;
 use App\Services\PatientService;
 use App\Services\UserService;
@@ -199,4 +200,27 @@ class PatientController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function updateProfileInfo(UpdateProfileRequest $request)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->updateProfileInfo($request);
+            return Response::Success($data['patientInfo'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function updatePassword(UpdateProfileRequest $request)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->updatePassword($request);
+            return Response::Success($data['password'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+
 }
