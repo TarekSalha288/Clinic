@@ -429,6 +429,7 @@ $apointment=Apointment::find($id);
             ->where('doctor_id', $apointment->doctor_id)
             ->whereDate('date', now()->toDateString())
             ->exists();
+
         if ($existingPreview) {
             return ['status' => 400, 'message' => "Alreday send notification"];
         }
