@@ -35,7 +35,7 @@ class EnterPatient implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('enter-patient.'.$this->id),
+            new Channel('enter-patient.'.$this->id),
         ];
     }
       public function broadcastWith()
