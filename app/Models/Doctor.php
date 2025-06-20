@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Month;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,6 +13,7 @@ use Illuminate\Notifications\Notifiable;
 class Doctor extends Model
 {
      use Notifiable;
+     use HasFactory;
          protected $guarded = [
 
     ];

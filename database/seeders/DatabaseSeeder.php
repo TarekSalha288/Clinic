@@ -2,6 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\Day;
+use App\Models\Doctor;
+use App\Models\MounthlyLeave;
+use App\Models\Patient;
+use App\Models\Son;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -13,11 +18,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        Day::factory(6)->create();
+        Doctor::factory(10)->create();
+        Patient::factory(10)->create();
+        Son::factory(5)->create();
+        User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+
     }
 }
