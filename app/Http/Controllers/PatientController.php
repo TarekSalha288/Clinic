@@ -234,4 +234,27 @@ class PatientController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function getMedicalAnalysis($preview_id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->getMedicalAnalysis($preview_id);
+            return Response::Success($data['path'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function deleteMedicalAnalysis($preview_id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->deleteMedicalAnalysis($preview_id);
+            return Response::Success($data['filePath'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+
 }

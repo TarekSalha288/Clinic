@@ -92,6 +92,8 @@ Route::group([
     Route::put('/updateProfileInfo', [PatientController::class, 'updateProfileInfo']);
     Route::put('/updatePassword', [PatientController::class, 'updatePassword']);
     Route::post('/postMedicalAnalysis/{preview_id}', [PatientController::class, 'postMedicalAnalysis']);
+    Route::get('/getMedicalAnalysis/{preview_id}', [PatientController::class, 'getMedicalAnalysis']);
+    Route::delete('/deleteMedicalAnalysis/{preview_id}', [PatientController::class, 'deleteMedicalAnalysis']);
 
 });
 

@@ -13,6 +13,7 @@ use App\Models\Son;
 use Illuminate\Support\Facades\Mail;
 use App\UploadImageTrait;
 use App\Models\MedicalAnalysis;
+use Illuminate\Support\Facades\Storage;
 use function PHPUnit\Framework\isNull;
 use function PHPUnit\Framework\returnArgument;
 
@@ -476,6 +477,15 @@ class PatientService
             return ['message' => $message, 'filePath' => null, 'code' => $code];
         }
         $preview = Preview::find($preview_id);
+        $patient = $user->patient;
+        $medical_analysis = MedicalAnalysis::where('patient_id', $patient->id)->where('preview_id', $preview_id)->first();
+        if ($medical_analysis) {
+            $path = $medical_analysis->medical_analysis_path;
+            $storagePath = str_replace('/storage/', '', $path);
+            if (Storage::disk('public')->exists($storagePath))
+                Storage::disk('public')->delete($storagePath);
+            $medical_analysis->delete();
+        }
         if ($preview->diagnoseis_type !== 0) {
             $message = "diagnoseis type for this preview is completed you can't add a medical analysis";
             $code = 400;
@@ -497,6 +507,67 @@ class PatientService
             $code = 400;
         }
         return ['message' => $message, 'filePath' => $url, 'code' => $code];
+    }
+    public function getMedicalAnalysis($preview_id)
+    {
+        $user = auth()->user();
+        if ($user) {
+            $preview = Preview::find($preview_id);
+            if ($preview->diagnoseis_type !== 0) {
+                $message = "diagnoseis type for this preview is completed you can't add a medical analysis";
+                $code = 400;
+                return ['message' => $message, 'Path' => null, 'code' => $code];
+            }
+            $patient = $user->patient;
+            $medical_analysis = MedicalAnalysis::where('patient_id', $patient->id)->where('preview_id', $preview_id)->first();
+            if ($medical_analysis) {
+                $path = $medical_analysis->medical_analysis_path;
+                if ($path) {
+                    $message = 'file uploaded successfully';
+                    $code = 200;
+                } else {
+                    $message = 'you dont uploaded file yet';
+                    $code = 400;
+                }
+            } else {
+                $message = "medical_analysis not found";
+                $code = 404;
+            }
+        } else {
+            $message = 'user not found';
+            $code = 404;
+        }
+        return ['message' => $message, 'path' => $path, 'code' => $code];
+    }
+    public function deleteMedicalAnalysis($preview_id)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            $message = "user not found";
+            $code = 404;
+            return ['message' => $message, 'filePath' => null, 'code' => $code];
+        }
+        $preview = Preview::find($preview_id);
+        if ($preview->diagnoseis_type !== 0) {
+            $message = "diagnoseis type for this preview is completed you can't add a medical analysis";
+            $code = 400;
+            return ['message' => $message, 'filePath' => null, 'code' => $code];
+        }
+        $patient = $user->patient;
+        $medical_analysis = MedicalAnalysis::where('patient_id', $patient->id)->where('preview_id', $preview_id)->first();
+        if ($medical_analysis) {
+            $path = $medical_analysis->medical_analysis_path;
+            $storagePath = str_replace('/storage/', '', $path);
+            if (Storage::disk('public')->exists($storagePath))
+                Storage::disk('public')->delete($storagePath);
+            $medical_analysis->delete();
+            $message = "medical analysis deleted succussfully";
+            $code = 200;
+        } else {
+            $message = "there is no medical analysis for this preview yet";
+            $code = 400;
+        }
+        return ['message' => $message, 'filePath' => $path, 'code' => $code];
     }
 }
 
