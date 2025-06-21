@@ -18,7 +18,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Day::factory(6)->create();
+       Day::factory()
+    ->count(6)
+    ->saturdayToThursday()
+    ->create();
         Doctor::factory(10)->create();
         Patient::factory(10)->create();
         Son::factory(5)->create();

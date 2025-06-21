@@ -14,10 +14,22 @@ class DayFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
-    {
+public function definition(): array
+{
+    return [
+        'available_days' => $this->faker->dayOfWeek(), // Fallback (not used in sequence)
+    ];
+}
+
+public function saturdayToThursday()
+{
+    $days = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+    static $index = 0;
+
+    return $this->state(function () use (&$index, $days) {
         return [
-            'available_days' => $this->faker->unique()->dayOfWeek(),
+            'available_days' => $days[$index++ % count($days)],
         ];
-    }
+    });
+}
 }
