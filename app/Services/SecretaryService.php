@@ -102,7 +102,7 @@ public function reverse(){
             }
  $patient = Patient::find(request('patient_id'));
             $doctor = Doctor::find(request('doctor_id'));
-
+$user=$patient->user;
             if (!$patient) {
                 return [
                     'status' => 404,
@@ -115,6 +115,8 @@ public function reverse(){
                     'message' => 'Doctor not found'
                 ];
             }
+
+
              $appointment = Apointment::create([
                 'patient_id' => $patient->id,
                 'doctor_id' => request('doctor_id'),
@@ -123,6 +125,10 @@ public function reverse(){
                 'apoitment_status'=>'immediate',
                 'status'=>'accepted'
             ]);
+            if(!$user){
+                $appointment->update(['apointment_status'=>'unapp']);
+                $appointment->save();
+            }
 
             return [
                 'status' => 201,
@@ -438,7 +444,11 @@ $apointment=Apointment::find($id);
                  return ['status' => 400, 'message' => "Alreday have a patient now"];
     $apointment->update(['enter'=>true]);
     $apointment->save();
-  Preview::create(['patient_id'=>$apointment->patient_id,
+    $uncompleteiagonaise=Preview::where('patient_id',$apointment->patient_id)
+    ->where('department_id',$apointment->department_id)
+    ->where('diagnoseis_type',false)->exists();
+    if(!$uncompleteiagonaise){
+ Preview::create(['patient_id'=>$apointment->patient_id,
 'doctor_id'=>$apointment->doctor_id,
 'department_id'=>$apointment->department_id,
 'diagnoseis'=>"",
@@ -447,6 +457,8 @@ $apointment=Apointment::find($id);
 'status'=>"",
 'notes'=>"",
 'date'=>now()]);
+    }
+
 $apointment->doctor->notify(new NotificationsEnterPatient("That is your patient",$apointment->patient));
 
 event(new EnterPatient("That is your patient",$apointment->doctor_id,$apointment->patient));
