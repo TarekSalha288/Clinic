@@ -36,4 +36,22 @@ class Doctor extends Model
     public function apointments():HasMany{
         return $this->hasMany(Apointment::class);
     }
+    public function rates():BelongsToMany{
+        return $this->belongsToMany(Patient::class,'rates')->withPivot('rate');
+    }
+
+public function scopeWithAverageRating($query)
+{
+    return $query->selectRaw('
+        doctors.*,
+        COALESCE(
+            ROUND(
+                (SELECT AVG(rate) FROM rates WHERE doctor_id = doctors.id),
+                1
+            ),
+            5.0
+        ) as average_rating
+    ');
+}
+
 }

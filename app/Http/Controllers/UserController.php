@@ -22,7 +22,7 @@ class UserController extends Controller
         return match ($data['status']) {
             200 => $this->response($data['message'], ['doctor' => $data['data']], 200),
             404 => $this->response($data['message'], null, 404),
-            500 => $this->response("Server error: " . $data['error'], null, 500),
+            500 => $this->response("Server error: " . $data['errors'], null, 500),
             default => $this->response("Unknown error", null, 520),
         };
     }
@@ -33,7 +33,7 @@ class UserController extends Controller
             200 => $this->response("That is all doctors", ['doctors' => $data['data']], 200),
             404 => $this->response("No doctors found", null, 404),
             422 => $this->response("Validation error: missing search query", null, 422),
-            500 => $this->response("Server error: " . $data['error'], null, 500),
+            500 => $this->response("Server error: " . $data['errors'], null, 500),
             default => $this->response("Unknown error", null, 520),
         };
     }
@@ -44,7 +44,7 @@ class UserController extends Controller
             200 => $this->response("That is  department", ['department' => $data['data']], 200),
             404 => $this->response("No department found", null, 404),
             422 => $this->response("Validation error: missing search query", null, 422),
-            500 => $this->response("Server error: " . $data['error'], null, 500),
+            500 => $this->response("Server error: " . $data['errors'], null, 500),
             default => $this->response("Unknown error", null, 520),
         };
     }
@@ -55,7 +55,7 @@ class UserController extends Controller
             200 => $this->response("That is all departments", ['departments' => $data['data']], 200),
             404 => $this->response("No departments found", null, 404),
             422 => $this->response("Validation error: missing search query", null, 422),
-            500 => $this->response("Server error: " . $data['error'], null, 500),
+            500 => $this->response("Server error: " . $data['errors'], null, 500),
             default => $this->response("Unknown error", null, 520),
         };
     }
@@ -65,7 +65,7 @@ class UserController extends Controller
         return match ($data['status']) {
             200 => $this->response("That is monthly leaves of doctor : ", ['leaves' => $data['data']], 200),
             404 => $this->response($data['message'], null, 404),
-            500 => $this->response("Server error: " . $data['error'], null, 500),
+            500 => $this->response("Server error: " . $data['errors'], null, 500),
             default => $this->response("Unknown error", null, 520),
         };
     }
@@ -76,7 +76,7 @@ class UserController extends Controller
             200 => $this->response("That is doctors of department : ", ['doctors' => $data['data']], 200),
             404 => $this->response("Department not found", null, 404),
             400 => $this->response("No doctors yet in this department", null, 400),
-            500 => $this->response("Server error: " . $data['error'], null, 500),
+            500 => $this->response("Server error: " . $data['errors'], null, 500),
             default => $this->response("Unknown error", null, 520),
         };
     }
@@ -87,7 +87,7 @@ class UserController extends Controller
             200 => $this->response("That is doctors of this day: ", ['doctors' => $data['data']], 200),
             404 => $this->response("Day  not found", null, 404),
             400 => $this->response("No doctors yet in this day", null, 400),
-            500 => $this->response("Server error: " . $data['error'], null, 500),
+            500 => $this->response("Server error: " . $data['errors'], null, 500),
             default => $this->response("Unknown error", null, 520),
         };
     }
@@ -98,7 +98,7 @@ class UserController extends Controller
             200 => $this->response("That is doctors of this day: ", $data['data'], 200),
             404 => $this->response($data['message'], null, 404),
             400 => $this->response($data['message'], null, 400),
-            500 => $this->response("Server error: " . $data['error'], null, 500),
+            500 => $this->response("Server error: " . $data['errors'], null, 500),
             default => $this->response("Unknown error", null, 520),
         };
     }
@@ -109,7 +109,7 @@ class UserController extends Controller
             200 => $this->response("Here are the results", ['results' => $data['data']], 200),
             404 => $this->response("No results found", null, 404),
             422 => $this->response("Validation error: missing search query", null, 422),
-            500 => $this->response("Server error: " . $data['error'], null, 500),
+            500 => $this->response("Server error: " . $data['errors'], null, 500),
             default => $this->response("Unknown error", null, 520),
         };
     }

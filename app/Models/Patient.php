@@ -55,7 +55,9 @@ class Patient extends Model
     {
         return $this->hasMany(Apointment::class);
     }
-
+  public function rates():BelongsToMany{
+    return $this->belongsToMany(Doctor::class,'rates');
+  }
     public static function encryptField($value)
     {
         if (empty($value))
