@@ -10,6 +10,7 @@ use App\Http\Middleware\TwoFactor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\SecretaryController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\AdminMiddleWare;
@@ -116,6 +117,7 @@ Route::group([
 });
 //////Any Body Can Access
 Route::group(['middleware' => [TwoFactor::class, 'api', 'auth']], function ($router) {
+
     Route::get('/doctor', [UserController::class, 'getDoctors']);
     Route::get('/department', [UserController::class, 'getDepartments']);
     Route::get('department/doctor/{departmentId}', [UserController::class, 'getDoctorsByDepartment']);
@@ -131,3 +133,6 @@ Route::group(['middleware' => [TwoFactor::class, 'api', 'auth']], function ($rou
     Route::get('/getProfileImage', [UserController::class, 'getProfileImage']);
     Route::delete('/deleteProfileImage', [UserController::class, 'deleteProfileImage']);
 });
+   Route::post('password/request', [PasswordController::class, 'sendConfirmationEmail']);  // Send email
+    Route::post('password/confirm', [PasswordController::class, 'confirmReset']); // Confirm password reset
+    Route::post('password/reset', [PasswordController::class, 'resetPassword']);
