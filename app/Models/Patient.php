@@ -55,9 +55,19 @@ class Patient extends Model
     {
         return $this->hasMany(Apointment::class);
     }
-  public function rates():BelongsToMany{
-    return $this->belongsToMany(Doctor::class,'rates');
-  }
+    public function rates(): BelongsToMany
+    {
+        return $this->belongsToMany(Doctor::class, 'rates');
+    }
+    public function favoritePost($postId)
+    {
+        return $this->favoritePosts()->where('post_id', $postId)->first();
+    }
+    public function favoritePosts()
+    {
+        return $this->hasMany(FavoritePost::class);
+    }
+
     public static function encryptField($value)
     {
         if (empty($value))

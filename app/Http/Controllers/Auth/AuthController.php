@@ -7,6 +7,7 @@ use App\Mail\TwoFactorMail;
 use App\Models\Patient;
 use App\Models\User;
 use App\Notifications\TwoFactorCode;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Validator;
 
@@ -93,7 +94,16 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        return $this->respondWithToken($token);
+        $user = auth()->user();
+
+        $user->generateCode();
+
+        Mail::to($user->email)->send(new TwoFactorMail($user->code, $user->first_name));
+
+        $json = $this->respondWithToken($token)->getContent();
+
+        $array = json_decode($json, true);
+        return response()->json(['token' => $array, 'user' => $user], 200);
     }
 
     /**
@@ -142,7 +152,8 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             // in this case I change the ttl from jwt config file and make it 1440
             // which mean the token expire in one day
-            'expires_in' => auth()->factory()->getTTL() * 60
+            'expires_in' => auth()->factory()->getTTL() * 60,
+            'expires_at' => Carbon::now()->addMinutes(auth()->factory()->getTTL())->toDateTimeString(),
         ]);
     }
 }

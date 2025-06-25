@@ -10,6 +10,7 @@ use App\Models\Patient;
 use App\Models\Post;
 use App\Models\Preview;
 use App\Models\Son;
+use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use App\UploadImageTrait;
 use App\Models\MedicalAnalysis;
@@ -46,6 +47,21 @@ class PatientService
         }
         return collect($formatedArticles);
     }
+    public function addInfoForAppointment($array, $patient, $user, $doctor, $son = null)
+    {
+
+        $doctorUser = User::find($doctor->user_id);
+        if ($son)
+            $sonPatient = Patient::find($son->patient_id);
+        $appointmentInfo = [
+            'imgPath' => $son == null ? $user->img_path : null,
+            'patientName' => $son == null ? ($user->first_name . " " . $user->last_name) : ($son->first_name . " " . $son->last_name),
+            'doctorName' => $doctorUser->first_name . " " . $doctorUser->last_name,
+            'gender' => $son == null ? $patient->gender : $sonPatient->gender
+        ];
+        $array['appointment_info'] = $appointmentInfo;
+        return $array;
+    }
     // ____________________________________________
     public function postPatientInformation($request)
     {
@@ -78,7 +94,7 @@ class PatientService
         $patient = Patient::create([
             'birth_date' => $request->birth_date,
             'age' => $request->age,
-            'gender' => Patient::encryptField($request->gender),
+            'gender' => $request->gender,
             'blood_type' => Patient::encryptField($request->blood_type),
             'chronic_diseases' => Patient::encryptField($request->chronic_diseases),
             'medication_allergies' => Patient::encryptField($request->medication_allergies),
@@ -119,7 +135,16 @@ class PatientService
     {
         $article = Post::find($id);
         $patient = auth()->user()->patient;
-        if ($article && $patient) {
+        $articleFavFound = FavoritePost::where('post_id', $id)->where('patient_id', $patient->id)->first();
+        if ($articleFavFound) {
+            return ['fav' => $article, 'message' => 'article already in fav', 'code' => 200];
+        }
+        if (!$patient) {
+            $message = "patient not found";
+            $code = 404;
+            return ['fav' => null, 'message' => $message, 'code' => $code];
+        }
+        if ($article) {
             $addFav = FavoritePost::create([
                 'patient_id' => $patient->id,
                 'post_id' => $id
@@ -132,16 +157,27 @@ class PatientService
                 $code = 400;
             }
         } else {
-            $message = "article or patient not found";
+            $message = "article not found";
             $code = 404;
         }
         return ['fav' => $article, 'message' => $message, 'code' => $code];
     }
     public function deleteArticleFav($id)
     {
+        $article = Post::find($id);
         $patient = auth()->user()->patient;
-        $favArticle = $patient->favoritePosts()->where('post_id', $id);
-        if ($favArticle && $patient) {
+        $favArticle = $patient->favoritePost($id);
+        if (!$patient) {
+            $message = "patient not found";
+            $code = 404;
+            return ['fav' => null, 'message' => $message, 'code' => $code];
+        }
+        if (!$article) {
+            $message = "article not found";
+            $code = 404;
+            return ['fav' => null, 'message' => $message, 'code' => $code];
+        }
+        if ($favArticle) {
             $deleteFav = $favArticle->delete();
             if ($deleteFav) {
                 $message = "article deleted from favorite successfully";
@@ -151,10 +187,10 @@ class PatientService
                 $code = 400;
             }
         } else {
-            $message = "article or patient not found";
+            $message = "article is not in the favorite to delete";
             $code = 404;
         }
-        return ['fav' => $favArticle, 'message' => $message, 'code' => $code];
+        return ['fav' => $article, 'message' => $message, 'code' => $code];
     }
     public function getFavArticles()
     {
@@ -176,7 +212,8 @@ class PatientService
     public function bookAppointment($request, $doctor_id)
     {
         $doctor = Doctor::find($doctor_id);
-        $patient = auth()->user()->patient;
+        $user = auth()->user();
+        $patient = $user->patient;
         $son_id = $request->son_id ?? null;
         $son = Son::find($son_id);
         if ($son && ($son->parent_id !== auth()->user()->id)) {
@@ -184,7 +221,12 @@ class PatientService
             $code = 404;
             return ['message' => $message, 'appointment' => null, 'code' => $code];
         }
-        if ($doctor && $patient) {
+        if (!$patient) {
+            $message = "patient not found";
+            $code = 404;
+            return ['appointment' => null, 'message' => $message, 'code' => $code];
+        }
+        if ($doctor) {
             $department = $doctor->department;
             if ($department) {
                 $appointment = Apointment::create([
@@ -195,6 +237,7 @@ class PatientService
                     'apoitment_status' => "app",
                     'status' => "waiting"
                 ]);
+                $this->addInfoForAppointment($appointment, $patient, $user, $doctor, $son);
             } else {
                 $code = 404;
                 $message = "department not found";
@@ -208,14 +251,15 @@ class PatientService
             }
         } else {
             $code = 404;
-            $message = "doctor or patient not found";
+            $message = "doctor not found";
         }
         return ['message' => $message, 'appointment' => $appointment ?? null, 'code' => $code];
     }
     public function updateApointment($request, $appointment_id)
     {
         $appointment = Apointment::find($appointment_id);
-        $patient = auth()->user()->patient;
+        $user = auth()->user();
+        $patient = $user->patient;
         $son_id = $request->son_id ?? null;
         $son = Son::find($son_id);
         if ($son && ($son->parent_id !== auth()->user()->id)) {
@@ -235,6 +279,9 @@ class PatientService
                     $updateData['patient_id'] = $patient->id;
                 }
                 $appointment->update($updateData);
+                $doctor = Doctor::find($appointment->doctor_id);
+                $this->addInfoForAppointment($appointment, $patient, $user, $doctor, $son);
+
                 if ($appointment) {
                     $message = "apointment updated successfully";
                     $code = 200;
@@ -255,6 +302,7 @@ class PatientService
     public function deleteAppointment($appointment_id)
     {
         $appointment = Apointment::find($appointment_id);
+
         if ($appointment) {
             $checkDelete = $appointment->delete();
             if ($checkDelete) {
@@ -277,16 +325,47 @@ class PatientService
         $sons = Son::where('parent_id', $user->id)->get();
         $formatedAppointments = [];
         $acceptedAppointmentsForPatient = Apointment::ofPatient($patient->id)->accepted()->get();
+        foreach ($acceptedAppointmentsForPatient as $acceptedAppointment) {
+            $patient = Patient::find($acceptedAppointment['patient_id']);
+            $user = User::find($patient['user_id']);
+            $doctor = Doctor::find($acceptedAppointment['doctor_id']);
+            $this->addInfoForAppointment($acceptedAppointment, $patient, $user, $doctor);
+        }
         $waitingAppointmentsForPatient = Apointment::ofPatient($patient->id)->waiting()->get();
+        foreach ($waitingAppointmentsForPatient as $waitingAppointment) {
+            $patient = Patient::find($waitingAppointment['patient_id']);
+            $user = User::find($patient['user_id']);
+            $doctor = Doctor::find($waitingAppointment['doctor_id']);
+            $this->addInfoForAppointment($waitingAppointment, $patient, $user, $doctor);
+        }
         $formatedAppointments['accepted_patient'] = $acceptedAppointmentsForPatient ?? null;
         $formatedAppointments['waiting_patient'] = $waitingAppointmentsForPatient ?? null;
         $acceptedAppointmentsForPatientSon = [];
         $waitingAppointmentsForPatientSon = [];
         if ($sons) {
             foreach ($sons as $son) {
-                $acceptedAppointmentsForPatientSon = Apointment::ofPatient($son->patient_id)->accepted()->get();
-                $waitingAppointmentsForPatientSon = Apointment::ofPatient($son->patient_id)->waiting()->get();
+                $acceptedAppointment = Apointment::ofPatient($son->patient_id)->accepted()->get();
+                foreach ($acceptedAppointment as $accepted) {
+                    $patient = Patient::find($accepted['patient_id']);
+                    $user = User::find($patient['user_id']);
+                    $doctor = Doctor::find($accepted['doctor_id']);
+                    $son = Son::where('patient_id', $patient->id)->first();
+                    $this->addInfoForAppointment($accepted, $patient, $user, $doctor, $son);
+                }
+                $acceptedAppointmentsForPatientSon[] = $acceptedAppointment;
+
+                $waitingAppointment = Apointment::ofPatient($son->patient_id)->waiting()->get();
+                foreach ($waitingAppointment as $waiting) {
+                    $patient = Patient::find($waiting['patient_id']);
+                    $user = User::find($patient['user_id']);
+                    $doctor = Doctor::find($waiting['doctor_id']);
+                    $son = Son::where('patient_id', $patient->id)->first();
+                    $this->addInfoForAppointment($waiting, $patient, $user, $doctor, $son);
+                }
+                $waitingAppointmentsForPatientSon[] = $waitingAppointment;
             }
+
+
             $formatedAppointments['accepted_sons'] = $acceptedAppointmentsForPatientSon ?? null;
             $formatedAppointments['waiting_sons'] = $waitingAppointmentsForPatientSon ?? null;
         }
