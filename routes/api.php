@@ -95,6 +95,10 @@ Route::group([
     Route::post('/postMedicalAnalysis/{preview_id}', [PatientController::class, 'postMedicalAnalysis']);
     Route::get('/getMedicalAnalysis/{preview_id}', [PatientController::class, 'getMedicalAnalysis']);
     Route::delete('/deleteMedicalAnalysis/{preview_id}', [PatientController::class, 'deleteMedicalAnalysis']);
+    Route::post('/addDoctorRate/{doctor_id}', [PatientController::class, 'addDoctorRate']);
+    Route::put('/updateDoctorRate/{doctor_id}', [PatientController::class, 'updateDoctorRate']);
+    Route::delete('/deleteDoctorRate/{doctor_id}', [PatientController::class, 'deleteDoctorRate']);
+    Route::get('/getDoctorRate/{doctor_id}', [PatientController::class, 'getDoctorRate']);
 
 });
 
@@ -133,6 +137,6 @@ Route::group(['middleware' => [TwoFactor::class, 'api', 'auth']], function ($rou
     Route::get('/getProfileImage', [UserController::class, 'getProfileImage']);
     Route::delete('/deleteProfileImage', [UserController::class, 'deleteProfileImage']);
 });
-   Route::post('password/request', [PasswordController::class, 'sendConfirmationEmail']);  // Send email
-    Route::post('password/confirm', [PasswordController::class, 'confirmReset']); // Confirm password reset
-    Route::post('password/reset', [PasswordController::class, 'resetPassword']);
+Route::post('password/request', [PasswordController::class, 'sendConfirmationEmail']);  // Send email
+Route::post('password/confirm', [PasswordController::class, 'confirmReset']); // Confirm password reset
+Route::post('password/reset', [PasswordController::class, 'resetPassword']);

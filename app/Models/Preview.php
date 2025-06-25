@@ -26,6 +26,12 @@ class Preview extends Model
     {
         return $query->where('diagnoseis_type', $type);
     }
+    public function scopeOfPatientAndDoctor($query, $patientId, $doctorId)
+    {
+        return $query->where('patient_id', $patientId)
+            ->where('doctor_id', $doctorId);
+    }
+
     public static function encryptField($value)
     {
         if (empty($value))

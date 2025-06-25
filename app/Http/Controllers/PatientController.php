@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AddChildRequest;
 use App\Http\Requests\BookAppointmentRequest;
+use App\Http\Requests\DoctorRateRequest;
 use App\Http\Requests\FileUploadRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\PatientProfileRequest;
@@ -256,5 +257,48 @@ class PatientController extends Controller
             return Response::Error($data, $message);
         }
     }
-
+    public function addDoctorRate(DoctorRateRequest $request, $doctor_id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->addDoctorRate($request, $doctor_id);
+            return Response::Success($data['rate'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function updateDoctorRate(DoctorRateRequest $request, $doctor_id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->updateDoctorRate($request, $doctor_id);
+            return Response::Success($data['rate'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function deleteDoctorRate($doctor_id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->deleteDoctorRate($doctor_id);
+            return Response::Success($data['rate'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function getDoctorRate($doctor_id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->getDoctorRate($doctor_id);
+            return Response::Success($data['rate'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
 }

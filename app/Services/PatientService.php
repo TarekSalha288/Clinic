@@ -9,6 +9,7 @@ use App\Models\FavoritePost;
 use App\Models\Patient;
 use App\Models\Post;
 use App\Models\Preview;
+use App\Models\Rate;
 use App\Models\Son;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
@@ -647,6 +648,135 @@ class PatientService
             $code = 400;
         }
         return ['message' => $message, 'filePath' => $path, 'code' => $code];
+    }
+    public function addDoctorRate($request, $doctor_id)
+    {
+        $patient = auth()->user()->patient;
+        $doctor = Doctor::find($doctor_id);
+        if (!$doctor) {
+            $message = "doctor not found";
+            $code = 404;
+            return ['rate' => null, 'message' => $message, 'code' => $code];
+        }
+        if (!$patient) {
+            $message = "patient not found";
+            $code = 404;
+            return ['rate' => null, 'message' => $message, 'code' => $code];
+        }
+        $preview = Preview::ofPatientAndDoctor($patient->id, $doctor_id)->first();
+        if ($preview) {
+            $rate = Rate::ofPatientAndDoctor($patient->id, $doctor_id)->first();
+            if ($rate) {
+                $message = "you rated this doctor before";
+                $code = 400;
+                return ['rate' => $rate, 'message' => $message, 'code' => $code];
+            }
+            $rate = Rate::create([
+                'patient_id' => $patient->id,
+                'doctor_id' => $doctor_id,
+                'rate' => $request->rate
+            ]);
+            if ($rate) {
+                $message = "doctor rated successfully";
+                $code = 200;
+            } else {
+                $message = "doctor rated failed";
+                $code = 400;
+            }
+        } else {
+            $message = "you dont have any preview for this doctor so you cant rated";
+            $code = 400;
+            $rate = null;
+        }
+        return ['message' => $message, 'rate' => $rate, 'code' => $code];
+    }
+    public function updateDoctorRate($request, $doctor_id)
+    {
+        $patient = auth()->user()->patient;
+        $doctor = Doctor::find($doctor_id);
+        if (!$doctor) {
+            $message = "doctor not found";
+            $code = 404;
+            return ['rate' => null, 'message' => $message, 'code' => $code];
+        }
+        if (!$patient) {
+            $message = "patient not found";
+            $code = 404;
+            return ['rate' => null, 'message' => $message, 'code' => $code];
+        }
+        $rate = Rate::ofPatientAndDoctor($patient->id, $doctor_id)->first();
+        if ($rate) {
+            $updateRate = $rate->update([
+                'patient_id' => $patient->id,
+                'doctor_id' => $doctor_id,
+                'rate' => $request->rate
+            ]);
+            if ($updateRate) {
+                $message = "rate updated successfully";
+                $code = 200;
+            } else {
+                $message = "rate updated failed";
+                $code = 400;
+            }
+        } else {
+            $message = "rate not found";
+            $code = 404;
+        }
+        return ['rate' => $rate, 'message' => $message, 'code' => $code];
+    }
+    public function deleteDoctorRate($doctor_id)
+    {
+        $patient = auth()->user()->patient;
+        $doctor = Doctor::find($doctor_id);
+        if (!$doctor) {
+            $message = "doctor not found";
+            $code = 404;
+            return ['rate' => null, 'message' => $message, 'code' => $code];
+        }
+        if (!$patient) {
+            $message = "patient not found";
+            $code = 404;
+            return ['rate' => null, 'message' => $message, 'code' => $code];
+        }
+        $rate = Rate::ofPatientAndDoctor($patient->id, $doctor_id)->first();
+        if ($rate) {
+            $deleteRate = $rate->delete();
+            if ($deleteRate) {
+                $message = "rate deleted successfully";
+                $code = 200;
+            } else {
+                $message = "rate deleted failed";
+                $code = 400;
+            }
+        } else {
+            $message = "rate not found";
+            $code = 404;
+        }
+        return ['rate' => $rate, 'message' => $message, 'code' => $code];
+    }
+    public function getDoctorRate($doctor_id)
+    {
+        $patient = auth()->user()->patient;
+        $doctor = Doctor::find($doctor_id);
+        if (!$doctor) {
+            $message = "doctor not found";
+            $code = 404;
+            return ['rate' => null, 'message' => $message, 'code' => $code];
+        }
+        if (!$patient) {
+            $message = "patient not found";
+            $code = 404;
+            return ['rate' => null, 'message' => $message, 'code' => $code];
+        }
+        $rate = Rate::ofPatientAndDoctor($patient->id, $doctor_id)->first();
+        if ($rate) {
+            $message = "rate return successfully";
+            $code = 200;
+        } else {
+            $message = "rate not found";
+            $code = 404;
+        }
+        return ['rate' => $rate, 'message' => $message, 'code' => $code];
     }
 }
 
