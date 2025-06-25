@@ -10,12 +10,14 @@ use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\PatientProfileRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Responses\Response;
+use App\ResponseJson;
 use App\Services\PatientService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Throwable;
 class PatientController extends Controller
 {
+    use ResponseJson;
     private PatientService $patientService;
     private UserService $userService;
     public function __construct(PatientService $patientService, UserService $userService)
@@ -301,4 +303,13 @@ class PatientController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function analyzeSymptoms(){
+    $data=$this->patientService->analyseSymtoms();
+    return match($data['status']){
+     200=>$this->response($data['message'],$data['data'],200),
+     400=>$this->response($data['message'],null,400),
+     500=>$this->response($data['errors'],null,500),
+     default=>$this->response("Unknown Error :",null,522),
+    };
+}
 }
