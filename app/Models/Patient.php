@@ -45,12 +45,24 @@ class Patient extends Model
     {
         return $this->belongsToMany(Doctor::class, 'apointments');
     }
-
+    public function sons()
+    {
+        return $this->hasMany(Son::class);
+    }
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    public function previews()
+    {
+        return $this->hasMany(Preview::class);
+    }
+
+    public function medicalAnalyses()
+    {
+        return $this->hasMany(MedicalAnalysis::class);
+    }
     public function apointments(): HasMany
     {
         return $this->hasMany(Apointment::class);

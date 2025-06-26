@@ -418,4 +418,45 @@ class DoctorService
         }
         return ['message' => $message, 'patients' => $previedPatients, 'code' => $code];
     }
+    public function patientSearch()
+    {
+        $keyword = request('query');
+        if (!$keyword) {
+            return ['message' => 'search input is required', 'patients' => null, 'code' => 400];
+        }
+        $patients = Patient::with(['user', 'sons', 'previews'])->get();
+        $filteredPatients = $patients->filter(function ($patient) use ($keyword) {
+
+            $nameMatch = stripos($patient->first_name, $keyword) !== false
+                || stripos($patient->last_name, $keyword) !== false;
+
+
+            $user = $patient->user;
+            $userMatch = $user && (stripos($user->first_name, $keyword) !== false || stripos($user->last_name, $keyword) !== false);
+
+
+            $sonsMatch = $patient->sons->contains(function ($son) use ($keyword) {
+                return stripos($son->first_name, $keyword) !== false || stripos($son->last_name, $keyword) !== false;
+            });
+
+
+            $previewsMatch = $patient->previews->contains(function ($preview) use ($keyword) {
+
+                return stripos($preview->diagnoseis, $keyword) !== false
+                    || stripos($preview->notes, $keyword) !== false
+                    || stripos($preview->medicine, $keyword) !== false
+                    || stripos($preview->date, $keyword) !== false;
+            });
+
+
+            return $nameMatch || $userMatch || $sonsMatch || $previewsMatch;
+        });
+        if ($filteredPatients) {
+            $message = "found successfully";
+            $code = 200;
+        } else {
+            $message = "found failed";
+        }
+        return ['message' => $message, 'patients' => $filteredPatients, 'code' => $code];
+    }
 }

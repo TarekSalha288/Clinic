@@ -70,6 +70,8 @@ Route::group([
     Route::delete('/deletePreview/{id}', [DoctorController::class, 'deletepreview']);
     Route::get('/getPreviews', [DoctorController::class, 'getPreviews']);
     Route::get('/getPreviedPatients', [DoctorController::class, 'getPreviedPatients']);
+    Route::post('/patientSearch', [DoctorController::class, 'patientSearch']);
+
 });
 
 Route::group([

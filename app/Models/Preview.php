@@ -17,6 +17,16 @@ class Preview extends Model
         'date',
         'status',
     ];
+    public static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+            $model->diagnoseis_plain = $model->diagnoseis; // النص غير مشفر
+            $model->notes_plain = $model->notes;
+            $model->medicine_plain = $model->medicine;
+        });
+    }
     public function scopeForPatient($query, $patientId)
     {
         return $query->where('patient_id', $patientId);
@@ -31,7 +41,10 @@ class Preview extends Model
         return $query->where('patient_id', $patientId)
             ->where('doctor_id', $doctorId);
     }
-
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class, 'patient_id', 'id');
+    }
     public static function encryptField($value)
     {
         if (empty($value))

@@ -188,5 +188,15 @@ class DoctorController extends Controller
             return Response::Error($data, $message);
         }
     }
-
+    public function patientSearch()
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->patientSearch();
+            return Response::Success($data["patients"], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
 }
