@@ -12,15 +12,16 @@ use Illuminate\Notifications\Notifiable;
 
 class Doctor extends Model
 {
-     use Notifiable;
-     use HasFactory;
-         protected $guarded = [
+    use Notifiable;
+    use HasFactory;
+    protected $guarded = [
 
     ];
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
+
     public function days(): BelongsToMany
     {
         return $this->belongsToMany(Day::class, 'mounthly_leaves');
@@ -33,16 +34,18 @@ class Doctor extends Model
     {
         return $this->hasMany(Post::class);
     }
-    public function apointments():HasMany{
+    public function apointments(): HasMany
+    {
         return $this->hasMany(Apointment::class);
     }
-    public function rates():BelongsToMany{
-        return $this->belongsToMany(Patient::class,'rates')->withPivot('rate');
+    public function rates(): BelongsToMany
+    {
+        return $this->belongsToMany(Patient::class, 'rates')->withPivot('rate');
     }
 
-public function scopeWithAverageRating($query)
-{
-    return $query->selectRaw('
+    public function scopeWithAverageRating($query)
+    {
+        return $query->selectRaw('
         doctors.*,
         COALESCE(
             ROUND(
@@ -52,6 +55,6 @@ public function scopeWithAverageRating($query)
             5.0
         ) as average_rating
     ');
-}
+    }
 
 }

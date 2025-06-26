@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Mail\TwoFactorMail;
 use App\Models\Apointment;
+use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\FavoritePost;
 use App\Models\Patient;
@@ -780,75 +781,117 @@ class PatientService
     }
 
 
-public function analyseSymtoms() {
-    try {
-        $symptoms = request()->input('symptoms', []);
+    public function analyseSymtoms()
+    {
+        try {
+            $symptoms = request()->input('symptoms', []);
 
-        if (empty($symptoms)) {
-            return [
-                'status' => 400,
-                'message' => 'No symptoms provided.',
-            ];
-        }
-        $identifiedDepartments = [];
-        foreach ($symptoms as $symptom) {
-            $cleanedSymptom = $symptom;
-            $matchedDepartment = null;
-            if (in_array($cleanedSymptom, ['chest pain', 'shortness of breath', 'palpitations', 'swelling in legs', 'fatigue', 'rapid heartbeat', 'fainting', 'high blood pressure'])) {
-                $matchedDepartment = 'Cardiology';
-            } elseif (in_array($cleanedSymptom, ['headaches', 'dizziness', 'numbness', 'muscle weakness', 'seizures', 'memory loss', 'tingling', 'loss of consciousness', 'tremors', 'vision problems'])) {
-                $matchedDepartment = 'Neurology';
-            } elseif (in_array($cleanedSymptom, ['abdominal pain', 'nausea', 'diarrhea', 'constipation', 'heartburn', 'bloating', 'vomiting', 'blood in stool', 'loss of appetite', 'difficulty swallowing'])) {
-                $matchedDepartment = 'Gastroenterology';
-            } elseif (in_array($cleanedSymptom, ['chronic cough', 'wheezing', 'shortness of breath', 'chest tightness', 'frequent respiratory infections', 'coughing up blood', 'snoring', 'hoarseness'])) {
-                $matchedDepartment = 'Pulmonology';
-            } elseif (in_array($cleanedSymptom, ['joint pain', 'swelling of joints', 'limited range of motion', 'muscle pain', 'fractures', 'back pain', 'neck pain', 'bone pain', 'stiffness'])) {
-                $matchedDepartment = 'Orthopedics';
-            } elseif (in_array($cleanedSymptom, ['fever', 'rash', 'ear infection', 'sore throat', 'growth delays', 'behavioral changes', 'poor appetite', 'developmental delays', 'bedwetting'])) {
-                $matchedDepartment = 'Pediatrics';
-            } elseif (in_array($cleanedSymptom, ['skin rash', 'itching', 'acne', 'eczema', 'psoriasis', 'skin lesions', 'hair loss', 'nail changes', 'skin discoloration'])) {
-                $matchedDepartment = 'Dermatology';
-            } elseif (in_array($cleanedSymptom, ['frequent urination', 'painful urination', 'blood in urine', 'kidney stones', 'urinary incontinence', 'urinary retention', 'testicular pain'])) {
-                $matchedDepartment = 'Urology';
-            }
-            if ($matchedDepartment === null) {
+            if (empty($symptoms)) {
                 return [
                     'status' => 400,
-                    'message' => "Our system can't categorize the symptom '{$symptom}'. Please consult a general practitioner.",
+                    'message' => 'No symptoms provided.',
                 ];
             }
-            $identifiedDepartments[] = $matchedDepartment;
-        }
-        $uniqueDepartments = array_unique($identifiedDepartments);
-        if (count($uniqueDepartments) > 1) {
-            return [
-                'status' => 400,
-                'message' => "Your symptoms suggest multiple departments. Please consult a general practitioner for a comprehensive diagnosis.",
-            ];
-        }
+            $identifiedDepartments = [];
+            foreach ($symptoms as $symptom) {
+                $cleanedSymptom = $symptom;
+                $matchedDepartment = null;
+                if (in_array($cleanedSymptom, ['chest pain', 'shortness of breath', 'palpitations', 'swelling in legs', 'fatigue', 'rapid heartbeat', 'fainting', 'high blood pressure'])) {
+                    $matchedDepartment = 'Cardiology';
+                } elseif (in_array($cleanedSymptom, ['headaches', 'dizziness', 'numbness', 'muscle weakness', 'seizures', 'memory loss', 'tingling', 'loss of consciousness', 'tremors', 'vision problems'])) {
+                    $matchedDepartment = 'Neurology';
+                } elseif (in_array($cleanedSymptom, ['abdominal pain', 'nausea', 'diarrhea', 'constipation', 'heartburn', 'bloating', 'vomiting', 'blood in stool', 'loss of appetite', 'difficulty swallowing'])) {
+                    $matchedDepartment = 'Gastroenterology';
+                } elseif (in_array($cleanedSymptom, ['chronic cough', 'wheezing', 'shortness of breath', 'chest tightness', 'frequent respiratory infections', 'coughing up blood', 'snoring', 'hoarseness'])) {
+                    $matchedDepartment = 'Pulmonology';
+                } elseif (in_array($cleanedSymptom, ['joint pain', 'swelling of joints', 'limited range of motion', 'muscle pain', 'fractures', 'back pain', 'neck pain', 'bone pain', 'stiffness'])) {
+                    $matchedDepartment = 'Orthopedics';
+                } elseif (in_array($cleanedSymptom, ['fever', 'rash', 'ear infection', 'sore throat', 'growth delays', 'behavioral changes', 'poor appetite', 'developmental delays', 'bedwetting'])) {
+                    $matchedDepartment = 'Pediatrics';
+                } elseif (in_array($cleanedSymptom, ['skin rash', 'itching', 'acne', 'eczema', 'psoriasis', 'skin lesions', 'hair loss', 'nail changes', 'skin discoloration'])) {
+                    $matchedDepartment = 'Dermatology';
+                } elseif (in_array($cleanedSymptom, ['frequent urination', 'painful urination', 'blood in urine', 'kidney stones', 'urinary incontinence', 'urinary retention', 'testicular pain'])) {
+                    $matchedDepartment = 'Urology';
+                }
+                if ($matchedDepartment === null) {
+                    return [
+                        'status' => 400,
+                        'message' => "Our system can't categorize the symptom '{$symptom}'. Please consult a general practitioner.",
+                    ];
+                }
+                $identifiedDepartments[] = $matchedDepartment;
+            }
+            $uniqueDepartments = array_unique($identifiedDepartments);
+            if (count($uniqueDepartments) > 1) {
+                return [
+                    'status' => 400,
+                    'message' => "Your symptoms suggest multiple departments. Please consult a general practitioner for a comprehensive diagnosis.",
+                ];
+            }
 
-        $finalDepartment = !empty($uniqueDepartments) ? $uniqueDepartments[0] : null;
-        if ($finalDepartment) {
+            $finalDepartment = !empty($uniqueDepartments) ? $uniqueDepartments[0] : null;
+            if ($finalDepartment) {
+                return [
+                    'status' => 200,
+                    'message' => "Based on your symptoms, you should go to the **{$finalDepartment}** department.",
+                    'data' => [
+                        'suggested_department' => $finalDepartment,
+                        'symptoms_provided' => $symptoms
+                    ]
+                ];
+            } else {
+                return [
+                    'status' => 400,
+                    'message' => "No clear department could be identified based on your input.",
+                ];
+            }
+        } catch (\Exception $e) {
+
             return [
-                'status' => 200,
-                'message' => "Based on your symptoms, you should go to the **{$finalDepartment}** department.",
-                'data' => [
-                    'suggested_department' => $finalDepartment,
-                    'symptoms_provided' => $symptoms
-                ]
-            ];
-        } else {
-            return [
-                'status' => 400,
-                'message' => "No clear department could be identified based on your input.",
+                'status' => 500,
+                'errors' => 'An internal server error occurred: ' . $e->getMessage()
             ];
         }
-    } catch (\Exception $e) {
-
-        return [
-            'status' => 500,
-            'errors' => 'An internal server error occurred: ' . $e->getMessage()
-        ];
     }
-}
+    public function searchDoctors()
+    {
+        $query = request('query');
+
+        if (!$query) {
+            return ['message' => 'search input is required', 'doctors' => null, 'code' => 400];
+        }
+        $doctors = Doctor::whereHas('user', function ($q) use ($query) {
+            $q->where('first_name', 'like', '%' . $query . '%')
+                ->orWhere('last_name', 'like', '%' . $query . '%');
+        })->with('user')->get();
+        if ($doctors) {
+            $message = "found successfully";
+            $code = 200;
+        } else {
+            $message = "found failed";
+            $code = 400;
+        }
+        return ['message' => $message, 'doctors' => $doctors, 'code' => $code];
+
+    }
+    public function searchDepartments()
+    {
+        $query = request('query');
+
+        if (!$query) {
+            return ['message' => 'search input is required', 'departments' => null, 'code' => 400];
+        }
+        $departments = Department::where('name', 'like', '%' . $query . '%')
+            ->orWhere('description', 'like', '%' . $query . '%')
+            ->get();
+        if ($departments) {
+            $message = "found successfully";
+            $code = 200;
+        } else {
+            $message = "found failed";
+            $code = 400;
+        }
+        return ['message' => $message, 'departments' => $departments, 'code' => $code];
+
+    }
 }

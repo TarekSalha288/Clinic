@@ -303,13 +303,36 @@ class PatientController extends Controller
             return Response::Error($data, $message);
         }
     }
-    public function analyzeSymptoms(){
-    $data=$this->patientService->analyseSymtoms();
-    return match($data['status']){
-     200=>$this->response($data['message'],$data['data'],200),
-     400=>$this->response($data['message'],null,400),
-     500=>$this->response($data['errors'],null,500),
-     default=>$this->response("Unknown Error :",null,522),
-    };
-}
+    public function searchDoctors()
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->searchDoctors();
+            return Response::Success($data['doctors'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function searchDepartments()
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->searchDepartments();
+            return Response::Success($data['departments'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function analyzeSymptoms()
+    {
+        $data = $this->patientService->analyseSymtoms();
+        return match ($data['status']) {
+            200 => $this->response($data['message'], $data['data'], 200),
+            400 => $this->response($data['message'], null, 400),
+            500 => $this->response($data['errors'], null, 500),
+            default => $this->response("Unknown Error :", null, 522),
+        };
+    }
 }
