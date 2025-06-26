@@ -16,10 +16,10 @@ class EnterPatient extends Notification
      */
     private $msg;
     private $patient;
-    public function __construct($msg,$patient)
+    public function __construct($msg, $patient)
     {
-        $this->msg=$msg;
-        $this->patient=$patient;
+        $this->msg = $msg;
+        $this->patient = $patient;
     }
 
     /**
@@ -51,8 +51,8 @@ class EnterPatient extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'data'=>$this->patient,
-            'msg'=>$this->msg,
+            'data' => $this->patient,
+            'msg' => $this->msg,
         ];
     }
 }

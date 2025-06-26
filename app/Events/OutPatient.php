@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class EnterPatient implements ShouldBroadcast
+class OutPatient
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -18,13 +18,11 @@ class EnterPatient implements ShouldBroadcast
      * Create a new event instance.
      */
     protected $msg;
-    protected $id;
-    protected $patientInfo;
-    public function __construct($msg, $doctorId, $patientInfo)
+    protected $patient_id;
+    public function __construct($msg, $patient_id)
     {
         $this->msg = $msg;
-        $this->id = $doctorId;
-        $this->patientInfo = $patientInfo;
+        $this->patient_id = $patient_id;
     }
 
     /**
@@ -35,19 +33,19 @@ class EnterPatient implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('enter-patient.' . $this->id),
+            new Channel('out-patient.' . $this->patient_id),
         ];
     }
     public function broadcastWith()
     {
         return [
-            'patient' => $this->patientInfo,
+            'patient_id' => $this->patient_id,
             'message' => $this->msg,
             'timestamp' => now()->toDateTimeString()
         ];
     }
     public function broadcastAs(): string
     {
-        return 'patient.entered'; // Listen for `.patient.entered` instead of full class path
+        return 'patient.outed';
     }
 }

@@ -96,9 +96,9 @@ class AuthController extends Controller
 
         $user = auth()->user();
 
-        $user->generateCode();
+        // $user->generateCode();
 
-        Mail::to($user->email)->send(new TwoFactorMail($user->code, $user->first_name));
+        // Mail::to($user->email)->send(new TwoFactorMail($user->code, $user->first_name));
 
         $json = $this->respondWithToken($token)->getContent();
 

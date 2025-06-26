@@ -5,11 +5,13 @@ namespace App\Services;
 use App\Models\Apointment;
 use App\Models\Department;
 use App\Models\Doctor;
+use App\Models\MedicalAnalysis;
 use App\Models\Patient;
 use App\Models\Post;
 use App\Models\Preview;
 use App\Models\Rate;
 use App\Models\User;
+use App\Notifications\OutPatient;
 use App\UploadImageTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Response;
@@ -37,6 +39,27 @@ class DoctorService
             'rates' => Rate::where('doctor_id', $doctor->id)->first()->rate ?? 0
         ];
         $array['doctor_info'] = $doctorInfo;
+        return $array;
+    }
+    private function addPreviewInfo($array, $preview)
+    {
+        $previewInfo = [
+            'id' => $preview->id,
+            'diagnoseis' => $preview->diagnoseis,
+            'diagnoseis_type' => $preview->diagnoseis_type,
+            'medicine' => $preview->medicine,
+            'notes' => $preview->notes,
+            'date' => $preview->date,
+        ];
+        $array['preview_info'] = $previewInfo;
+        return $array;
+    }
+    private function addMedicalAnalysisInfo($array, $medicalAnalysis)
+    {
+        $medicalAnalysis = [
+            'medical_analysis_path' => $medicalAnalysis->medical_analysis_path,
+        ];
+        $array['medical_analysis_info'] = $medicalAnalysis;
         return $array;
     }
     //______________________________________
@@ -276,6 +299,11 @@ class DoctorService
             ]);
             $preview->save();
             if ($updatePreview) {
+
+                $scretary = User::where('role', 'secretary')->first();
+                $scretary->notify(new OutPatient('I am finshed from this patient please enter the next one'));
+                event(new \App\Events\OutPatient('I am finshed from this patient please enter the next one', $preview->patient_id));
+
                 $message = "preview updated successfully";
                 $code = 200;
             } else {
@@ -325,4 +353,35 @@ class DoctorService
 
         return ['message' => $message, 'previews' => $previews, 'code' => $code];
     }
+    public function getPreviedPatients()
+    {
+        $doctor = auth()->user()->doctor;
+        if (!$doctor) {
+            return ['message' => 'doctor not found', 'patients' => null, 'code' => 404];
+        }
+        $previews = Preview::where('doctor_id', $doctor->id)->get();
+        if ($previews) {
+            $previedPatients = [];
+            foreach ($previews as $preview) {
+                $patient = Patient::find($preview->patient_id);
+                $medicalAnalysis = MedicalAnalysis::where('preview_id', $preview->id)->where('patient_id', $patient->id)->first();
+                if ($medicalAnalysis)
+                    $this->addMedicalAnalysisInfo($patient, $medicalAnalysis);
+                $this->addPreviewInfo($patient, $preview);
+                $previedPatients[] = $patient;
+            }
+            if ($previedPatients) {
+                $message = "pateitns return successfully";
+                $code = 200;
+            } else {
+                $message = "we don't found any doctors";
+                $code = 404;
+            }
+        } else {
+            $message = "this doctor does not have any previed patients";
+            $code = 400;
+        }
+        return ['message' => $message, 'patients' => $previedPatients, 'code' => $code];
+    }
+
 }

@@ -7,17 +7,17 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class Reverse extends Notification
+class OutPatient extends Notification
 {
     use Queueable;
 
+    private $msg;
     /**
      * Create a new notification instance.
      */
-    private $message;
-    public function __construct($message)
+    public function __construct($msg)
     {
-        $this->message = $message;
+        $this->msg = $msg;
     }
 
     /**
@@ -49,7 +49,7 @@ class Reverse extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => $this->message,
+            'msg' => $this->msg
         ];
     }
 }
