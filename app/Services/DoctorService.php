@@ -337,7 +337,7 @@ class DoctorService
 
                 $scretary = User::where('role', 'secretary')->first();
                 $scretary->notify(new OutPatient('I am finshed from this patient please enter the next one'));
-                event(new \App\Events\OutPatient('I am finshed from this patient please enter the next one', $preview->patient_id));
+                event(new \App\Events\OutPatient('I am finshed from this patient please enter the next one', $scretary->id));
 
                 $message = "preview updated successfully";
                 $code = 200;

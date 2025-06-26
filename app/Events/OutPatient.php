@@ -18,11 +18,11 @@ class OutPatient
      * Create a new event instance.
      */
     protected $msg;
-    protected $patient_id;
-    public function __construct($msg, $patient_id)
+    protected $scretary_id;
+    public function __construct($msg, $scretary_id)
     {
         $this->msg = $msg;
-        $this->patient_id = $patient_id;
+        $this->scretary_id = $scretary_id;
     }
 
     /**
@@ -33,13 +33,13 @@ class OutPatient
     public function broadcastOn(): array
     {
         return [
-            new Channel('out-patient.' . $this->patient_id),
+            new Channel('out-patient.' . $this->scretary_id),
         ];
     }
     public function broadcastWith()
     {
         return [
-            'patient_id' => $this->patient_id,
+            'scretary_id' => $this->scretary_id,
             'message' => $this->msg,
             'timestamp' => now()->toDateTimeString()
         ];
