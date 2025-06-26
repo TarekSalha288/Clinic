@@ -127,7 +127,7 @@ class SecretaryService
                 'status' => 'accepted'
             ]);
             if (!$user) {
-                $appointment->update(['apointment_status' => 'unapp']);
+                $appointment->update(['apoitment_status' => 'unapp']);
                 $appointment->save();
             }
 
