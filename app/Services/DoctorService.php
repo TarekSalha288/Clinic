@@ -10,6 +10,7 @@ use App\Models\Patient;
 use App\Models\Post;
 use App\Models\Preview;
 use App\Models\Rate;
+use App\Models\Son;
 use App\Models\User;
 use App\Notifications\OutPatient;
 use App\UploadImageTrait;
@@ -236,12 +237,16 @@ class DoctorService
             $formatedApointments = [];
 
             foreach ($apointments as $apointment) {
-                $patient_info = User::find(Patient::where('id', $apointment->patient_id)->first()->user_id);
+                $patient = Patient::find($apointment->patient_id);
+                $patient_info = User::find($patient->user_id);
+                if (!$patient_info) {
+                    $son = Son::where('patient_id', $patient->id)->first();
+                }
                 $apointment = [
                     'id' => $apointment->id,
-                    'patient_name' => $patient_info->first_name . " " . $patient_info->last_name,
-                    'patient_phone' => $patient_info->phone,
-                    'patient_photo' => $patient_info->img_path,
+                    'patient_name' => $patient_info ? $patient_info->first_name . " " . $patient_info->last_name : $son->first_name . " " . $son->last_name,
+                    'patient_phone' => $patient_info ? $patient_info->phone : null,
+                    'patient_photo' => $patient_info ? $patient_info->img_path : null,
                     'apointment_date' => $apointment->apointment_date,
                     'apointment_status' => $apointment->apointment_status,
                     'status' => $apointment->status,
