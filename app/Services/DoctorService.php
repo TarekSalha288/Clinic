@@ -63,6 +63,34 @@ class DoctorService
         $array['medical_analysis_info'] = $medicalAnalysis;
         return $array;
     }
+    private function addPatientInfo($array, $patient)
+    {
+        $patientInfo = [
+            'id' => $patient->id,
+            'age' => $patient->age,
+            'gender' => $patient->gender,
+            'birth_date' => $patient->birth_date,
+            'blood_type' => $patient->blood_type,
+            'chronic_diseases' => $patient->chronic_diseases,
+            'medication_allergies' => $patient->medication_allergies,
+            'permanent_medications' => $patient->permanent_medications,
+            'previous_surgeries' => $patient->previous_surgeries,
+            'previous_illnesses' => $patient->previous_illnesses,
+            'honest_score' => $patient->honest_score
+        ];
+        $array['patient_info'] = $patientInfo;
+        return $array;
+    }
+    private function addBasicInfo($array, $patient, $user, $son)
+    {
+        $basicInfo = [
+            'patient_name' => $user ? $user->first_name . " " . $user->last_name : ($son ? $son->first_name . " " . $son->last_name : $patient->first_name . " " . $patient->last_name),
+            'patient_phone' => $user ? $user->phone : ($son ? $patient->phone : null),
+            'patient_photo' => $user ? $user->img_path : null,
+        ];
+        $array['basic_info'] = $basicInfo;
+        return $array;
+    }
     //______________________________________
     public function postArtical($request)
     {
@@ -225,7 +253,7 @@ class DoctorService
         if (!$user) {
             $message = "user not found";
             $code = 404;
-            return ['message' => $message, 'apointments' => null, 'code' => $code];
+            return ['message' => $message, 'data' => null, 'code' => $code];
         }
         $doctor = $user->doctor;
         $apointments = Apointment::forDoctor($doctor->id)
@@ -234,34 +262,36 @@ class DoctorService
             ->get();
         // if it dont work because the date in the database not today
         if ($apointments) {
-            $formatedApointments = [];
+            $formatedAppointments = [];
 
             foreach ($apointments as $apointment) {
                 $patient = Patient::find($apointment->patient_id);
                 $patient_info = User::find($patient->user_id);
-                if (!$patient_info) {
-                    $son = Son::where('patient_id', $patient->id)->first();
-                }
-                $apointment = [
-                    'id' => $apointment->id,
-                    'patient_name' => $patient_info ? $patient_info->first_name . " " . $patient_info->last_name : $son->first_name . " " . $son->last_name,
-                    'patient_phone' => $patient_info ? $patient_info->phone : null,
-                    'patient_photo' => $patient_info ? $patient_info->img_path : null,
-                    'apointment_date' => $apointment->apointment_date,
-                    'apointment_status' => $apointment->apointment_status,
-                    'status' => $apointment->status,
-                ];
-                $formatedApointments[] = $apointment;
+                $son = (!$patient_info && $patient) ? Son::where('patient_id', $patient->id)->first() : null;
 
+                $apointmentData = $apointment->toArray();
+
+                $apointmentData['basic_info'] = $this->addBasicInfo([], $patient, $patient_info, $son)['basic_info'];
+                $apointmentData['patient_info'] = $this->addPatientInfo([], $patient)['patient_info'];
+
+                $formatedAppointments[] = $apointmentData;
             }
-            $formatedApointments = $this->addDoctorInfo($formatedApointments, $doctor, $user);
+            $doctorInfo = $this->addDoctorInfo([], $doctor, $user)['doctor_info'];
             $message = 'apointments return successfully';
             $code = 200;
         } else {
             $message = 'apointments not found';
             $code = 404;
         }
-        return ['message' => $message, 'apointments' => $formatedApointments, 'code' => $code];
+        return
+            [
+                'message' => $message,
+                'data' => [
+                    'appointments' => $formatedAppointments,
+                    'doctor_info' => $doctorInfo
+                ],
+                'code' => $code
+            ];
     }
     public function postPreview($request, $patient_id)
     {
@@ -388,5 +418,4 @@ class DoctorService
         }
         return ['message' => $message, 'patients' => $previedPatients, 'code' => $code];
     }
-
 }

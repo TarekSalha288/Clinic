@@ -127,7 +127,7 @@ class DoctorController extends Controller
         $data = [];
         try {
             $data = $this->doctorService->getApointments();
-            return Response::Success($data['apointments'], $data['message'], $data['code']);
+            return Response::Success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);
