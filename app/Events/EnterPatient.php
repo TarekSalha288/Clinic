@@ -20,11 +20,13 @@ class EnterPatient implements ShouldBroadcast
     protected $msg;
     protected $id;
     protected $patientInfo;
-    public function __construct($msg, $doctorId, $patientInfo)
+    protected $preview;
+    public function __construct($msg, $doctorId, $patientInfo,$preview)
     {
         $this->msg = $msg;
         $this->id = $doctorId;
         $this->patientInfo = $patientInfo;
+        $this->preview=$preview;
     }
 
     /**
@@ -42,6 +44,7 @@ class EnterPatient implements ShouldBroadcast
     {
         return [
             'patient' => $this->patientInfo,
+            'preview'=>$this->preview,
             'message' => $this->msg,
             'timestamp' => now()->toDateTimeString()
         ];

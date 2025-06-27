@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Preview extends Model
 {
@@ -35,6 +36,9 @@ class Preview extends Model
     public function patient()
     {
         return $this->belongsTo(Patient::class, 'patient_id', 'id');
+    }
+    public function medical_analysis():HasMany{
+        return $this->hasMany(MedicalAnalysis::class);
     }
     public static function encryptField($value)
     {

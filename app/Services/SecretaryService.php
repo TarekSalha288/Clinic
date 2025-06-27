@@ -437,10 +437,7 @@ class SecretaryService
         try {
             $apointment = Apointment::find($id);
             if ($apointment) {
-                $existingPreview = Preview::where('patient_id', $apointment->patient_id)
-                    ->where('doctor_id', $apointment->doctor_id)
-                    ->whereDate('date', now()->toDateString())
-                    ->exists();
+                $existingPreview =Apointment::where('enter',1)->where('doctor_id',$apointment->doctor_id)->exists();
 
                 if ($existingPreview) {
                     return ['status' => 400, 'message' => "Alreday send notification"];
@@ -450,10 +447,10 @@ class SecretaryService
                     return ['status' => 400, 'message' => "Alreday have a patient now"];
                 $apointment->update(['enter' => true]);
                 $apointment->save();
-                $uncompleteiagonaise = Preview::where('patient_id', $apointment->patient_id)
+                $preview = Preview::with('medical_analysis')->where('patient_id', $apointment->patient_id)
                     ->where('department_id', $apointment->department_id)
-                    ->where('diagnoseis_type', false)->exists();
-                if (!$uncompleteiagonaise) {
+                    ->where('diagnoseis_type', false)->first();
+                if (!$preview) {
                     Preview::create([
                         'patient_id' => $apointment->patient_id,
                         'doctor_id' => $apointment->doctor_id,
@@ -464,12 +461,12 @@ class SecretaryService
                         'status' => "",
                         'notes' => "",
                         'date' => now()
-                    ]);
+                    ])->with('medical_analysis');
                 }
 
                 $apointment->doctor->notify(new NotificationsEnterPatient("That is your patient", $apointment->patient));
 
-                event(new EnterPatient("That is your patient", $apointment->doctor_id, $apointment->patient));
+                event(new EnterPatient("That is your patient", $apointment->doctor_id, $apointment->patient,$preview));
                 return ['status' => 200, 'message' => "Enter patient done"];
 
             }
