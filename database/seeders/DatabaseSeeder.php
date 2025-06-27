@@ -5,11 +5,10 @@ namespace Database\Seeders;
 use App\Models\Day;
 use App\Models\Department;
 use App\Models\Doctor;
-use App\Models\MounthlyLeave;
+use App\Models\MonthlyLeave;
 use App\Models\Patient;
 use App\Models\Son;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -19,17 +18,28 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-       Day::factory()
-    ->count(6)
-    ->saturdayToThursday()
-    ->create();
-    Department::factory(8)->create();
-     User::factory(10)->create();
-     //
+        Day::factory()
+            ->count(6)
+            ->saturdayToThursday()
+            ->create();
+
+        Department::factory(8)->create();
+
+        User::factory(10)->create();
+        $doctorUsers = User::factory(8)->doctor()->create();
+
         Patient::factory(10)->create();
+
         Son::factory(5)->create();
 
-//Doctor::factory(8)->create();
+        $departments = Department::all();
+        foreach ($doctorUsers as $user) {
 
+            $randomDepartment = $departments->random();
+            Doctor::factory()->for($user)->create([
+                'department_id' => $randomDepartment->id,
+                'bio' => fake()->realText(200),
+            ]);
+        }
     }
 }
