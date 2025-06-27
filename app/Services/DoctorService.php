@@ -424,7 +424,15 @@ class DoctorService
         if (!$keyword) {
             return ['message' => 'search input is required', 'patients' => null, 'code' => 400];
         }
-        $patients = Patient::with(['user', 'sons', 'previews'])->get();
+        $doctor = auth()->user()->doctor;
+        $doctorId = auth()->user()->doctor->id;
+
+        $patients = Patient::with(['user', 'sons', 'previews'])
+            ->whereHas('previews', function ($query) use ($doctorId) {
+                $query->where('doctor_id', $doctorId);
+            })
+            ->get();
+
         $filteredPatients = $patients->filter(function ($patient) use ($keyword) {
 
             $nameMatch = stripos($patient->first_name, $keyword) !== false
