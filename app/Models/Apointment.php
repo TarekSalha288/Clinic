@@ -11,6 +11,10 @@ class Apointment extends Model
     protected $guarded = [
 
     ];
+     protected $casts = [
+        'apointment_date' => 'datetime',
+        'reminder_sent_at' => 'datetime',
+    ];
     public function scopeAccepted(Builder $query): Builder
     {
         return $query->where('status', 'accepted');

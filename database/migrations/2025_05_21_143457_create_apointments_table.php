@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->foreignId('doctor_id')->references('id')->on('doctors')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('department_id')->references('id')->on('departments')->cascadeOnDelete()->cascadeOnUpdate();
             $table->dateTime('apointment_date');
+            $table->dateTime('reminder_sent_at')->nullable();
             $table->string('apoitment_status');// app || unapp
             $table->string('status');// waiting || accepted || rejected
             $table->boolean('enter')->default(0);
