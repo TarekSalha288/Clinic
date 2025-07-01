@@ -12,6 +12,7 @@ use App\Models\Post;
 use App\Models\Preview;
 use App\Models\Rate;
 use App\Models\Son;
+use App\Models\Symbtom;
 use App\Models\User;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Mail;
@@ -781,7 +782,6 @@ class PatientService
         return ['rate' => $rate, 'message' => $message, 'code' => $code];
     }
 
-
     public function analyseSymtoms()
     {
         try {
@@ -880,7 +880,7 @@ class PatientService
         $locale = request()->input('lang');
         App::setLocale($locale);
         if (!$locale) {
-            return ['message' => 'lang is requered', 'departments' => null, 'code' => 422];
+            return ['message' => 'you must enter the lang type', 'departments' => null, 'code' => 400];
         }
 
         $query = request('query');
@@ -907,5 +907,26 @@ class PatientService
         }
         return ['message' => $message, 'departments' => $departments, 'code' => $code];
 
+    }
+    public function getSymbtoms()
+    {
+        $locale = request()->input('lang');
+        App::setLocale($locale);
+        if (!$locale) {
+            return ['message' => 'you must enter the lang type', 'symbtoms' => null, 'code' => 400];
+        }
+        $symbtoms = Symbtom::all()->map(function ($symbtom) use ($locale) {
+            return [
+                'symbtom_name' => $symbtom->getTranslation('symbtom_name', $locale),
+            ];
+        });
+        if ($symbtoms) {
+            $message = "symbtoms return successfully";
+            $code = 200;
+        } else {
+            $message = "symbtoms return failes";
+            $code = 400;
+        }
+        return ['message' => $message, 'symbtoms' => $symbtoms, 'code' => $code];
     }
 }

@@ -8,8 +8,10 @@ use App\Models\Doctor;
 use App\Models\MonthlyLeave;
 use App\Models\Patient;
 use App\Models\Son;
+use App\Models\Symbtom;
 use App\Models\User;
 use Database\Factories\DepartmentFactory;
+use Database\Factories\SymbtomFactory;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -25,6 +27,7 @@ class DatabaseSeeder extends Seeder
             ->create();
 
         Department::factory(count(DepartmentFactory::$departments))->create();
+        Symbtom::factory(count(SymbtomFactory::$symptoms))->create();
         User::factory(10)->create();
         $doctorUsers = User::factory(8)->doctor()->create();
 

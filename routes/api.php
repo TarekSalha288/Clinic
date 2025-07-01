@@ -101,6 +101,7 @@ Route::group([
     Route::get('symptom/analyze', [PatientController::class, 'analyzeSymptoms']);
     Route::post('/searchDoctors', [PatientController::class, 'searchDoctors']);
     Route::post('/searchDepartments', [PatientController::class, 'searchDepartments']);
+    Route::get('/getSymbtoms', [PatientController::class, 'getSymbtoms']);
 
 
 });

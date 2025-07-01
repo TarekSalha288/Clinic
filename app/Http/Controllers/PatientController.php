@@ -325,6 +325,17 @@ class PatientController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function getSymbtoms()
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->getSymbtoms();
+            return Response::Success($data['symbtoms'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
     public function analyzeSymptoms()
     {
         $data = $this->patientService->analyseSymtoms();
@@ -335,4 +346,5 @@ class PatientController extends Controller
             default => $this->response("Unknown Error :", null, 522),
         };
     }
+
 }
