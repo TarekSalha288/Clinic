@@ -13,6 +13,7 @@ use App\Models\Preview;
 use App\Models\Rate;
 use App\Models\Son;
 use App\Models\User;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Mail;
 use App\UploadImageTrait;
 use App\Models\MedicalAnalysis;
@@ -876,6 +877,12 @@ class PatientService
     }
     public function searchDepartments()
     {
+        $locale = request()->input('lang');
+        App::setLocale($locale);
+        if (!$locale) {
+            return ['message' => 'lang is requered', 'departments' => null, 'code' => 422];
+        }
+
         $query = request('query');
 
         if (!$query) {
@@ -883,7 +890,14 @@ class PatientService
         }
         $departments = Department::where('name', 'like', '%' . $query . '%')
             ->orWhere('description', 'like', '%' . $query . '%')
-            ->get();
+            ->get()->map(function ($department) use ($locale) {
+                $data = $department->toArray();
+
+                $data['name'] = $department->getTranslation('name', $locale);
+                $data['description'] = $department->getTranslation('description', $locale);
+
+                return $data;
+            });
         if ($departments) {
             $message = "found successfully";
             $code = 200;

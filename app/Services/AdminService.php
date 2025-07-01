@@ -13,196 +13,203 @@ use Illuminate\Support\Facades\Validator;
 
 class AdminService
 {
-use UploadImageTrait;
+    use UploadImageTrait;
 
-public function createSecretary()
-{
-    try {
-        $validator = Validator::make(request()->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
-            'email'      => 'required|email|unique:users,email',
-            'phone'      => 'required|unique:users,phone|regex:/^\+963\d{9}$/',
-            'password'   => 'required|string|confirmed|min:8',
-        ]);
+    public function createSecretary()
+    {
+        try {
+            $validator = Validator::make(request()->all(), [
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email',
+                'phone' => 'required|unique:users,phone|regex:/^\+963\d{9}$/',
+                'password' => 'required|string|confirmed|min:8',
+            ]);
 
-       if ($validator->fails()) {
-          return [
-        'status' => 400,
-        'errors' => $validator->errors()->toArray(),
-    ];
-        }
-        $existing = User::where('role', 'secretary')->first();
-        if ($existing) {
-            return ['status' => 409];
-        }
+            if ($validator->fails()) {
+                return [
+                    'status' => 400,
+                    'errors' => $validator->errors()->toArray(),
+                ];
+            }
+            $existing = User::where('role', 'secretary')->first();
+            if ($existing) {
+                return ['status' => 409];
+            }
 
-        $user = User::create([
-            'first_name' => request('first_name'),
-            'last_name'  => request('last_name'),
-            'email'      => request('email'),
-            'phone'      => request('phone'),
-            'password'   => bcrypt(request('password')),
-            'role'       => 'secretary',
-        ]);
+            $user = User::create([
+                'first_name' => request('first_name'),
+                'last_name' => request('last_name'),
+                'email' => request('email'),
+                'phone' => request('phone'),
+                'password' => bcrypt(request('password')),
+                'role' => 'secretary',
+            ]);
 
-        return [
-            'status' => 201,
-            'user'   => $user,
-        ];
+            return [
+                'status' => 201,
+                'user' => $user,
+            ];
 
-    } catch (\Exception $e) {
-        return [
-            'status' => 500,
-            'error'  => $e->getMessage(),
-        ];
-    }
-}
-
-     public function updateSecretary(){
-        try{
-  $validator = Validator::make(request()->all(), [
-    'first_name' => 'required',
-    'last_name' => 'required',
-    'email' => 'required|email|unique:users,email,',
-    'phone' => 'required|regex:/^\+963\d{9}$/|unique:users,phone,',
-    'password' => 'confirmed|min:8',
-]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
-        }
-$user = User::where('role','secretary')->first();
-        $user->update([
-            'email' => request('email'),
-            'first_name' => request('first_name'),
-            'last_name' => request('last_name'),
-            'phone' => request('phone'),
-            'password' => bcrypt(request('password')),
-        ]);
-       // $user->save();
-        return $user;
-        }catch(\Exception $e){
-             return response()->json(['error' => $e->getMessage()], 500);
+        } catch (\Exception $e) {
+            return [
+                'status' => 500,
+                'error' => $e->getMessage(),
+            ];
         }
     }
-    public function deleteSecretary(){
-        try{
-           $secretary=User::where('role','secretary')->first();
-           if($secretary){
-            $secretary->delete();
-            return null;
-           }
-           return "No secretary account for delete it";
-        }catch(\Exception $e){
+
+    public function updateSecretary()
+    {
+        try {
+            $validator = Validator::make(request()->all(), [
+                'first_name' => 'required',
+                'last_name' => 'required',
+                'email' => 'required|email|unique:users,email,',
+                'phone' => 'required|regex:/^\+963\d{9}$/|unique:users,phone,',
+                'password' => 'confirmed|min:8',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors()->toJson(), 400);
+            }
+            $user = User::where('role', 'secretary')->first();
+            $user->update([
+                'email' => request('email'),
+                'first_name' => request('first_name'),
+                'last_name' => request('last_name'),
+                'phone' => request('phone'),
+                'password' => bcrypt(request('password')),
+            ]);
+            // $user->save();
+            return $user;
+        } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
- public function createDoctor(){
-    try {
-        $validator = Validator::make(request()->all(), [
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'bio' => 'required',
-            'department'=>'required',
-            'email' => 'required|email|unique:users',
-            'phone' => 'required|unique:users|regex:/^\+963\d{9}$/',
-            'password' => 'required|confirmed|min:8',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
+    public function deleteSecretary()
+    {
+        try {
+            $secretary = User::where('role', 'secretary')->first();
+            if ($secretary) {
+                $secretary->delete();
+                return null;
+            }
+            return "No secretary account for delete it";
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-$department = Department::where('name', request('department'))->first();
-
-        if(!$department) {
-            return response()->json(['error' => 'Department not found'], 404);
-        }
-        $user = User::create([
-            'email' => request('email'),
-            'first_name' => request('first_name'),
-            'last_name' => request('last_name'),
-            'phone' => request('phone'),
-            'password' => bcrypt(request('password')),
-            'role'=>'doctor',
-        ]);
-
-
-
-        $doctor = Doctor::create([
-            'user_id' => $user->id,
-            'department_id' => $department->id,
-            'bio' => request('bio')
-        ]);
-       return $doctor;
-
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
     }
-}
+    public function createDoctor()
+    {
+        try {
+            $validator = Validator::make(request()->all(), [
+                'first_name' => 'required',
+                'last_name' => 'required',
+                'bio' => 'required',
+                'department' => 'required',
+                'email' => 'required|email|unique:users',
+                'phone' => 'required|unique:users|regex:/^\+963\d{9}$/',
+                'password' => 'required|confirmed|min:8',
+            ]);
 
-  public function deleteDoctor($id){
-      try {
-          $doctor=Doctor::findOrFail($id);
-          if($doctor){
-              Doctor::destroy($id);
-              User::destroy($doctor->user_id);
-              return null;
-          }
-          return "Doctor Not Found";
-      } catch (\Exception $e) {
-          throw $e;
-      }
-  }
+            if ($validator->fails()) {
+                return response()->json($validator->errors()->toJson(), 400);
+            }
+            $department = Department::where('name', request('department'))->first();
 
-  public function createDepartment(){
-      try {
-          $validator = Validator::make(request()->all(), [
+            if (!$department) {
+                return response()->json(['error' => 'Department not found'], 404);
+            }
+            $user = User::create([
+                'email' => request('email'),
+                'first_name' => request('first_name'),
+                'last_name' => request('last_name'),
+                'phone' => request('phone'),
+                'password' => bcrypt(request('password')),
+                'role' => 'doctor',
+            ]);
+
+
+
+            $doctor = Doctor::create([
+                'user_id' => $user->id,
+                'department_id' => $department->id,
+                'bio' => request('bio')
+            ]);
+            return $doctor;
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function deleteDoctor($id)
+    {
+        try {
+            $doctor = Doctor::findOrFail($id);
+            if ($doctor) {
+                Doctor::destroy($id);
+                User::destroy($doctor->user_id);
+                return null;
+            }
+            return "Doctor Not Found";
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function createDepartment()
+    {
+        try {
+            $validator = Validator::make(request()->all(), [
                 'name' => 'required|unique:departments',
-                'description'=>'required',
-                'image'=>'required|image'
+                'description' => 'required',
+                'image' => 'required|image'
             ]);
 
             if ($validator->fails()) {
                 return response()->json($validator->errors()->toJson(), 400);
             }
 
-            $department=Department::create([
-                'name'=>request('name'),
-                'description'=>request('description'),
-                'image'=>''
+            $department = Department::create([
+                'name' => request('name'),
+                'description' => request('description'),
+                'image' => ''
             ]);
-             $url=$this->ImageUpload(request(),$department->id,'departments');
-             $department->update(['image'=>$url]);
-             $department->save();
+            $url = $this->ImageUpload(request(), $department->id, 'departments');
+            $department->update(['image' => $url]);
+            $department->save();
             return $department;
-      } catch (\Exception $e) {
-          throw $e;
-      }
-  }
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
 
-  public function deleteDepartment($id){
-      try {
-          $department=Department::findOrFail($id);
-          if($department){
-              Department::destroy($id);
-              return null;
-          }
-      } catch (\Exception $e) {
-          throw $e;
-      }
-  }
+    public function deleteDepartment($id)
+    {
+        try {
+            $department = Department::findOrFail($id);
+            if ($department) {
+                Department::destroy($id);
+                return null;
+            }
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
 
-  public function deleteUser($id){
-      try {
-          $user=User::findOrFail($id);
-          if($user){
-              User::destroy($id);
-              return null;
-          }
-          return "User Not Found";
-      } catch (\Exception $e) {
-          throw $e;
-      }
-  }
+    public function deleteUser($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            if ($user) {
+                User::destroy($id);
+                return null;
+            }
+            return "User Not Found";
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
 }

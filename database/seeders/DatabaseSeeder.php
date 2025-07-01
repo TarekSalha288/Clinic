@@ -9,6 +9,7 @@ use App\Models\MonthlyLeave;
 use App\Models\Patient;
 use App\Models\Son;
 use App\Models\User;
+use Database\Factories\DepartmentFactory;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -23,8 +24,7 @@ class DatabaseSeeder extends Seeder
             ->saturdayToThursday()
             ->create();
 
-        Department::factory(8)->create();
-
+        Department::factory(count(DepartmentFactory::$departments))->create();
         User::factory(10)->create();
         $doctorUsers = User::factory(8)->doctor()->create();
 

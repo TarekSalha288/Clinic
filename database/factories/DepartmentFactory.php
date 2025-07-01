@@ -23,15 +23,87 @@ class DepartmentFactory extends Factory
      *
      * @var array
      */
-    private static $medicalDepartmentNames = [
-        'Cardiology',
-        'Neurology',
-        'Gastroenterology',
-        'Pulmonology',
-        'Orthopedics',
-        'Pediatrics',
-        'Dermatology',
-        'Urology',
+    public static $departments = [
+        [
+            'name' => [
+                'en' => 'Cardiology',
+                'ar' => 'طب القلب',
+            ],
+            'description' => [
+                'en' => 'This department specializes in diagnosing and treating heart diseases.',
+                'ar' => 'يختص هذا القسم بتشخيص وعلاج أمراض القلب.',
+            ],
+        ],
+        [
+            'name' => [
+                'en' => 'Neurology',
+                'ar' => 'طب الأعصاب',
+            ],
+            'description' => [
+                'en' => 'Deals with disorders of the nervous system, including the brain and spinal cord.',
+                'ar' => 'يعالج اضطرابات الجهاز العصبي، بما في ذلك الدماغ والحبل الشوكي.',
+            ],
+        ],
+        [
+            'name' => [
+                'en' => 'Pediatrics',
+                'ar' => 'طب الأطفال',
+            ],
+            'description' => [
+                'en' => 'Provides medical care for infants, children, and adolescents.',
+                'ar' => 'يقدم رعاية طبية للرضع والأطفال والمراهقين.',
+            ],
+        ],
+        [
+            'name' => [
+                'en' => 'Dermatology',
+                'ar' => 'الأمراض الجلدية',
+            ],
+            'description' => [
+                'en' => 'Focuses on the diagnosis and treatment of skin conditions.',
+                'ar' => 'يركز على تشخيص وعلاج حالات الجلد المختلفة.',
+            ],
+        ],
+        [
+            'name' => [
+                'en' => 'Orthopedics',
+                'ar' => 'جراحة العظام',
+            ],
+            'description' => [
+                'en' => 'Treats conditions related to bones, joints, and muscles.',
+                'ar' => 'يعالج الحالات المتعلقة بالعظام والمفاصل والعضلات.',
+            ],
+        ],
+        [
+            'name' => [
+                'en' => 'Urology',
+                'ar' => 'المسالك البولية',
+            ],
+            'description' => [
+                'en' => 'Concerned with urinary tract diseases and male reproductive organs.',
+                'ar' => 'يعنى بأمراض الجهاز البولي والأعضاء التناسلية الذكرية.',
+            ],
+        ],
+        [
+            'name' => [
+                'en' => 'Pulmonology',
+                'ar' => 'طب الرئة',
+            ],
+            'description' => [
+                'en' => 'Specializes in lung and respiratory system diseases.',
+                'ar' => 'متخصص في أمراض الرئة والجهاز التنفسي.',
+            ],
+        ],
+        [
+            'name' => [
+                'en' => 'Gastroenterology',
+                'ar' => 'أمراض الجهاز الهضمي',
+            ],
+            'description' => [
+                'en' => 'Focuses on the digestive system and related disorders.',
+                'ar' => 'يركز على الجهاز الهضمي والاضطرابات المرتبطة به.',
+            ],
+        ],
     ];
 
     /**
@@ -39,6 +111,8 @@ class DepartmentFactory extends Factory
      *
      * @return array<string, mixed>
      */
+
+    private static $index = 0;
     public function definition(): array
     {
         // لحل مشكلة "Maximum retries of 10000 reached without finding a unique value":
@@ -57,16 +131,25 @@ class DepartmentFactory extends Factory
         // Department::factory(8)->create(); // هذا سيستخدم كل الأسماء مرة واحدة بالضبط
         // Department::factory(5)->create(); // هذا سيستخدم 5 أسماء فريدة عشوائية من القائمة
 
+
+        // return [
+        //     // تستخدم unique()->randomElement() لضمان أن كل اسم قسم يتم استخدامه مرة واحدة فقط
+        //     // من القائمة المحددة لكل عملية seeding، طالما أن عدد السجلات المطلوبة لا يتجاوز
+        //     // حجم القائمة.
+        //     'name' => $this->faker->unique()->randomElement(self::$medicalDepartmentNames),
+
+        //     // يولد نصًا أكثر واقعية كـ"وصف"
+        //     'description' => $this->faker->realText(200),
+
+        //     // يولد رابط صورة عشوائي بناءً على الكلمات الرئيسية
+        // ];
+        $data = self::$departments[self::$index];
+
+        self::$index++;
+
         return [
-            // تستخدم unique()->randomElement() لضمان أن كل اسم قسم يتم استخدامه مرة واحدة فقط
-            // من القائمة المحددة لكل عملية seeding، طالما أن عدد السجلات المطلوبة لا يتجاوز
-            // حجم القائمة.
-            'name' => $this->faker->unique()->randomElement(self::$medicalDepartmentNames),
-
-            // يولد نصًا أكثر واقعية كـ"وصف"
-            'description' => $this->faker->realText(200),
-
-            // يولد رابط صورة عشوائي بناءً على الكلمات الرئيسية
+            'name' => $data['name'],
+            'description' => $data['description'],
             'image' => $this->faker->imageUrl(640, 480, 'hospital medical', true, 'clinic room', true),
         ];
     }

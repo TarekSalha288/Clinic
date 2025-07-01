@@ -45,6 +45,7 @@ class UserController extends Controller
             404 => $this->response("No department found", null, 404),
             422 => $this->response("Validation error: missing search query", null, 422),
             500 => $this->response("Server error: " . $data['errors'], null, 500),
+            400 => $this->response($data['message'], $data['data'], $data['status']),
             default => $this->response("Unknown error", null, 520),
         };
     }
@@ -56,6 +57,7 @@ class UserController extends Controller
             404 => $this->response("No departments found", null, 404),
             422 => $this->response("Validation error: missing search query", null, 422),
             500 => $this->response("Server error: " . $data['errors'], null, 500),
+            400 => $this->response($data['message'], $data['data'], $data['status']),
             default => $this->response("Unknown error", null, 520),
         };
     }
@@ -110,6 +112,7 @@ class UserController extends Controller
             404 => $this->response("No results found", null, 404),
             422 => $this->response("Validation error: missing search query", null, 422),
             500 => $this->response("Server error: " . $data['errors'], null, 500),
+            400 => $this->response($data['message'], $data['data'], $data['status']),
             default => $this->response("Unknown error", null, 520),
         };
     }
