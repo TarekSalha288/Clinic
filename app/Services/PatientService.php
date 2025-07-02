@@ -784,6 +784,14 @@ class PatientService
 
     public function analyseSymtoms()
     {
+        $locale = request()->input('lang');
+        App::setLocale($locale);
+        if (!$locale) {
+            return [
+                'status' => 400,
+                'message' => 'you must enter the lang type'
+            ];
+        }
         try {
             $symptoms = request()->input('symptoms', []);
 
@@ -794,25 +802,195 @@ class PatientService
                 ];
             }
             $identifiedDepartments = [];
+            $chestPain = Symbtom::where('symbtom_name', '{"en":"Chest Pain","ar":"ألم في الصدر"}')->first();
+            $shortnessOfBreath = Symbtom::where('symbtom_name', '{"en":"Shortness of Breath","ar":"ضيق في التنفس"}')->first();
+            $palpitations = Symbtom::where('symbtom_name', '{"en":"Palpitations","ar":"خفقان القلب"}')->first();
+            $swellingInLegs = Symbtom::where('symbtom_name', '{"en":"Swelling in Legs","ar":"تورم الساقين"}')->first();
+            $fatigue = Symbtom::where('symbtom_name', '{"en":"Fatigue","ar":"إرهاق"}')->first();
+            $rapidHeartbeat = Symbtom::where('symbtom_name', '{"en":"Rapid Heartbeat","ar":"خفقان سريع"}')->first();
+            $fainting = Symbtom::where('symbtom_name', '{"en":"Fainting","ar":"إغماء"}')->first();
+            $highBloodPressure = Symbtom::where('symbtom_name', '{"en":"High Blood Pressure","ar":"ارتفاع ضغط الدم"}')->first();
+            // _____________________________________________________________________________________
+            $headaches = Symbtom::where('symbtom_name', '{"en":"Headaches","ar":"صداع"}')->first();
+            $dizziness = Symbtom::where('symbtom_name', '{"en":"Dizziness","ar":"دوخة"}')->first();
+            $numbness = Symbtom::where('symbtom_name', '{"en":"Numbness","ar":"خدر"}')->first();
+            $muscleWeakness = Symbtom::where('symbtom_name', '{"en":"Muscle Weakness","ar":"ضعف العضلات"}')->first();
+            $seizures = Symbtom::where('symbtom_name', '{"en":"Seizures","ar":"نوبات صرع"}')->first();
+            $memoryLoss = Symbtom::where('symbtom_name', '{"en":"Memory Loss","ar":"فقدان الذاكرة"}')->first();
+            $tingling = Symbtom::where('symbtom_name', '{"en":"Tingling","ar":"تنميل"}')->first();
+            $lossOfConsciousness = Symbtom::where('symbtom_name', '{"en":"Loss of Consciousness","ar":"فقدان الوعي"}')->first();
+            $tremors = Symbtom::where('symbtom_name', '{"en":"Tremors","ar":"رعشة"}')->first();
+            $visionProblems = Symbtom::where('symbtom_name', '{"en":"Vision Problems","ar":"مشاكل في الرؤية"}')->first();
+            // _____________________________________________________________________________________
+
+            $abdominalPain = Symbtom::where('symbtom_name', '{"en":"Abdominal Pain","ar":"ألم في البطن"}')->first();
+            $nausea = Symbtom::where('symbtom_name', '{"en":"Nausea","ar":"غثيان"}')->first();
+            $diarrhea = Symbtom::where('symbtom_name', '{"en":"Diarrhea","ar":"إسهال"}')->first();
+            $constipation = Symbtom::where('symbtom_name', '{"en":"Constipation","ar":"إمساك"}')->first();
+            $heartburn = Symbtom::where('symbtom_name', '{"en":"Heartburn","ar":"حرقة المعدة"}')->first();
+            $bloating = Symbtom::where('symbtom_name', '{"en":"Bloating","ar":"انتفاخ"}')->first();
+            $vomiting = Symbtom::where('symbtom_name', '{"en":"Vomiting","ar":"قيء"}')->first();
+            $bloodInStool = Symbtom::where('symbtom_name', '{"en":"Blood in Stool","ar":"دم في البراز"}')->first();
+            $lossOfAppetite = Symbtom::where('symbtom_name', '{"en":"Loss of Appetite","ar":"فقدان الشهية"}')->first();
+            $difficultySwallowing = Symbtom::where('symbtom_name', '{"en":"Difficulty Swallowing","ar":"صعوبة في البلع"}')->first();
+
+            // _____________________________________________________________________________________
+            $chronicCough = Symbtom::where('symbtom_name', '{"en":"Chronic Cough","ar":"سعال مزمن"}')->first();
+            $wheezing = Symbtom::where('symbtom_name', '{"en":"Wheezing","ar":"صفير في التنفس"}')->first();
+            $dyspnea = Symbtom::where('symbtom_name', '{"en":"Shortness of Breath (Dyspnea)","ar":"ضيق في التنفس"}')->first();
+            $chestTightness = Symbtom::where('symbtom_name', '{"en":"Chest Tightness","ar":"ضيق في الصدر"}')->first();
+            $respInfections = Symbtom::where('symbtom_name', '{"en":"Frequent Respiratory Infections","ar":"عدوى تنفسية متكررة"}')->first();
+            $coughingUpBlood = Symbtom::where('symbtom_name', '{"en":"Coughing Up Blood","ar":"السعال مع دم"}')->first();
+            $snoring = Symbtom::where('symbtom_name', '{"en":"Snoring","ar":"الشخير"}')->first();
+            $hoarseness = Symbtom::where('symbtom_name', '{"en":"Hoarseness","ar":"بحة الصوت"}')->first();
+
+            // _____________________________________________________________________________________
+            $jointPain = Symbtom::where('symbtom_name', '{"en":"Joint Pain","ar":"ألم المفاصل"}')->first();
+            $jointSwelling = Symbtom::where('symbtom_name', '{"en":"Swelling of Joints","ar":"تورم المفاصل"}')->first();
+            $limitedMotion = Symbtom::where('symbtom_name', '{"en":"Limited Range of Motion","ar":"نطاق حركة محدود"}')->first();
+            $musclePain = Symbtom::where('symbtom_name', '{"en":"Muscle Pain","ar":"ألم العضلات"}')->first();
+            $fractures = Symbtom::where('symbtom_name', '{"en":"Fractures","ar":"كسور"}')->first();
+            $backPain = Symbtom::where('symbtom_name', '{"en":"Back Pain","ar":"ألم في الظهر"}')->first();
+            $neckPain = Symbtom::where('symbtom_name', '{"en":"Neck Pain","ar":"ألم الرقبة"}')->first();
+            $bonePain = Symbtom::where('symbtom_name', '{"en":"Bone Pain","ar":"ألم العظام"}')->first();
+            $stiffness = Symbtom::where('symbtom_name', '{"en":"Stiffness","ar":"تصلب"}')->first();
+
+            // _____________________________________________________________________________________
+
+            $feverChildren = Symbtom::where('symbtom_name', '{"en":"Fever (in children)","ar":"حمى (عند الأطفال)"}')->first();
+            $rashChildren = Symbtom::where('symbtom_name', '{"en":"Rash (in children)","ar":"طفح جلدي (عند الأطفال)"}')->first();
+            $earInfection = Symbtom::where('symbtom_name', '{"en":"Ear Infection","ar":"عدوى الأذن"}')->first();
+            $soreThroat = Symbtom::where('symbtom_name', '{"en":"Sore Throat","ar":"التهاب الحلق"}')->first();
+            $growthDelays = Symbtom::where('symbtom_name', '{"en":"Growth Delays","ar":"تأخر في النمو"}')->first();
+            $behavioralChanges = Symbtom::where('symbtom_name', '{"en":"Behavioral Changes","ar":"تغيرات سلوكية"}')->first();
+            $poorAppetite = Symbtom::where('symbtom_name', '{"en":"Poor Appetite","ar":"ضعف الشهية"}')->first();
+            $developmentalDelays = Symbtom::where('symbtom_name', '{"en":"Developmental Delays","ar":"تأخر في النمو"}')->first();
+            $bedwetting = Symbtom::where('symbtom_name', '{"en":"Bedwetting","ar":"التبول اللاإرادي"}')->first();
+
+            // _____________________________________________________________________________________
+            $skinRash = Symbtom::where('symbtom_name', '{"en":"Skin Rash","ar":"طفح جلدي"}')->first();
+            $itching = Symbtom::where('symbtom_name', '{"en":"Itching (Pruritus)","ar":"حكة (حِكاك)"}')->first();
+            $acne = Symbtom::where('symbtom_name', '{"en":"Acne","ar":"حب الشباب"}')->first();
+            $eczema = Symbtom::where('symbtom_name', '{"en":"Eczema","ar":"أكزيما"}')->first();
+            $psoriasis = Symbtom::where('symbtom_name', '{"en":"Psoriasis","ar":"صدفية"}')->first();
+            $skinLesions = Symbtom::where('symbtom_name', '{"en":"Moles/Skin Lesions","ar":"شامات/آفات جلدية"}')->first();
+            $hairLoss = Symbtom::where('symbtom_name', '{"en":"Hair Loss","ar":"تساقط الشعر"}')->first();
+            $nailChanges = Symbtom::where('symbtom_name', '{"en":"Nail Changes","ar":"تغيرات الأظافر"}')->first();
+            $skinDiscoloration = Symbtom::where('symbtom_name', '{"en":"Skin Discoloration","ar":"تغير لون الجلد"}')->first();
+
+            // _____________________________________________________________________________________
+            $moles = Symbtom::where('symbtom_name', '{"en":"Moles/Skin Lesions","ar":"شامات/آفات جلدية"}')->first();
+            $frequentUrination = Symbtom::where('symbtom_name', '{"en":"Frequent Urination","ar":"تبول متكرر"}')->first();
+            $dysuria = Symbtom::where('symbtom_name', '{"en":"Painful Urination (Dysuria)","ar":"تبول مؤلم (عُسر التبول)"}')->first();
+            $hematuria = Symbtom::where('symbtom_name', '{"en":"Blood in Urine (Hematuria)","ar":"دم في البول (بيلة دموية)"}')->first();
+            $kidneyStones = Symbtom::where('symbtom_name', '{"en":"Kidney Stones","ar":"حصى الكلى"}')->first();
+            $incontinence = Symbtom::where('symbtom_name', '{"en":"Urinary Incontinence","ar":"سلس البول"}')->first();
+            $urinaryRetention = Symbtom::where('symbtom_name', '{"en":"Urinary Retention","ar":"احتباس البول"}')->first();
+            $testicularPain = Symbtom::where('symbtom_name', '{"en":"Testicular Pain","ar":"ألم في الخصية"}')->first();
+
+
             foreach ($symptoms as $symptom) {
                 $cleanedSymptom = $symptom;
                 $matchedDepartment = null;
-                if (in_array($cleanedSymptom, ['chest pain', 'shortness of breath', 'palpitations', 'swelling in legs', 'fatigue', 'rapid heartbeat', 'fainting', 'high blood pressure'])) {
-                    $matchedDepartment = 'Cardiology';
-                } elseif (in_array($cleanedSymptom, ['headaches', 'dizziness', 'numbness', 'muscle weakness', 'seizures', 'memory loss', 'tingling', 'loss of consciousness', 'tremors', 'vision problems'])) {
-                    $matchedDepartment = 'Neurology';
-                } elseif (in_array($cleanedSymptom, ['abdominal pain', 'nausea', 'diarrhea', 'constipation', 'heartburn', 'bloating', 'vomiting', 'blood in stool', 'loss of appetite', 'difficulty swallowing'])) {
-                    $matchedDepartment = 'Gastroenterology';
-                } elseif (in_array($cleanedSymptom, ['chronic cough', 'wheezing', 'shortness of breath', 'chest tightness', 'frequent respiratory infections', 'coughing up blood', 'snoring', 'hoarseness'])) {
-                    $matchedDepartment = 'Pulmonology';
-                } elseif (in_array($cleanedSymptom, ['joint pain', 'swelling of joints', 'limited range of motion', 'muscle pain', 'fractures', 'back pain', 'neck pain', 'bone pain', 'stiffness'])) {
-                    $matchedDepartment = 'Orthopedics';
-                } elseif (in_array($cleanedSymptom, ['fever', 'rash', 'ear infection', 'sore throat', 'growth delays', 'behavioral changes', 'poor appetite', 'developmental delays', 'bedwetting'])) {
-                    $matchedDepartment = 'Pediatrics';
-                } elseif (in_array($cleanedSymptom, ['skin rash', 'itching', 'acne', 'eczema', 'psoriasis', 'skin lesions', 'hair loss', 'nail changes', 'skin discoloration'])) {
-                    $matchedDepartment = 'Dermatology';
-                } elseif (in_array($cleanedSymptom, ['frequent urination', 'painful urination', 'blood in urine', 'kidney stones', 'urinary incontinence', 'urinary retention', 'testicular pain'])) {
-                    $matchedDepartment = 'Urology';
+                if (in_array($cleanedSymptom, [$chestPain->getTranslation('symbtom_name', $locale), $shortnessOfBreath->getTranslation('symbtom_name', $locale), $palpitations->getTranslation('symbtom_name', $locale), $swellingInLegs->getTranslation('symbtom_name', $locale), $fatigue->getTranslation('symbtom_name', $locale), $rapidHeartbeat->getTranslation('symbtom_name', $locale), $fainting->getTranslation('symbtom_name', $locale), $highBloodPressure->getTranslation('symbtom_name', $locale)])) {
+                    $matchedDepartment = Department::where('name->en', 'Cardiology')->first();
+                } elseif (
+                    in_array($cleanedSymptom, [
+                        $headaches->getTranslation('symbtom_name', $locale),
+                        $dizziness->getTranslation('symbtom_name', $locale),
+                        $numbness->getTranslation('symbtom_name', $locale),
+                        $muscleWeakness->getTranslation('symbtom_name', $locale),
+                        $seizures->getTranslation('symbtom_name', $locale),
+                        $memoryLoss->getTranslation('symbtom_name', $locale),
+                        $tingling->getTranslation('symbtom_name', $locale),
+                        $lossOfConsciousness->getTranslation('symbtom_name', $locale),
+                        $tremors->getTranslation('symbtom_name', $locale),
+                        $visionProblems->getTranslation('symbtom_name', $locale),
+                    ])
+                ) {
+                    $matchedDepartment = Department::where('name->en', 'Neurology')->first();
+                } elseif (
+                    in_array($cleanedSymptom, [
+                        $abdominalPain->getTranslation('symbtom_name', $locale),
+                        $nausea->getTranslation('symbtom_name', $locale),
+                        $diarrhea->getTranslation('symbtom_name', $locale),
+                        $constipation->getTranslation('symbtom_name', $locale),
+                        $heartburn->getTranslation('symbtom_name', $locale),
+                        $bloating->getTranslation('symbtom_name', $locale),
+                        $vomiting->getTranslation('symbtom_name', $locale),
+                        $bloodInStool->getTranslation('symbtom_name', $locale),
+                        $lossOfAppetite->getTranslation('symbtom_name', $locale),
+                        $difficultySwallowing->getTranslation('symbtom_name', $locale),
+                    ])
+                ) {
+                    $matchedDepartment = Department::where('name->en', 'Gastroenterology')->first();
+                } elseif (
+                    in_array($cleanedSymptom, [
+                        $chronicCough->getTranslation('symbtom_name', $locale),
+                        $wheezing->getTranslation('symbtom_name', $locale),
+                        $shortnessOfBreath->getTranslation('symbtom_name', $locale),
+                        $chestTightness->getTranslation('symbtom_name', $locale),
+                        $respInfections->getTranslation('symbtom_name', $locale),
+                        $coughingUpBlood->getTranslation('symbtom_name', $locale),
+                        $snoring->getTranslation('symbtom_name', $locale),
+                        $hoarseness->getTranslation('symbtom_name', $locale),
+                    ])
+                ) {
+                    $matchedDepartment = Department::where('name->en', 'Pulmonology')->first();
+                } elseif (
+                    in_array($cleanedSymptom, [
+                        $jointPain->getTranslation('symbtom_name', $locale),
+                        $jointSwelling->getTranslation('symbtom_name', $locale),
+                        $limitedMotion->getTranslation('symbtom_name', $locale),
+                        $musclePain->getTranslation('symbtom_name', $locale),
+                        $fractures->getTranslation('symbtom_name', $locale),
+                        $backPain->getTranslation('symbtom_name', $locale),
+                        $neckPain->getTranslation('symbtom_name', $locale),
+                        $bonePain->getTranslation('symbtom_name', $locale),
+                        $stiffness->getTranslation('symbtom_name', $locale),
+                    ])
+                ) {
+                    $matchedDepartment = Department::where('name->en', 'Orthopedics')->first();
+                } elseif (
+                    in_array($cleanedSymptom, [
+                        $feverChildren->getTranslation('symbtom_name', $locale),
+                        $rashChildren->getTranslation('symbtom_name', $locale),
+                        $earInfection->getTranslation('symbtom_name', $locale),
+                        $soreThroat->getTranslation('symbtom_name', $locale),
+                        $growthDelays->getTranslation('symbtom_name', $locale),
+                        $behavioralChanges->getTranslation('symbtom_name', $locale),
+                        $poorAppetite->getTranslation('symbtom_name', $locale),
+                        $developmentalDelays->getTranslation('symbtom_name', $locale),
+                        $bedwetting->getTranslation('symbtom_name', $locale),
+                    ])
+                ) {
+                    $matchedDepartment = Department::where('name->en', 'Pediatrics')->first();
+                } elseif (
+                    in_array($cleanedSymptom, [
+                        $skinRash->getTranslation('symbtom_name', $locale),
+                        $itching->getTranslation('symbtom_name', $locale),
+                        $acne->getTranslation('symbtom_name', $locale),
+                        $eczema->getTranslation('symbtom_name', $locale),
+                        $psoriasis->getTranslation('symbtom_name', $locale),
+                        $skinLesions->getTranslation('symbtom_name', $locale),
+                        $hairLoss->getTranslation('symbtom_name', $locale),
+                        $nailChanges->getTranslation('symbtom_name', $locale),
+                        $skinDiscoloration->getTranslation('symbtom_name', $locale),
+                    ])
+                ) {
+                    $matchedDepartment = Department::where('name->en', 'Dermatology')->first();
+                } elseif (
+                    in_array($cleanedSymptom, [
+                        $frequentUrination->getTranslation('symbtom_name', $locale),
+                        $dysuria->getTranslation('symbtom_name', $locale),
+                        $hematuria->getTranslation('symbtom_name', $locale),
+                        $kidneyStones->getTranslation('symbtom_name', $locale),
+                        $incontinence->getTranslation('symbtom_name', $locale),
+                        $urinaryRetention->getTranslation('symbtom_name', $locale),
+                        $testicularPain->getTranslation('symbtom_name', $locale),
+                    ])
+                ) {
+                    $matchedDepartment = Department::where('name->en', 'Urology')->first();
                 }
                 if ($matchedDepartment === null) {
                     return [
@@ -831,12 +1009,15 @@ class PatientService
             }
 
             $finalDepartment = !empty($uniqueDepartments) ? $uniqueDepartments[0] : null;
+            $formatedDepartment = $finalDepartment->toArray();
+            $formatedDepartment['name'] = $finalDepartment->getTranslation('name', $locale);
+            $formatedDepartment['description'] = $finalDepartment->getTranslation('description', $locale);
             if ($finalDepartment) {
                 return [
                     'status' => 200,
-                    'message' => "Based on your symptoms, you should go to the **{$finalDepartment}** department.",
+                    'message' => "Based on your symptoms, you should go to the **" . $finalDepartment['name'] . "** department.",
                     'data' => [
-                        'suggested_department' => $finalDepartment,
+                        'suggested_department' => $formatedDepartment,
                         'symptoms_provided' => $symptoms
                     ]
                 ];
