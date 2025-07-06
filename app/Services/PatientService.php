@@ -81,6 +81,8 @@ class PatientService
             'permanent_medications' => Patient::encryptField($request->permanent_medications),
             'previous_surgeries' => Patient::encryptField($request->previous_surgeries),
             'previous_illnesses' => Patient::encryptField($request->previous_illnesses),
+            'first_name'=>auth()->user()->first_name,
+            'last_name'=>auth()->user()->last_name,
             'honest_score' => 100
         ]);
         if ($patient) {
