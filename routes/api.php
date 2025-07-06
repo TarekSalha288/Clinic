@@ -98,7 +98,7 @@ Route::group([
     Route::post('/postMedicalAnalysis/{preview_id}', [PatientController::class, 'postMedicalAnalysis']);
     Route::get('/getMedicalAnalysis/{preview_id}', [PatientController::class, 'getMedicalAnalysis']);
     Route::delete('/deleteMedicalAnalysis/{preview_id}', [PatientController::class, 'deleteMedicalAnalysis']);
-    Route::get('symptom/analyze', [PatientController::class, 'analyzeSymptoms']);
+    Route::post('symptom/analyze', [PatientController::class, 'analyzeSymptoms']);
     Route::post('/searchDoctors', [PatientController::class, 'searchDoctors']);
     Route::post('/searchDepartments', [PatientController::class, 'searchDepartments']);
     Route::get('/getSymbtoms', [PatientController::class, 'getSymbtoms']);

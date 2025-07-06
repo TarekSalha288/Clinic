@@ -180,14 +180,14 @@ class SecretaryService
 
             if ($user) {
                 // Notify the user
-//         if($user->fcm_token){
-//   app('App\Services\FcmService')->sendNotification(
-//                 $user->fcm_token,
-//                 "Appointment Accepted",
-//                 "We have accepted your appointment ",
-//                 ['appointment' => $appointment]
-//             );
-//         }
+        if($user->fcm_token){
+  app('App\Services\FcmService')->sendNotification(
+                $user->fcm_token,
+                "Appointment Accepted",
+                "We have accepted your appointment ",
+                ['appointment' => $appointment]
+            );
+        }
                 Notification::send($user, new Reverse("Your appointment has been accepted"));
             }
 
@@ -216,14 +216,14 @@ class SecretaryService
                 return ['status' => 200, 'message' => "Appointment rejected sucssfully", 'data' => null];
                 if ($user) {
                     // Notify the user
-//         if($user->fcm_token){
-//   app('App\Services\FcmService')->sendNotification(
-//                 $user->fcm_token,
-//                 "Appointment Rejected",
-//                 "We have rejected your appointment ",
-//                 ['appointment' => $appointment]
-//             );
-//         }
+        if($user->fcm_token){
+  app('App\Services\FcmService')->sendNotification(
+                $user->fcm_token,
+                "Appointment Rejected",
+                "We have rejected your appointment ",
+                ['appointment' => $appointment]
+            );
+        }
                     Notification::send($user, new Reverse("Your appointment has been rejected reverse again"));
                 }
             } else {
@@ -241,9 +241,9 @@ class SecretaryService
     {
         try {
 
-            $date = date('Y-m-d', strtotime($appointment_date));
+           // $date = date('Y-m-d', strtotime($appointment_date));
 
-            $appointments = Apointment::with('patient')->whereDate('apointment_date', $date)
+            $appointments = Apointment::with('patient')->whereDate('apointment_date', $appointment_date)
                 ->where('doctor_id', $doctor_id)
                 ->get();
 
