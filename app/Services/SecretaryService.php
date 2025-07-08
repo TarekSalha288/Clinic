@@ -130,11 +130,11 @@ class SecretaryService
                 $appointment->update(['apoitment_status' => 'unapp']);
                 $appointment->save();
             }
-
+$appointment->patient;
             return [
                 'status' => 201,
                 'message' => 'Appointment added successfully',
-                'data' => $appointment
+                'data' => $appointment,
             ];
 
 
@@ -209,11 +209,10 @@ class SecretaryService
     {
         try {
             $appointment = Apointment::find($id);
-            $patient = Patient::find($appointment->patient_id);
+if(!$appointment)
+ return ['status' => 404, 'message' => "Appointment not found"];
+ $patient = Patient::find($appointment->patient_id);
             $user = $patient->user;
-            if ($appointment) {
-                $appointment->delete();
-                return ['status' => 200, 'message' => "Appointment rejected sucssfully", 'data' => null];
                 if ($user) {
                     // Notify the user
         if($user->fcm_token){
@@ -226,10 +225,10 @@ class SecretaryService
         }
                     Notification::send($user, new Reverse("Your appointment has been rejected reverse again"));
                 }
-            } else {
-                return ['status' => 404, 'message' => "Appointment not found"];
+                $appointment->delete();
+                return ['status' => 200, 'message' => "Appointment rejected sucssfully", 'data' => null];
             }
-        } catch (\Exception $e) {
+         catch (\Exception $e) {
             return [
                 'status' => 500,
                 'message' => 'Something went wrong.',

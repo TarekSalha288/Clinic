@@ -48,14 +48,14 @@ class SendReminderNotification implements ShouldQueue
             $user = $appointment->patient->user;
             if ($user) {
           // Notify the user
-//         if($user->fcm_token){
-//   app('App\Services\FcmService')->sendNotification(
-//                 $user->fcm_token,
-//                 "Don't forget your appointment",
-//                 "You have appointment at  ",
-//                 ['appointment_date' => $appointment->apointment_date]
-//             );
-//         }
+        if($user->fcm_token){
+  app('App\Services\FcmService')->sendNotification(
+                $user->fcm_token,
+                "Don't forget your appointment",
+                "You have appointment at  ",
+                ['appointment_date' => $appointment->apointment_date]
+            );
+        }
                 $user->notify(new ReminderNotification($appointment->apointment_date));
                 $appointment->update(['reminder_sent_at' => Carbon::now()]);
             }
