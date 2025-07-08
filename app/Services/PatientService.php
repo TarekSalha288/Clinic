@@ -81,8 +81,8 @@ class PatientService
             'permanent_medications' => Patient::encryptField($request->permanent_medications),
             'previous_surgeries' => Patient::encryptField($request->previous_surgeries),
             'previous_illnesses' => Patient::encryptField($request->previous_illnesses),
-            'first_name'=>auth()->user()->first_name,
-            'last_name'=>auth()->user()->last_name,
+            'first_name' => auth()->user()->first_name,
+            'last_name' => auth()->user()->last_name,
             'honest_score' => 100
         ]);
         if ($patient) {
@@ -562,15 +562,18 @@ class PatientService
             return ['message' => $message, 'filePath' => null, 'code' => $code];
         }
         $preview = Preview::find($preview_id);
-        $patient = $user->patient;
-        $medical_analysis = MedicalAnalysis::where('patient_id', $patient->id)->where('preview_id', $preview_id)->first();
-        if ($medical_analysis) {
-            $path = $medical_analysis->medical_analysis_path;
-            $storagePath = str_replace('/storage/', '', $path);
-            if (Storage::disk('public')->exists($storagePath))
-                Storage::disk('public')->delete($storagePath);
-            $medical_analysis->delete();
+        if (!$preview) {
+            return ['message' => 'preview not found', 'filePath' => null, 'code' => 404];
         }
+        // $patient = $user->patient;
+        // $medical_analysis = MedicalAnalysis::where('patient_id', $patient->id)->where('preview_id', $preview_id)->first();
+        // if ($medical_analysis) {
+        //     $path = $medical_analysis->medical_analysis_path;
+        //     $storagePath = str_replace('/storage/', '', $path);
+        //     if (Storage::disk('public')->exists($storagePath))
+        //         Storage::disk('public')->delete($storagePath);
+        //     $medical_analysis->delete();
+        // }
         if ($preview->diagnoseis_type !== 0) {
             $message = "diagnoseis type for this preview is completed you can't add a medical analysis";
             $code = 400;

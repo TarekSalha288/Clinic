@@ -71,6 +71,8 @@ Route::group([
     Route::get('/getPreviews', [DoctorController::class, 'getPreviews']);
     Route::get('/getPreviedPatients', [DoctorController::class, 'getPreviedPatients']);
     Route::post('/patientSearch', [DoctorController::class, 'patientSearch']);
+    Route::get('/getActivePatientInfo', [DoctorController::class, 'getActivePatientInfo']);
+    Route::get('/getPreviewById/{preview_id}', [DoctorController::class, 'getPreviewById']);
 
 });
 

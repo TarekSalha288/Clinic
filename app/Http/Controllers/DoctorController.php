@@ -177,6 +177,17 @@ class DoctorController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function getPreviewById($preview_id)
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->getPreviewById($preview_id);
+            return Response::Success($data['preview'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
     public function getPreviedPatients()
     {
         $data = [];
@@ -194,6 +205,17 @@ class DoctorController extends Controller
         try {
             $data = $this->doctorService->patientSearch();
             return Response::Success($data["patients"], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function getActivePatientInfo()
+    {
+        $data = [];
+        try {
+            $data = $this->doctorService->getActivePatientInfo();
+            return Response::Success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error($data, $message);

@@ -388,6 +388,22 @@ class DoctorService
 
         return ['message' => $message, 'previews' => $previews, 'code' => $code];
     }
+    public function getPreviewById($preview_id)
+    {
+        $doctor = auth()->user()->doctor;
+        if (!$doctor) {
+            return ['message' => 'doctor not found', 'data' => null, 'code' => 404];
+        }
+        $preview = Preview::where('id', $preview_id)->where('doctor_id', $doctor->id)->first();
+        if ($preview) {
+            $message = 'preview return successfully';
+            $code = 200;
+        } else {
+            $message = "prevew not found";
+            $code = 404;
+        }
+        return ['message' => $message, 'preview' => $preview, 'code' => $code];
+    }
     public function getPreviedPatients()
     {
         $doctor = auth()->user()->doctor;
@@ -467,4 +483,39 @@ class DoctorService
         }
         return ['message' => $message, 'patients' => $filteredPatients, 'code' => $code];
     }
+    public function getActivePatientInfo()
+    {
+        $doctor = auth()->user()->doctor;
+        if (!$doctor) {
+            return ['message' => 'doctor not found', 'data' => null, 'code' => 404];
+        }
+        $apointmentPatient = Apointment::where('doctor_id', $doctor->id)->where('status', 'accepted')->where('enter', 1)->first();
+        if ($apointmentPatient)
+            $patient = Patient::find($apointmentPatient->patient_id);
+        if ($patient) {
+            $previews = Preview::where('doctor_id', $doctor->id)->where('patient_id', $patient->id)->get();
+            $allMedicalAnalysis = [];
+            foreach ($previews as $preview) {
+                $patient = Patient::find($preview->patient_id);
+                $medicalAnalysis = MedicalAnalysis::where('preview_id', $preview->id)->where('patient_id', $patient->id)->first();
+                if ($medicalAnalysis)
+                    $allMedicalAnalysis[] = $medicalAnalysis;
+            }
+            $message = "active patient info return successfully";
+            $code = 200;
+        } else {
+            $message = "patient not found";
+            $code = 404;
+        }
+        return [
+            'message' => $message,
+            'data' => [
+                'patient' => $patient,
+                'previews' => $previews,
+                'medicalAnalysis' => $allMedicalAnalysis
+            ],
+            'code' => $code
+        ];
+    }
+
 }
