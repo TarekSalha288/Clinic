@@ -6,8 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Http\Responses\Response;
 use \Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\ValidationException;
-
-class BookAppointmentRequest extends FormRequest
+class NewPaymentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,9 +24,9 @@ class BookAppointmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'appointment_date' => 'required|date_format:Y-m-d H:i:s',
-            'son_id' => 'nullable|exists:sons,id',
-            'payment_id' => 'required'
+            'phone_number' => 'required|unique:payment_companies|regex:/^\+963\d{9}$/',
+            'company_name' => 'required:in:Syriatel_cash,MTN_Cash',
+            'balance' => 'required'
         ];
     }
     protected function failedValidation(Validator $validator)

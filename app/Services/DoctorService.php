@@ -114,7 +114,6 @@ class DoctorService
         }
         return ['message' => $message, 'post' => $post, 'code' => $code];
     }
-
     public function updateProfile($request)
     {
         $user = User::find(auth()->user()->id);
@@ -324,6 +323,9 @@ class DoctorService
     public function updatePreview($request, $preview_id)
     {
         $preview = Preview::find($preview_id);
+        $patient = Patient::find($preview->patient_id);
+        $patient->discount_point += $preview->price_after_discount / 1000;
+        $patient->save();
         if ($preview) {
             $updatePreview = $preview->update([
                 'diagnoseis' => Patient::encryptField($request->diagnoseis),
@@ -517,5 +519,4 @@ class DoctorService
             'code' => $code
         ];
     }
-
 }

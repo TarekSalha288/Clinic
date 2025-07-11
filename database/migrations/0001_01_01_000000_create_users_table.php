@@ -23,6 +23,7 @@ return new class extends Migration {
             $table->string('img_path')->nullable();
             $table->string('role')->default('patient');
             $table->integer('enter_id')->nullable();
+            $table->double('secretary_sallary')->nullable();
             $table->string('code')->nullable();
             $table->dateTime('expire_at')->nullable();
             $table->text('fcm_token')->nullable();

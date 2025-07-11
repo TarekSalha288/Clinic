@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\FavoritePost;
 use App\Models\Patient;
+use App\Models\PaymentCompany;
 use App\Models\Post;
 use App\Models\Preview;
 use App\Models\Rate;
@@ -83,7 +84,8 @@ class PatientService
             'previous_illnesses' => Patient::encryptField($request->previous_illnesses),
             'first_name' => auth()->user()->first_name,
             'last_name' => auth()->user()->last_name,
-            'honest_score' => 100
+            'honest_score' => 100,
+            'discount_point' => 50
         ]);
         if ($patient) {
             $message = 'patient profile added successfullt';
@@ -107,6 +109,7 @@ class PatientService
             'permanent_medications' => Patient::encryptField($request->permanent_medications),
             'previous_surgeries' => Patient::encryptField($request->previous_surgeries),
             'previous_illnesses' => Patient::encryptField($request->previous_illnesses),
+            'discount_point' => 50
         ]);
         $son = Son::create([
             'patient_id' => $patient->id,
@@ -124,7 +127,6 @@ class PatientService
         }
         return ['message' => $message, 'son' => $son, 'code' => $code];
     }
-
     public function getArticles()
     {
         $patient = auth()->user()->patient;
@@ -235,14 +237,51 @@ class PatientService
         if ($doctor) {
             $department = $doctor->department;
             if ($department) {
+                $doctorPayment = PaymentCompany::where('user_id', $doctor->user_id)->first();
+                $payment = PaymentCompany::find($request->payment_id);
+                if ($payment->user_id !== $user->id) {
+                    return ['message' => 'you dont have aceess for this payment account', 'appointment' => null, 'code' => 400];
+                }
+                $priceWithDiscount = ($doctor->price_of_examination - ($son_id == null ? ($patient->discount_point * 200) : ((Patient::find($son->patient_id)->discount_point) * 200)));
+                $previews = Preview::where('patient_id', $son_id == null ? $patient->id : $son->patient_id)->where('doctor_id', $doctor_id)->get();
+                $paysFlag = true;
+                foreach ($previews as $preview) {
+                    if ($preview->diagnoseis_type === 0) { // because its boolean value
+                        $paysFlag = false;
+                    }
+                }
+                if ($priceWithDiscount > $payment->balance && $paysFlag) {
+                    return [
+                        'message' => "sorry you don't have enough mouny in your acount",
+                        'appointment' => null,
+                        'code' => 400,
+                    ];
+                }
                 $appointment = Apointment::create([
                     'patient_id' => $son_id == null ? $patient->id : $son->patient_id,
                     'doctor_id' => $doctor_id,
                     'department_id' => $department->id,
+                    'payment_id' => $request->payment_id,
                     'apointment_date' => $request->appointment_date,
                     'apoitment_status' => "app",
-                    'status' => "waiting"
+                    'status' => "waiting",
+                    'price_after_discount' => $paysFlag ? $priceWithDiscount : 0
                 ]);
+
+                $payment->update([
+                    'balance' => $paysFlag ? $payment->balance -= $priceWithDiscount : $payment->balance -= 0,
+                ]);
+                $doctorPayment->update([
+                    'balance' => $paysFlag ? $doctorPayment->balance += $priceWithDiscount : $doctorPayment->balance += 0,
+                ]);
+                $son_id == null ? $patient->update([
+                    'discount_point' => $paysFlag ? 0 : $patient->discount_point
+                ]) :
+                    Patient::find($son->patient_id)->update([
+                        'discount_point' => $paysFlag ? 0 : $patient->discount_point
+                    ]);
+
+
                 $this->addInfoForAppointment($appointment, $patient, $user, $doctor, $son);
             } else {
                 $code = 404;
@@ -266,27 +305,42 @@ class PatientService
         $appointment = Apointment::find($appointment_id);
         $user = auth()->user();
         $patient = $user->patient;
-        $son_id = $request->son_id ?? null;
-        $son = Son::find($son_id);
-        if ($son && ($son->parent_id !== auth()->user()->id)) {
-            $message = "patient don't have this son";
-            $code = 404;
-            return ['message' => $message, 'appointment' => null, 'code' => $code];
-        }
+        // $son_id = $request->son_id ?? null;
+        // $son = Son::find($son_id);
+        // if ($son && ($son->parent_id !== auth()->user()->id)) {
+        //     $message = "patient don't have this son";
+        //     $code = 404;
+        //     return ['message' => $message, 'appointment' => null, 'code' => $code];
+        // }
         if ($appointment) {
             if ($appointment->status === "waiting") {
                 $updateData = [];
-                if ($request->has('apointment_date') && $request->apointment_date !== null) {
-                    $updateData['apointment_date'] = $request->apointment_date;
+                if ($request->has('appointment_date') && $request->appointment_date !== null) {
+                    $updateData['apointment_date'] = $request->appointment_date;
                 }
-                if ($son && $son_id !== null) {
-                    $updateData['patient_id'] = $son->patient_id;
-                } else {
-                    $updateData['patient_id'] = $patient->id;
+                if ($request->has('payment_id') && $appointment->payment_id != $request->payment_id) {
+                    $oldPayment = PaymentCompany::find($appointment->payment_id);
+                    $newPayment = PaymentCompany::find($request->payment_id);
+                    if ($newPayment->balance >= $appointment->price_after_discount) {
+                        $newPayment->balance -= $appointment->price_after_discount;
+                        $appointment->payment_id = $request->payment_id;
+                        $appointment->save();
+                        $newPayment->save();
+                    } else {
+                        return ['message' => "you don't have enough money in this payment acount", 'appointment' => null, 'code' => 400];
+                    }
+                    $oldPayment->balance += $appointment->price_after_discount;
+                    $oldPayment->save();
                 }
-                $appointment->update($updateData);
+                // if ($son && $son_id !== null) {
+                //     $updateData['patient_id'] = $son->patient_id;
+                // } else {
+                //     $updateData['patient_id'] = $patient->id;
+                // }
+                // $appointment->update($updateData);
+
                 $doctor = Doctor::find($appointment->doctor_id);
-                $this->addInfoForAppointment($appointment, $patient, $user, $doctor, $son);
+                $this->addInfoForAppointment($appointment, $patient, $user, $doctor, );
 
                 if ($appointment) {
                     $message = "apointment updated successfully";
@@ -308,8 +362,29 @@ class PatientService
     public function deleteAppointment($appointment_id)
     {
         $appointment = Apointment::find($appointment_id);
+        $user = auth()->user();
+        if (!$user) {
+            return ['message' => 'user not found', 'appointment' => null, 'code' => 404];
+        }
 
         if ($appointment) {
+
+            $payment = PaymentCompany::find($appointment->payment_id);
+            $payment->balance += $appointment->price_after_discount;
+            $payment->save();
+
+            $doctor = Doctor::find($appointment->doctor_id);
+
+            $doctorPayment = PaymentCompany::where('user_id', $doctor->user_id)->first();
+            $doctorPayment->balance -= $appointment->price_after_discount;
+            $doctorPayment->save();
+
+            $patient = Patient::find($appointment->patient_id);
+            $point = ($doctor->price_of_examination - $appointment->price_after_discount) / 200;
+            if ($appointment->price_after_discount != 0) {
+                $patient->discount_point += $point;
+                $patient->save();
+            }
             $checkDelete = $appointment->delete();
             if ($checkDelete) {
                 $message = "Appointment deleted successfully";
@@ -440,8 +515,13 @@ class PatientService
     {
         $son = Son::find($id);
         if ($son) {
+            $patient = Patient::find($son->patient_id);
+            if (!$patient) {
+                return ['message' => 'patient not found', 'son' => null, 'code' => 404];
+            }
+            $deletePatientCheck = $patient->delete();
             $deletedCheck = $son->delete();
-            if ($deletedCheck) {
+            if ($deletedCheck && $deletePatientCheck) {
                 $message = "Son deleted successfully";
                 $code = 200;
             } else {
@@ -601,22 +681,24 @@ class PatientService
         $user = auth()->user();
         if ($user) {
             $preview = Preview::find($preview_id);
-            if ($preview->diagnoseis_type !== 0) {
-                $message = "diagnoseis type for this preview is completed you can't add a medical analysis";
-                $code = 400;
-                return ['message' => $message, 'Path' => null, 'code' => $code];
-            }
+            // if ($preview->diagnoseis_type !== 0) {
+            //     $message = "diagnoseis type for this preview is completed you can't add a medical analysis";
+            //     $code = 400;
+            //     return ['message' => $message, 'Path' => null, 'code' => $code];
+            // }
             $patient = $user->patient;
-            $medical_analysis = MedicalAnalysis::where('patient_id', $patient->id)->where('preview_id', $preview_id)->first();
+            $medical_analysis = MedicalAnalysis::where('patient_id', $patient->id)->where('preview_id', $preview_id)->get();
             if ($medical_analysis) {
-                $path = $medical_analysis->medical_analysis_path;
-                if ($path) {
-                    $message = 'file uploaded successfully';
-                    $code = 200;
-                } else {
-                    $message = 'you dont uploaded file yet';
-                    $code = 400;
-                }
+                // $path = $medical_analysis->medical_analysis_path;
+                // if ($path) {
+                //     $message = 'file uploaded successfully';
+                //     $code = 200;
+                // } else {
+                //     $message = 'you dont uploaded file yet';
+                //     $code = 400;
+                // }
+                $message = "medical_analysis return successfully";
+                $code = 200;
             } else {
                 $message = "medical_analysis not found";
                 $code = 404;
@@ -625,9 +707,9 @@ class PatientService
             $message = 'user not found';
             $code = 404;
         }
-        return ['message' => $message, 'path' => $path, 'code' => $code];
+        return ['message' => $message, 'path' => $medical_analysis, 'code' => $code];
     }
-    public function deleteMedicalAnalysis($preview_id)
+    public function deleteMedicalAnalysis($medical_id)
     {
         $user = auth()->user();
         if (!$user) {
@@ -635,14 +717,14 @@ class PatientService
             $code = 404;
             return ['message' => $message, 'filePath' => null, 'code' => $code];
         }
-        $preview = Preview::find($preview_id);
-        if ($preview->diagnoseis_type !== 0) {
-            $message = "diagnoseis type for this preview is completed you can't add a medical analysis";
-            $code = 400;
-            return ['message' => $message, 'filePath' => null, 'code' => $code];
-        }
+        // $preview = Preview::find($preview_id);
+        // if ($preview->diagnoseis_type !== 0) {
+        //     $message = "diagnoseis type for this preview is completed you can't add a medical analysis";
+        //     $code = 400;
+        //     return ['message' => $message, 'filePath' => null, 'code' => $code];
+        // }
         $patient = $user->patient;
-        $medical_analysis = MedicalAnalysis::where('patient_id', $patient->id)->where('preview_id', $preview_id)->first();
+        $medical_analysis = MedicalAnalysis::find($medical_id);
         if ($medical_analysis) {
             $path = $medical_analysis->medical_analysis_path;
             $storagePath = str_replace('/storage/', '', $path);
@@ -652,10 +734,10 @@ class PatientService
             $message = "medical analysis deleted succussfully";
             $code = 200;
         } else {
-            $message = "there is no medical analysis for this preview yet";
+            $message = "there is no medical analysis";
             $code = 400;
         }
-        return ['message' => $message, 'filePath' => $path, 'code' => $code];
+        return ['message' => $message, 'filePath' => $medical_analysis, 'code' => $code];
     }
     public function addDoctorRate($request, $doctor_id)
     {
@@ -1114,5 +1196,54 @@ class PatientService
             $code = 400;
         }
         return ['message' => $message, 'symbtoms' => $symbtoms, 'code' => $code];
+    }
+    public function postNewPayment($request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return ['message' => 'user not found', 'payment' => null, 'code' => 404];
+        }
+        $paymentCompany = PaymentCompany::create([
+            'user_id' => $user->id,
+            'phone_number' => $request->phone_number,
+            'company_name' => $request->company_name,
+            'balance' => $request->balance
+        ]);
+        if ($paymentCompany) {
+            $message = "new payment way added successfully";
+            $code = 200;
+        } else {
+            $message = "new payment way added failed";
+            $code = 400;
+        }
+        return ['message' => $message, 'payment' => $paymentCompany, 'code' => $code];
+    }
+    public function getPayments()
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return ['message' => 'user not found', 'payments' => null, 'code' => 404];
+        }
+        $payments = PaymentCompany::where('user_id', $user->id)->get();
+        if ($payments) {
+            $message = "payments return successfully";
+            $code = 200;
+        } else {
+            $message = "payments return failed";
+            $code = 400;
+        }
+        return ['payments' => $payments, 'message' => $message, 'code' => $code];
+    }
+    public function getPayment($payment_id)
+    {
+        $payment = PaymentCompany::find($payment_id);
+        if ($payment) {
+            $message = "payments return successfully";
+            $code = 200;
+        } else {
+            $message = "payments return failed";
+            $code = 400;
+        }
+        return ['message' => $message, 'payment' => $payment, 'code' => $code];
     }
 }

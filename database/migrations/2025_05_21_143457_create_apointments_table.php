@@ -21,6 +21,7 @@ return new class extends Migration {
             $table->string('apoitment_status');// app || unapp
             $table->string('status');// waiting || accepted || rejected
             $table->boolean('enter')->default(0);
+            $table->double('price_after_discount')->nullable();
             $table->timestamps();
         });
     }

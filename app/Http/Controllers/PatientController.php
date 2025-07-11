@@ -7,6 +7,7 @@ use App\Http\Requests\BookAppointmentRequest;
 use App\Http\Requests\DoctorRateRequest;
 use App\Http\Requests\FileUploadRequest;
 use App\Http\Requests\ImageUploadRequest;
+use App\Http\Requests\NewPaymentRequest;
 use App\Http\Requests\PatientProfileRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Responses\Response;
@@ -345,6 +346,39 @@ class PatientController extends Controller
             500 => $this->response($data['errors'], null, 500),
             default => $this->response("Unknown Error :", null, 522),
         };
+    }
+    public function postNewPayment(NewPaymentRequest $request)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->postNewPayment($request);
+            return Response::Success($data['payment'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function getPayments()
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->getPayments();
+            return Response::Success($data['payments'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
+    public function getPayment($payment_id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->getPayment($payment_id);
+            return Response::Success($data['payment'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
     }
 
 }

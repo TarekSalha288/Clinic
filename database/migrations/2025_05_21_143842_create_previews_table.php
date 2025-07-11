@@ -22,6 +22,7 @@ return new class extends Migration {
             $table->string('notes');
             $table->date('date');
             $table->string('status');
+            $table->double('price_after_discount')->nullable();
             $table->timestamps();
         });
     }

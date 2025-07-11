@@ -28,6 +28,7 @@ return new class extends Migration {
             $table->string('previous_surgeries')->nullable();
             $table->string('previous_illnesses')->nullable();
             $table->double('honest_score')->default(100);
+            $table->double('discount_point')->nullable();
             $table->timestamps();
         });
     }

@@ -5,9 +5,11 @@ namespace App\Services;
 use App\Mail\TwoFactorMail;
 use App\Models\Department;
 use App\Models\Doctor;
+use App\Models\PaymentCompany;
 use App\Models\User;
 use App\UploadImageTrait;
 use Exception;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
@@ -24,6 +26,7 @@ class AdminService
                 'email' => 'required|email|unique:users,email',
                 'phone' => 'required|unique:users,phone|regex:/^\+963\d{9}$/',
                 'password' => 'required|string|confirmed|min:8',
+                'secretary_sallary' => 'required'
             ]);
 
             if ($validator->fails()) {
@@ -43,8 +46,17 @@ class AdminService
                 'email' => request('email'),
                 'phone' => request('phone'),
                 'password' => bcrypt(request('password')),
+                'secretary_sallary' => request('secretary_sallary'),
                 'role' => 'secretary',
             ]);
+
+            $paymentCompany = PaymentCompany::create([
+                'user_id' => $user->id,
+                'phone_number' => $user->phone,
+                'company_name' => in_array(request('phone')[5], ['9', '8']) || in_array(substr(request('phone'), 5, 7), ['98,81,95,82,98,96,87,97']) ? "Syriatel_cash" : "MTN_Cash",
+                'balance' => rand(2, 3) * 100000
+            ]);
+
 
             return [
                 'status' => 201,
@@ -67,6 +79,7 @@ class AdminService
                 'last_name' => 'required',
                 'email' => 'required|email|unique:users,email,',
                 'phone' => 'required|regex:/^\+963\d{9}$/|unique:users,phone,',
+                'secretary_sallary' => 'required',
                 'password' => 'confirmed|min:8',
             ]);
 
@@ -78,8 +91,10 @@ class AdminService
                 'email' => request('email'),
                 'first_name' => request('first_name'),
                 'last_name' => request('last_name'),
+                'secretary_sallary' => request('secretary_sallary'),
                 'phone' => request('phone'),
                 'password' => bcrypt(request('password')),
+
             ]);
             // $user->save();
             return $user;
@@ -102,12 +117,22 @@ class AdminService
     }
     public function createDoctor()
     {
+        $locale = request()->input('lang');
+        App::setLocale($locale);
+        if (!$locale) {
+            return [
+                'status' => 400,
+                'message' => 'you must enter the lang type'
+            ];
+        }
         try {
             $validator = Validator::make(request()->all(), [
                 'first_name' => 'required',
                 'last_name' => 'required',
                 'bio' => 'required',
                 'department' => 'required',
+                'subscription' => 'required',
+                'price_of_examination' => 'required',
                 'email' => 'required|email|unique:users',
                 'phone' => 'required|unique:users|regex:/^\+963\d{9}$/',
                 'password' => 'required|confirmed|min:8',
@@ -116,7 +141,7 @@ class AdminService
             if ($validator->fails()) {
                 return response()->json($validator->errors()->toJson(), 400);
             }
-            $department = Department::where('name', request('department'))->first();
+            $department = Department::where("name->{$locale}", request('department'))->first();
 
             if (!$department) {
                 return response()->json(['error' => 'Department not found'], 404);
@@ -135,7 +160,15 @@ class AdminService
             $doctor = Doctor::create([
                 'user_id' => $user->id,
                 'department_id' => $department->id,
-                'bio' => request('bio')
+                'bio' => request('bio'),
+                'subscription' => request('subscription'),
+                'price_of_examination' => request('price_of_examination'),
+            ]);
+            $paymentCompany = PaymentCompany::create([
+                'user_id' => $user->id,
+                'phone_number' => $user->phone,
+                'company_name' => in_array(request('phone')[5], ['9', '8']) || in_array(substr(request('phone'), 5, 7), ['98,81,95,82,98,96,87,97']) ? "Syriatel_cash" : "MTN_Cash",
+                'balance' => rand(2, 3) * 100000
             ]);
             return $doctor;
 
@@ -161,10 +194,13 @@ class AdminService
 
     public function createDepartment()
     {
+
         try {
             $validator = Validator::make(request()->all(), [
-                'name' => 'required|unique:departments',
-                'description' => 'required',
+                'name_en' => 'required|unique:departments,name->en',
+                'name_ar' => 'required|unique:departments,name->ar',
+                'description_en' => 'required',
+                'description_ar' => 'required',
                 'image' => 'required|image'
             ]);
 
@@ -173,8 +209,10 @@ class AdminService
             }
 
             $department = Department::create([
-                'name' => request('name'),
-                'description' => request('description'),
+                'name->en' => request("name_en"),
+                'name->ar' => request("name_ar"),
+                'description->en' => request('description_en'),
+                'description->ar' => request('description_ar'),
                 'image' => ''
             ]);
             $url = $this->ImageUpload(request(), $department->id, 'departments');

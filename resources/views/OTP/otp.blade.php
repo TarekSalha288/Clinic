@@ -90,7 +90,7 @@
         <p>Your verification code is:</p>
         <div class="otp-box" id="otpCode">{{ $code }}</div>
 
-        <div class="timer" id="timer">01:00</div>
+        <div class="timer" id="timer">05:00</div>
         <p style="font-size: 0.95rem; color: #7C8283; margin-bottom: 2rem;">
             This code will expire in one minute.
         </p>

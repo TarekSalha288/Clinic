@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\MonthlyLeave;
 use App\Models\Patient;
+use App\Models\PaymentCompany;
 use App\Models\Son;
 use App\Models\Symbtom;
 use App\Models\User;
@@ -31,6 +32,7 @@ class DatabaseSeeder extends Seeder
         User::factory(10)->create();
         $doctorUsers = User::factory(8)->doctor()->create();
 
+
         Patient::factory(10)->create();
 
         Son::factory(5)->create();
@@ -42,6 +44,14 @@ class DatabaseSeeder extends Seeder
             Doctor::factory()->for($user)->create([
                 'department_id' => $randomDepartment->id,
                 'bio' => fake()->realText(200),
+                'subscription' => rand(5, 10) * 1000000,
+                'price_of_examination' => rand(4, 8) * 10000,
+            ]);
+        }
+
+        foreach (User::all() as $user) {
+            PaymentCompany::factory()->create([
+                'user_id' => $user->id,
             ]);
         }
     }

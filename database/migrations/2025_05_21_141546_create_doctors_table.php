@@ -16,15 +16,17 @@ return new class extends Migration {
 
             // Use constrained() for better readability and automatic reference
             $table->foreignId('user_id')
-                  ->constrained('users')
-                  ->cascadeOnDelete()
-                  ->unique(); // Add unique if one-to-one relationship
+                ->constrained('users')
+                ->cascadeOnDelete()
+                ->unique(); // Add unique if one-to-one relationship
 
             $table->foreignId('department_id')
-                  ->constrained('departments')
-                  ->cascadeOnDelete();
+                ->constrained('departments')
+                ->cascadeOnDelete();
 
             $table->text('bio');
+            $table->integer('subscription')->nullable();
+            $table->integer('price_of_examination')->nullable();
             $table->timestamps();
         });
 

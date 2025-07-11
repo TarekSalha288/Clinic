@@ -36,6 +36,7 @@ class PatientFactory extends Factory
             'previous_surgeries' => $this->faker->optional(0.5)->sentence(),
             'previous_illnesses' => $this->faker->optional(0.5)->sentence(),
             'honest_score' => $this->faker->randomFloat(2, 50, 100),
+            'discount_point' => 50,
         ];
     }
 }
