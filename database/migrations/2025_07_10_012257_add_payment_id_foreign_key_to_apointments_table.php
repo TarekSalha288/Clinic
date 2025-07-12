@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('apointments', function (Blueprint $table) {
-            $table->foreignId('payment_id')->after('department_id')->references('id')->on('payment_companies')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('payment_id')->nullable()->after('department_id')->references('id')->on('payment_companies')->cascadeOnDelete()->cascadeOnUpdate();
         });
     }
 

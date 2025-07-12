@@ -102,6 +102,9 @@ class AuthController extends Controller
         }
 
         $user = auth()->user();
+        if($user->role=='doctor'){
+            $user->doctor;
+        }
 
         // $user->generateCode();
 

@@ -10,9 +10,11 @@ use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\MounthlyLeave;
 use App\Models\Patient;
+use App\Models\PaymentCompany;
 use App\Models\Preview;
 use App\Notifications\EnterPatient as NotificationsEnterPatient;
 use App\Notifications\Reverse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 
@@ -60,7 +62,7 @@ class SecretaryService
                 'permanent_medications' => Patient::encryptField(request('permanent_medications')),
                 'previous_surgeries' => Patient::encryptField(request('previous_surgeries')),
                 'previous_illnesses' => Patient::encryptField(request('previous_illnesses')),
-                'honest_score' => 5.0
+                'honest_score' => 100
             ]);
             $appointment = Apointment::create([
                 'patient_id' => $patient->id,
@@ -68,7 +70,8 @@ class SecretaryService
                 'department_id' => $doctor->department->id,
                 'apointment_date' => request('appointment_date'),
                 'apoitment_status' => 'unapp',
-                'status' => 'accepted'
+                'status' => 'accepted',
+                'price_after_discount'=>$doctor->price_of_examination,
             ]);
 
             return [
@@ -103,13 +106,20 @@ class SecretaryService
             }
             $patient = Patient::find(request('patient_id'));
             $doctor = Doctor::find(request('doctor_id'));
-            $user = $patient->user;
+            $date=request('apointment_date');
+            if($date<now()){
+                return [
+                    'status'=>400,
+                    'errors'=>'Time not correct'
+                ];
+            }
             if (!$patient) {
                 return [
                     'status' => 404,
                     'message' => 'Patient not found'
                 ];
             }
+
             if (!$doctor) {
                 return [
                     'status' => 404,
@@ -117,14 +127,16 @@ class SecretaryService
                 ];
             }
 
-
+$user = $patient->user;
             $appointment = Apointment::create([
                 'patient_id' => $patient->id,
                 'doctor_id' => request('doctor_id'),
                 'department_id' => $doctor->department->id,
                 'apointment_date' => request('apointment_date'),
                 'apoitment_status' => 'immediate',
-                'status' => 'accepted'
+                'status' => 'accepted',
+'price_after_discount'=>$doctor->price_of_examination,
+
             ]);
             if (!$user) {
                 $appointment->update(['apoitment_status' => 'unapp']);
@@ -214,7 +226,24 @@ if(!$appointment)
  $patient = Patient::find($appointment->patient_id);
             $user = $patient->user;
                 if ($user) {
-                    // Notify the user
+                    $price=$appointment->price_after_discount;
+                    $doctorpreview=$appointment->doctor->price_of_examination;
+                    $points=($doctorpreview-$price)/200;
+
+                    $payment=PaymentCompany::find($appointment->payment_id);
+                    $allmoney=$payment->balance;
+                    $allmoney+=$price;
+                    $allpoints=$patient->discount_point;
+                    $allpoints+=$points;
+                    $patient->update(['discount_point'=>$allpoints]);
+
+                    $payment->update(['balance'=>$allmoney]);
+
+
+
+                }
+                $appointment->delete();
+                                    // Notify the user
         if($user->fcm_token){
   app('App\Services\FcmService')->sendNotification(
                 $user->fcm_token,
@@ -222,10 +251,9 @@ if(!$appointment)
                 "We have rejected your appointment ",
                 ['appointment' => $appointment]
             );
+Notification::send($user, new Reverse("Your appointment has been rejected reverse again"));
         }
-                    Notification::send($user, new Reverse("Your appointment has been rejected reverse again"));
-                }
-                $appointment->delete();
+
                 return ['status' => 200, 'message' => "Appointment rejected sucssfully", 'data' => null];
             }
          catch (\Exception $e) {
@@ -410,27 +438,47 @@ if(!$appointment)
             ];
         }
     }
-    public function relaseRate()
-    {
-        try {
-            $apointments = Apointment::where('status', 'accepted')->get();
-            if ($apointments->isEmpty())
-                return ['status' => 404, 'message' => 'No latecomers'];
-            foreach ($apointments as $apointment) {
-                $patient = $apointment->patient;
-                $patient->honest_score -= 10;
-                $patient->save();
+  public function relaseRate()
+{
+    try {
+        $appointments = Apointment::where('status', 'accepted')->get();
 
-            }
-            return ['status' => 200, 'message' => 'Relase rates done'];
-        } catch (\Exception $e) {
-            return [
-                'status' => 500,
-                'error' => $e->getMessage()
-            ];
-
+        if ($appointments->isEmpty()) {
+            return ['status' => 404, 'message' => 'No accepted appointments found'];
         }
+
+        foreach ($appointments as $appointment) {
+            $patient = $appointment->patient;
+            $patient->honest_score -= 10;
+            $patient->save();
+
+            if ($patient->user) {
+                $price = $appointment->price_after_discount;
+                $doctorPreview = $appointment->doctor->price_of_examination;
+                $points = ($doctorPreview - $price) / 200;
+
+                $payment = PaymentCompany::find($appointment->payment_id);
+
+                if ($payment) {
+                    $payment->balance += $price;
+                    $payment->save();
+
+                    $patient->discount_point += $points;
+                    $patient->save();
+                }
+            }
+            $appointment->delete();
+        }
+
+        return ['status' => 200, 'message' => 'Release rates processed successfully'];
+    } catch (\Exception $e) {
+        return [
+            'status' => 500,
+            'message' => 'Something went wrong',
+            'error' => $e->getMessage()
+        ];
     }
+}
     public function enterPatient($id)
     {
         try {
@@ -459,7 +507,8 @@ if(!$appointment)
                         'medicine' => "",
                         'status' => "",
                         'notes' => "",
-                        'date' => now()
+                        'date' => now(),
+                        'price_after_discount'=>$apointment->price_after_discount,
                     ])->with('medical_analysis');
                 }
 
