@@ -127,6 +127,7 @@ Route::group([
     Route::post('secretary/appointment', [SecretaryController::class, 'reverse']);
     Route::post('secretary/unapp/appointment', [SecretaryController::class, 'reverseUnApp']);
     Route::get('secretary/patient/{apointmentId}', [SecretaryController::class, 'enterPatient']);
+    Route::post('secretary/doctor/{id}',[AdminController::class,'updateDoctor']);
 });
 //////Any Body Can Access
 Route::group(['middleware' => [TwoFactor::class, 'api', 'auth']], function ($router) {
@@ -137,7 +138,7 @@ Route::group(['middleware' => [TwoFactor::class, 'api', 'auth']], function ($rou
     Route::get('doctor/{id}', [UserController::class, 'getDoctor']);
     Route::get('department/{id}', [UserController::class, 'getDepartment']);
     Route::get('/leave/{id}', [UserController::class, 'getLeaves']);
-
+Route::get('/notifications',[UserController::class,'getNotifications']);
 
     Route::get('/doctor/{dayId}/{departmentId}', [UserController::class, 'getDoctorsInDayAndDepartment']);
     Route::get('/doctors/{dayId}', [UserController::class, 'getDoctorsAndDepartment']);
@@ -146,6 +147,6 @@ Route::group(['middleware' => [TwoFactor::class, 'api', 'auth']], function ($rou
     Route::get('/getProfileImage', [UserController::class, 'getProfileImage']);
     Route::delete('/deleteProfileImage', [UserController::class, 'deleteProfileImage']);
 });
-Route::post('password/request', [PasswordController::class, 'sendConfirmationEmail']);  // Send email
-Route::post('password/confirm', [PasswordController::class, 'confirmReset']); // Confirm password reset
+Route::post('password/request', [PasswordController::class, 'sendConfirmationEmail']);
+Route::post('password/confirm', [PasswordController::class, 'confirmReset']);
 Route::post('password/reset', [PasswordController::class, 'resetPassword']);

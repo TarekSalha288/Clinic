@@ -138,5 +138,14 @@ class UserController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function getNotifications(){
+        $data=$this->userService->getNotifications();
+        return match($data['status']){
+             200 => $this->response("Here are the notifications", ['notifications' => $data['data']], 200),
+            500 => $this->response("Server error: " . $data['errors'], null, 500),
+            400 => $this->response($data['message'], $data['data'], $data['status']),
+            default => $this->response("Unknown error", null, 520),
+        };
+    }
 
 }

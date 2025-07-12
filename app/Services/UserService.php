@@ -56,33 +56,56 @@ class UserService
             return ['status' => 500, 'errors' => $e->getMessage()];
         }
     }
-    public function getDepartments()
-    {
-        $locale = request()->input('lang');
-        App::setLocale($locale);
-        if (!$locale) {
+public function getDepartments()
+{
+    $locale = request()->input('lang');
+    App::setLocale($locale);
+
+    if (!$locale) {
+        return [
+            'status' => 400,
+            'message' => 'You must enter the lang type',
+            'data' => null
+        ];
+    }
+
+    try {
+        $departments = Department::with(['doctors' => function($query) {
+            $query->withAverageRating()->with('user');
+        }])->get()->map(function ($department) use ($locale) {
+            $data = $department->toArray();
+
+            $data['name'] = $department->getTranslation('name', $locale);
+            $data['description'] = $department->getTranslation('description', $locale);
+            $data['doctors'] = $department->doctors->map(function ($doctor) {
+                return [
+                  'doctor'=>$doctor,
+                ];
+            });
+
+            return $data;
+        });
+
+        if ($departments->isNotEmpty()) {
             return [
-                'status' => 400,
-                'message' => 'you must enter the lang type',
-                'data' => null
+                'status' => 200,
+                'message' => 'That is all departments',
+                'data' => $departments
             ];
         }
-        try {
-            $departments = Department::with(['doctors.user'])->get()->map(function ($department) use ($locale) {
-                $data = $department->toArray();
 
-                $data['name'] = $department->getTranslation('name', $locale);
-                $data['description'] = $department->getTranslation('description', $locale);
-
-                return $data;
-            });
-            if ($departments)
-                return ['status' => 200, 'message' => 'That is all departments', 'data' => $departments];
-            return ['status' => 404, 'message' => 'No departments yet', 'data' => null];
-        } catch (\Exception $e) {
-            return ['status' => 500, 'errors' => $e->getMessage()];
-        }
+        return [
+            'status' => 404,
+            'message' => 'No departments yet',
+            'data' => null
+        ];
+    } catch (\Exception $e) {
+        return [
+            'status' => 500,
+            'errors' => $e->getMessage()
+        ];
     }
+}
     public function getDepartment($id)
     {
         $locale = request()->input('lang');
@@ -354,6 +377,20 @@ class UserService
         }
         return ['message' => $message, 'path' => $img_path, 'code' => $code];
     }
+ public function getNotifications()
+{
+    try {
+        $notifications = auth()->user()->notifications;
+
+        if ($notifications->isEmpty()) {
+            return ['status' => 400, 'message' => "No notifications yet", 'data' => null];
+        }
+
+        return ['status' => 200, 'data' => $notifications];
+    } catch (\Exception $e) {
+        return ['status' => 500, 'errors' => $e->getMessage()];
+    }
+}
 
 
 

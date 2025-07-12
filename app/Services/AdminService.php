@@ -102,6 +102,47 @@ class AdminService
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+    public function updateDoctor($id){
+try{
+    $locale = request()->input('lang');
+        App::setLocale($locale);
+    $doctor=Doctor::find($id);
+    $department=Department::where('name',request('department'))->first();
+    if(!$doctor)
+        return response()->json("Doctor not found",404);
+    if(!$department)
+        return response()->json("Department not found",404);
+
+ $validator = Validator::make(request()->all(), [
+                'first_name' => 'required',
+                'last_name' => 'required',
+                'bio' => 'required',
+                'department' => 'required',
+                'subscription' => 'required',
+                'price_of_examination' => 'required',
+                'email' => 'required|email|unique:users',
+                'phone' => 'required|unique:users|regex:/^\+963\d{9}$/',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json($validator->errors()->toJson(), 400);
+            }
+            User::where('id',$doctor->user_id)->update(['first_name'=>request('first_name'),
+            'last_name'=>request('last_name'),
+             'phone'=>request('phone'),
+             'email'=>request('email'),
+        ]);
+        $doctor->update([
+'bio'=>request('bio'),
+             'department_id'=>request('department'),
+             'subscription'=>request('subscription'),
+             'price_of_examination'=>request('price_of_examination'),
+
+        ]);
+}catch(\Exception $e){
+    return response()->json(['error' => $e->getMessage()], 500);
+}
+    }
     public function deleteSecretary()
     {
         try {

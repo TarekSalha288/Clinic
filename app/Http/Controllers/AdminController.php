@@ -38,6 +38,13 @@ class AdminController extends Controller
         }
         return $this->response("Secratery Updated Successfully", ['secratery' => $data], 200);
     }
+    public function updateDoctor($id){
+        $data=$this->AdminService->updateDoctor($id);
+  if ($data->original) {
+            return $this->response($data->original, null, 400);
+        }
+        return $this->response("Doctor Updated Successfully", ['doctor' => $data], 200);
+    }
      public function deleteSecretary()
     {
         $data = $this->AdminService->deleteSecretary();
