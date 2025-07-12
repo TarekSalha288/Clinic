@@ -180,4 +180,15 @@ class SecretaryController extends Controller
             default => $this->response("Unknown error", null, 520),
         };
     }
+      public function secretaryInfo($dayId)
+    {
+        $data = $this->SecretaryServece->secretaryInfo($dayId);
+        return match ($data['status']) {
+            200 => $this->response($data['message'],  $data['data'], 200),
+            400 => $this->response($data['message'], null, 400),
+            404 => $this->response($data['message'], null, 404),
+            500 => $this->response("Server error: " . $data['error'], null, 500),
+            default => $this->response("Unknown error", null, 520),
+        };
+    }
 }

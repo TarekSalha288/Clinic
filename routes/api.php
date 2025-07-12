@@ -128,6 +128,7 @@ Route::group([
     Route::post('secretary/unapp/appointment', [SecretaryController::class, 'reverseUnApp']);
     Route::get('secretary/patient/{apointmentId}', [SecretaryController::class, 'enterPatient']);
     Route::post('secretary/doctor/{id}',[AdminController::class,'updateDoctor']);
+    Route::get('secretary/manage/{dayId}',[SecretaryController::class,'secretaryInfo']);
 });
 //////Any Body Can Access
 Route::group(['middleware' => [TwoFactor::class, 'api', 'auth']], function ($router) {
