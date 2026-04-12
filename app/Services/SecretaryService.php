@@ -534,18 +534,15 @@ Notification::send($user, new Reverse("Your appointment has been rejected revers
         if (!$day) {
             return ['status' => 404, 'message' => 'Day not found'];
         }
-        $departments = Department::with(['doctors' => function($query) use ($dayId) {
-            $query->whereHas('days', function($q) use ($dayId) {
-                    $q->where('days.id', $dayId);
-                })
-                ->with('user')
-                ->withAverageRating();
-        }])->get();
-
-        $appointments = Apointment::all();
-        $enteredPatients = Apointment::where('enter', 1)->get();
-
-        if ($appointments->isEmpty()) {
+        // $departments = Department::with(['doctors' => function($query) use ($dayId) {
+        //     $query->whereHas('days', function($q) use ($dayId) {
+        //             $q->where('days.id', $dayId);
+        //         })
+        //         ->with('user')
+        //         ->withAverageRating();
+        // }])->get();
+$entered=Apointment::where('enter',1)->with(['doctor','doctor.department','patient'])->get();
+        if ($entered->isEmpty()) {
             return ['status' => 400, 'message' => 'No appointments yet', 'data' => null];
         }
 
@@ -553,9 +550,8 @@ Notification::send($user, new Reverse("Your appointment has been rejected revers
             'status' => 200,
             'message' => 'Secretary information retrieved successfully',
             'data' => [
-                'departments' => $departments,
-                'appointments' => $appointments,
-                'entered_patients' => $enteredPatients
+
+                'entered_patients' => $entered
             ]
         ];
     } catch (\Exception $e) {
