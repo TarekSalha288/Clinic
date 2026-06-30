@@ -344,7 +344,7 @@ class UserService
         $user_id = $user->id;
         $url = $this->ImageUpload($request, $user_id, $folderName);
         if ($url) {
-            if ($folderName === "Profile_Photo") {
+            if ($folderName === "Profile_Photo" || $folderName === "Patient_Profile_Photo") {
                 $user->img_path = $url;
                 $user->save();
             }
