@@ -25,8 +25,8 @@ class NewPaymentRequest extends FormRequest
     {
         return [
             'phone_number' => 'required|unique:payment_companies|regex:/^\+963\d{9}$/',
-            'company_name' => 'required:in:Syriatel_cash,MTN_Cash',
-            'balance' => 'required'
+            'company_name' => 'required:in:Syriatel_cash,MTN_Cash,Sham_Cash',
+            // 'balance' => 'required'
         ];
     }
     protected function failedValidation(Validator $validator)

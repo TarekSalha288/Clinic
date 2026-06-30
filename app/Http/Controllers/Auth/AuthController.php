@@ -63,12 +63,12 @@ class AuthController extends Controller
             }
         }
         $phone = $user->phone;
-        $paymentCompany = PaymentCompany::create([
-            'user_id' => $user->id,
-            'phone_number' => $user->phone,
-            'company_name' => in_array($phone[5], ['9', '8']) || in_array(substr($phone, 5, 7), ['98,81,95,82,98,96,87,97']) ? "Syriatel_cash" : "MTN_Cash",
-            'balance' => rand(2, 3) * 100000
-        ]);
+        // $paymentCompany = PaymentCompany::create([
+        //     'user_id' => $user->id,
+        //     'phone_number' => $user->phone,
+        //     'company_name' => in_array($phone[5], ['9', '8']) || in_array(substr($phone, 5, 7), ['98,81,95,82,98,96,87,97']) ? "Syriatel_cash" : "MTN_Cash",
+        //     'balance' => rand(2, 3) * 100000
+        // ]);
 
         $user->generateCode();
 

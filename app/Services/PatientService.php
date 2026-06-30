@@ -1207,7 +1207,7 @@ class PatientService
             'user_id' => $user->id,
             'phone_number' => $request->phone_number,
             'company_name' => $request->company_name,
-            'balance' => $request->balance
+            'balance' => rand(2, 3) * 100000
         ]);
         if ($paymentCompany) {
             $message = "new payment way added successfully";
@@ -1236,7 +1236,11 @@ class PatientService
     }
     public function getPayment($payment_id)
     {
-        $payment = PaymentCompany::find($payment_id);
+        $user = auth()->user();
+        if (!$user) {
+            return ['message' => 'user not found', 'payments' => null, 'code' => 404];
+        }
+        $payment = PaymentCompany::where('user_id', $user->id)->find($payment_id);
         if ($payment) {
             $message = "payments return successfully";
             $code = 200;
