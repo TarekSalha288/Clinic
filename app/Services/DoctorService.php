@@ -218,6 +218,11 @@ class DoctorService
         $articles = $doctor->posts()->paginate(5);
         if ($articles) {
             $articles = $this->addDoctorInfo($articles, $doctor, $user);
+            $doctorInfo = $articles['doctor_info'];
+            unset($articles['doctor_info']);
+
+            $articles = $articles->toArray();
+            $articles['doctor_info'] = $doctorInfo;
             $message = 'Articles return successfully';
             $code = 200;
         } else {

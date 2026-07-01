@@ -68,7 +68,7 @@ Route::group([
     Route::post('/postPreview/{id}', [DoctorController::class, 'postPreview']);
     Route::put('/updatePreview/{id}', [DoctorController::class, 'updatePreview']);
     Route::delete('/deletePreview/{id}', [DoctorController::class, 'deletepreview']);
-    Route::get('/getPreviews', [DoctorController::class, 'getPreviews']);
+    // Route::get('/getPreviews', [DoctorController::class, 'getPreviews']);
     Route::get('/getPreviedPatients', [DoctorController::class, 'getPreviedPatients']);
     Route::post('/patientSearch', [DoctorController::class, 'patientSearch']);
     Route::get('/getActivePatientInfo', [DoctorController::class, 'getActivePatientInfo']);
