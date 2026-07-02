@@ -540,21 +540,40 @@ class PatientService
         if (!$patient) {
             return ['message' => 'patient not found', 'previews' => null, 'code' => 404];
         }
+
+        $sonPatientIds = Son::where('parent_id', auth()->user()->id)->pluck('patient_id');
+
         $completePreviews = Preview::forPatient($patient->id)
             ->diagnoseisType(1)
             ->get();
         $partlyPreviews = Preview::forPatient($patient->id)
             ->diagnoseisType(0)
             ->get();
-        if ($completePreviews || $partlyPreviews) {
-            $formatedPreviews = [];
-            $formatedPreviews['completePreviews'] = $completePreviews;
-            $formatedPreviews['partlyPreviews'] = $partlyPreviews;
+
+        $completPrivewSons = Preview::whereIn('patient_id', $sonPatientIds)
+            ->diagnoseisType(1)
+            ->get();
+        $partlySons = Preview::whereIn('patient_id', $sonPatientIds)
+            ->diagnoseisType(0)
+            ->get();
+
+        $formatedPreviews = [];
+        $formatedPreviews['completePreviews'] = $completePreviews;
+        $formatedPreviews['partlyPreviews'] = $partlyPreviews;
+        $formatedPreviews['completPrivewSons'] = $completPrivewSons;
+        $formatedPreviews['partlySons'] = $partlySons;
+
+        if (
+            $completePreviews->isNotEmpty() ||
+            $partlyPreviews->isNotEmpty() ||
+            $completPrivewSons->isNotEmpty() ||
+            $partlySons->isNotEmpty()
+        ) {
             $message = "preview return successfully";
             $code = 200;
         } else {
             $message = "no previews yet";
-            $message = 400;
+            $code = 400;
         }
         return ['message' => $message, 'previews' => $formatedPreviews, 'code' => $code];
     }
