@@ -18,13 +18,18 @@ class UserService
     public function getDoctor($id)
     {
         try {
+            $locale = request()->input('lang');
+            App::setLocale($locale);
+            if (!$locale) {
+                return ['message' => 'you must enter the lang type', 'departments' => null, 'code' => 400];
+            }
             $doctor = Doctor::with(['department', 'days', 'user'])->withAverageRating()->find($id);
             $docInfo = [];
             if ($doctor) {
                 $apointments = Apointment::where('doctor_id', $doctor->id)->get();
 
                 $docInfo = [
-                    'department' => $doctor->department,
+                    'department' => $doctor->department->getTranslation('name', $locale),
                     'days' => $doctor->days,
                     'user' => $doctor->user,
                     'apointments' => [
@@ -48,7 +53,25 @@ class UserService
     public function getDoctors()
     {
         try {
-            $doctors = Doctor::with(['department', 'user'])->withAverageRating()->get();
+            $locale = request()->input('lang');
+            App::setLocale($locale);
+            if (!$locale) {
+                return ['message' => 'you must enter the lang type', 'departments' => null, 'code' => 400];
+            }
+            $doctors = Doctor::with(['department', 'user'])->withAverageRating()->get()->map(function ($doctor) use ($locale) {
+                $data = $doctor->toArray();
+
+                if ($doctor->department) {
+                    $data['department'] = [
+                        'id' => $doctor->department->id,
+                        'name' => $doctor->department->getTranslation('name', $locale),
+                        'description' => $doctor->department->getTranslation('description', $locale),
+                    ];
+                }
+
+                return $data;
+            });
+
             if ($doctors->isNotEmpty())
                 return ['status' => 200, 'message' => "That is all doctors", 'data' => $doctors];
             return ['status' => 404, 'message' => "No doctors yet", 'data' => null];
@@ -56,56 +79,58 @@ class UserService
             return ['status' => 500, 'errors' => $e->getMessage()];
         }
     }
-public function getDepartments()
-{
-    $locale = request()->input('lang');
-    App::setLocale($locale);
+    public function getDepartments()
+    {
+        $locale = request()->input('lang');
+        App::setLocale($locale);
 
-    if (!$locale) {
-        return [
-            'status' => 400,
-            'message' => 'You must enter the lang type',
-            'data' => null
-        ];
-    }
-
-    try {
-        $departments = Department::with(['doctors' => function($query) {
-            $query->withAverageRating()->with('user');
-        }])->get()->map(function ($department) use ($locale) {
-            $data = $department->toArray();
-
-            $data['name'] = $department->getTranslation('name', $locale);
-            $data['description'] = $department->getTranslation('description', $locale);
-            $data['doctors'] = $department->doctors->map(function ($doctor) {
-                return [
-                  'doctor'=>$doctor,
-                ];
-            });
-
-            return $data;
-        });
-
-        if ($departments->isNotEmpty()) {
+        if (!$locale) {
             return [
-                'status' => 200,
-                'message' => 'That is all departments',
-                'data' => $departments
+                'status' => 400,
+                'message' => 'You must enter the lang type',
+                'data' => null
             ];
         }
 
-        return [
-            'status' => 404,
-            'message' => 'No departments yet',
-            'data' => null
-        ];
-    } catch (\Exception $e) {
-        return [
-            'status' => 500,
-            'errors' => $e->getMessage()
-        ];
+        try {
+            $departments = Department::with([
+                'doctors' => function ($query) {
+                    $query->withAverageRating()->with('user');
+                }
+            ])->get()->map(function ($department) use ($locale) {
+                $data = $department->toArray();
+
+                $data['name'] = $department->getTranslation('name', $locale);
+                $data['description'] = $department->getTranslation('description', $locale);
+                $data['doctors'] = $department->doctors->map(function ($doctor) {
+                    return [
+                        'doctor' => $doctor,
+                    ];
+                });
+
+                return $data;
+            });
+
+            if ($departments->isNotEmpty()) {
+                return [
+                    'status' => 200,
+                    'message' => 'That is all departments',
+                    'data' => $departments
+                ];
+            }
+
+            return [
+                'status' => 404,
+                'message' => 'No departments yet',
+                'data' => null
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status' => 500,
+                'errors' => $e->getMessage()
+            ];
+        }
     }
-}
     public function getDepartment($id)
     {
         $locale = request()->input('lang');
@@ -319,7 +344,7 @@ public function getDepartments()
         $user_id = $user->id;
         $url = $this->ImageUpload($request, $user_id, $folderName);
         if ($url) {
-            if ($folderName === "Profile_Photo") {
+            if ($folderName === "Profile_Photo" || $folderName === "Patient_Profile_Photo") {
                 $user->img_path = $url;
                 $user->save();
             }
@@ -377,20 +402,20 @@ public function getDepartments()
         }
         return ['message' => $message, 'path' => $img_path, 'code' => $code];
     }
- public function getNotifications()
-{
-    try {
-        $notifications = auth()->user()->notifications;
+    public function getNotifications()
+    {
+        try {
+            $notifications = auth()->user()->notifications;
 
-        if ($notifications->isEmpty()) {
-            return ['status' => 400, 'message' => "No notifications yet", 'data' => null];
+            if ($notifications->isEmpty()) {
+                return ['status' => 400, 'message' => "No notifications yet", 'data' => null];
+            }
+
+            return ['status' => 200, 'data' => $notifications];
+        } catch (\Exception $e) {
+            return ['status' => 500, 'errors' => $e->getMessage()];
         }
-
-        return ['status' => 200, 'data' => $notifications];
-    } catch (\Exception $e) {
-        return ['status' => 500, 'errors' => $e->getMessage()];
     }
-}
 
 
 

@@ -68,7 +68,7 @@ Route::group([
     Route::post('/postPreview/{id}', [DoctorController::class, 'postPreview']);
     Route::put('/updatePreview/{id}', [DoctorController::class, 'updatePreview']);
     Route::delete('/deletePreview/{id}', [DoctorController::class, 'deletepreview']);
-    Route::get('/getPreviews', [DoctorController::class, 'getPreviews']);
+    // Route::get('/getPreviews', [DoctorController::class, 'getPreviews']);
     Route::get('/getPreviedPatients', [DoctorController::class, 'getPreviedPatients']);
     Route::post('/patientSearch', [DoctorController::class, 'patientSearch']);
     Route::get('/getActivePatientInfo', [DoctorController::class, 'getActivePatientInfo']);
@@ -108,6 +108,10 @@ Route::group([
     Route::get('/getPayments', [PatientController::class, 'getPayments']);
     Route::get('/getPayment/{payment_id}', [PatientController::class, 'getPayment']);
 
+    Route::post('/addDoctorRate/{doctor_id}', [PatientController::class, 'addDoctorRate']);
+    Route::put('/updateDoctorRate/{doctor_id}', [PatientController::class, 'updateDoctorRate']);
+    Route::delete('/deleteDoctorRate/{doctor_id}', [PatientController::class, 'deleteDoctorRate']);
+    Route::get('/getDoctorRate/{doctor_id}', [PatientController::class, 'getDoctorRate']);
 
 });
 
@@ -127,8 +131,8 @@ Route::group([
     Route::post('secretary/appointment', [SecretaryController::class, 'reverse']);
     Route::post('secretary/unapp/appointment', [SecretaryController::class, 'reverseUnApp']);
     Route::get('secretary/patient/{apointmentId}', [SecretaryController::class, 'enterPatient']);
-    Route::post('secretary/doctor/{id}',[AdminController::class,'updateDoctor']);
-    Route::get('secretary/manage/{dayId}',[SecretaryController::class,'secretaryInfo']);
+    Route::post('secretary/doctor/{id}', [AdminController::class, 'updateDoctor']);
+    Route::get('secretary/manage/{dayId}', [SecretaryController::class, 'secretaryInfo']);
 });
 //////Any Body Can Access
 Route::group(['middleware' => [TwoFactor::class, 'api', 'auth']], function ($router) {
@@ -139,7 +143,7 @@ Route::group(['middleware' => [TwoFactor::class, 'api', 'auth']], function ($rou
     Route::get('doctor/{id}', [UserController::class, 'getDoctor']);
     Route::get('department/{id}', [UserController::class, 'getDepartment']);
     Route::get('/leave/{id}', [UserController::class, 'getLeaves']);
-Route::get('/notifications',[UserController::class,'getNotifications']);
+    Route::get('/notifications', [UserController::class, 'getNotifications']);
 
     Route::get('/doctor/{dayId}/{departmentId}', [UserController::class, 'getDoctorsInDayAndDepartment']);
     Route::get('/doctors/{dayId}', [UserController::class, 'getDoctorsAndDepartment']);
