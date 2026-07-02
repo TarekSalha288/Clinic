@@ -93,6 +93,7 @@ Route::group([
     Route::put('/updateAppointment/{appointment_id}', [PatientController::class, 'updateAppointment']);
     Route::delete('/deleteAppointment/{appointemnt_id}', [PatientController::class, 'deleteAppointment']);
     Route::get('/getAppointments', [PatientController::class, 'getAppointments']);
+    Route::get('/getAppointmentById/{child_id}', [PatientController::class, 'getAppointmentById']);
     Route::get('/getPreviews', [PatientController::class, 'getPreviews']);
     Route::post('/uploadImagesForPatientProfile', [PatientController::class, 'uploadImagesForProfile']);
     Route::put('/updateProfileInfo', [PatientController::class, 'updateProfileInfo']);

@@ -33,6 +33,10 @@ class Preview extends Model
         return $query->where('patient_id', $patientId)
             ->where('doctor_id', $doctorId);
     }
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class, 'doctor_id', 'id');
+    }
     public function patient()
     {
         return $this->belongsTo(Patient::class, 'patient_id', 'id');

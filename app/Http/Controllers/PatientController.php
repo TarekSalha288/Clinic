@@ -380,5 +380,16 @@ class PatientController extends Controller
             return Response::Error($data, $message);
         }
     }
+    public function getAppointmentById($child_id)
+    {
+        $data = [];
+        try {
+            $data = $this->patientService->getAppointmentById($child_id);
+            return Response::Success($data['appointment'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error($data, $message);
+        }
+    }
 
 }
