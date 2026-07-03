@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->foreign('patient_id')->references('id')->on('patients')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('doctor_id')->references('id')->on('doctors')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('department_id')->references('id')->on('departments')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('apointment_id')->references('id')->on('apointments')->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('diagnoseis');
             $table->boolean('diagnoseis_type');// 1 complete diagnos// 0 partial diagnos
             $table->string('medicine');

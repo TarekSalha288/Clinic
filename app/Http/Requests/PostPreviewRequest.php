@@ -27,6 +27,7 @@ class PostPreviewRequest extends FormRequest
         return [
             'diagnoseis' => ['required', 'string'],
             'diagnoseis_type' => ['required', 'boolean'],
+            'appointment_id' => ['required', 'integer', 'exists:apointments,id'],
             'medicine' => ['required', 'string'],
             'notes' => ['required', 'string', 'max:1000'],
             'status' => 'required'

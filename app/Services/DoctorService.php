@@ -305,10 +305,17 @@ class DoctorService
             $code = 404;
             return ['message' => $message, 'preview' => null, 'code' => $code];
         }
+        $appointment = Apointment::where('id', $request->appointment_id)->where('patient_id', $patient_id)->first();
+        if (!$appointment) {
+            $message = "apointment not found";
+            $code = 404;
+            return ['message' => $message, 'preview' => null, 'code' => $code];
+        }
         $preview = Preview::create([
             'patient_id' => $patient_id,
             'doctor_id' => $doctor->id,
             'department_id' => $doctor->department_id,
+            'apointment_id' => $appointment->id,
             'diagnoseis' => Patient::encryptField($request->diagnoseis),
             'diagnoseis_type' => $request->diagnoseis_type,
             'medicine' => Patient::encryptField($request->medicine),
