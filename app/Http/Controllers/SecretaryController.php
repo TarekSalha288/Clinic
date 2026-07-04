@@ -191,4 +191,15 @@ class SecretaryController extends Controller
             default => $this->response("Unknown error", null, 520),
         };
     }
+  public function getDoctors()
+{
+    $data = $this->SecretaryServece->getDoctors();
+
+    return match ($data['status']) {
+        200 => $this->response($data['message'], ['doctors' => $data['data']], 200),
+        404 => $this->response($data['message'], null, 404),
+        500 => $this->response("Server error: " . $data['error'], null, 500),
+        default => $this->response("Unknown error", null, 520),
+    };
+}
 }

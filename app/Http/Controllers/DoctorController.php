@@ -99,17 +99,20 @@ class DoctorController extends Controller
         }
     }
     public function getArticles()
-    {
-        $data = [];
-        try {
-            $data = $this->doctorService->getArticles();
-            return Response::Success($data['articles'], $data['message'], $data['code']);
-
-        } catch (Throwable $th) {
-            $message = $th->getMessage();
-            return Response::Error($data, $message);
+{
+    $data = [];
+    try {
+        $result = $this->doctorService->getArticles();
+        if ($result['code'] !== 200) {
+            return Response::Error($result['data'], $result['message'], $result['code']);
         }
+        return Response::Success($result['data'], $result['message'], $result['code']);
+
+    } catch (\Throwable $th) {
+        $message = $th->getMessage();
+        return Response::Error($data, $message, 500);
     }
+}
     public function getArticleById($id)
     {
         $data = [];
@@ -166,17 +169,20 @@ class DoctorController extends Controller
             return Response::Error($data, $message);
         }
     }
-    public function getPreviews()
-    {
-        $data = [];
-        try {
-            $data = $this->doctorService->getPreviews();
-            return Response::Success($data['previews'], $data['message'], $data['code']);
-        } catch (Throwable $th) {
-            $message = $th->getMessage();
-            return Response::Error($data, $message);
+   public function getPreviews()
+{
+    $data = [];
+    try {
+        $result = $this->doctorService->getPreviews();
+        if ($result['code'] !== 200) {
+            return Response::Error($result['data'], $result['message'], $result['code']);
         }
+        return Response::Success($result['data'], $result['message'], $result['code']);
+    } catch (\Throwable $th) {
+        $message = $th->getMessage();
+        return Response::Error($data, $message, 500);
     }
+}
     public function getPreviewById($preview_id)
     {
         $data = [];

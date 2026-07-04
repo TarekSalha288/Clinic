@@ -207,30 +207,36 @@ class DoctorService
         return ['article' => $article, 'message' => $message, 'code' => $code];
     }
     public function getArticles()
-    {
-        $user = auth()->user();
-        if (!$user) {
-            $message = "user not found";
-            $code = 404;
-            return ['message' => $message, 'articles' => null, 'code' => $code];
-        }
-        $doctor = $user->doctor;
-        $articles = $doctor->posts()->paginate(5);
-        if ($articles) {
-            $articles = $this->addDoctorInfo($articles, $doctor, $user);
-            $doctorInfo = $articles['doctor_info'];
-            unset($articles['doctor_info']);
-
-            $articles = $articles->toArray();
-            $articles['doctor_info'] = $doctorInfo;
-            $message = 'Articles return successfully';
-            $code = 200;
-        } else {
-            $message = "Articles return failed";
-            $code = 400;
-        }
-        return ['articles' => $articles, 'message' => $message, 'code' => $code];
+{
+    $user = auth()->user();
+    if (!$user) {
+        return [
+            'data'    => null,
+            'message' => "User not found",
+            'code'    => 404
+        ];
     }
+    $doctor = $user->doctor;
+    if (!$doctor) {
+        return [
+            'data'    => null,
+            'message' => "Doctor profile not found",
+            'code'    => 404
+        ];
+    }
+    $articles = $doctor->posts()->paginate(5)->toArray();
+    $doctor->load('department');
+    $doctorInfo = $doctor->toArray();
+    $responseData = [
+        'doctor_info' => $doctorInfo,
+        'articles'    => $articles
+    ];
+    return [
+        'data'    => $responseData,
+        'message' => 'Articles returned successfully',
+        'code'    => 200
+    ];
+}
     public function getArticleById($id)
     {
         $user = auth()->user();
@@ -384,24 +390,32 @@ class DoctorService
         return ['message' => $message, 'preview' => $preview, 'code' => $code];
     }
     public function getPreviews()
-    {
-        $doctor = auth()->user()->doctor;
-        if (!$doctor) {
-            $message = "doctor not found";
-            $code = 404;
-            return ['message' => $message, 'previews' => null, 'code' => $code];
-        }
-        $previews = Preview::where('doctor_id', $doctor->id)->get();
-        if ($previews) {
-            $message = "previews return successfully";
-            $code = 200;
-        } else {
-            $message = "previews return failed";
-            $code = 400;
-        }
-
-        return ['message' => $message, 'previews' => $previews, 'code' => $code];
+{
+    $user = auth()->user();
+    if (!$user) {
+        return [
+            'data'    => null,
+            'message' => "User not found",
+            'code'    => 404
+        ];
     }
+    $doctor = $user->doctor;
+    if (!$doctor) {
+        return [
+            'data'    => null,
+            'message' => "Doctor profile not found",
+            'code'    => 404
+        ];
+    }
+    $previews = Preview::with(['patient', 'doctor', 'department','patient.user'])
+        ->where('doctor_id',$doctor->id)
+        ->get();
+    return [
+        'data'    => $previews,
+        'message' => "Previews returned successfully",
+        'code'    => 200
+    ];
+}
     public function getPreviewById($preview_id)
     {
         $doctor = auth()->user()->doctor;

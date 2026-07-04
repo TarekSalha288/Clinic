@@ -89,5 +89,8 @@ class Preview extends Model
     {
         return self::decryptField($value);
     }
-
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id', 'id');
+    }
 }

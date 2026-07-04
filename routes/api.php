@@ -68,7 +68,7 @@ Route::group([
     Route::post('/postPreview/{id}', [DoctorController::class, 'postPreview']);
     Route::put('/updatePreview/{id}', [DoctorController::class, 'updatePreview']);
     Route::delete('/deletePreview/{id}', [DoctorController::class, 'deletepreview']);
-    // Route::get('/getPreviews', [DoctorController::class, 'getPreviews']);
+    Route::get('/doctor/previews', [DoctorController::class, 'getPreviews']);
     Route::get('/getPreviedPatients', [DoctorController::class, 'getPreviedPatients']);
     Route::post('/patientSearch', [DoctorController::class, 'patientSearch']);
     Route::get('/getActivePatientInfo', [DoctorController::class, 'getActivePatientInfo']);
@@ -132,6 +132,7 @@ Route::group([
     Route::post('secretary/appointment', [SecretaryController::class, 'reverse']);
     Route::post('secretary/unapp/appointment', [SecretaryController::class, 'reverseUnApp']);
     Route::get('secretary/patient/{apointmentId}', [SecretaryController::class, 'enterPatient']);
+    Route::get('secretary/doctors', [SecretaryController::class, 'getDoctors']);
     Route::post('secretary/doctor/{id}', [AdminController::class, 'updateDoctor']);
     Route::get('secretary/manage/{dayId}', [SecretaryController::class, 'secretaryInfo']);
 });

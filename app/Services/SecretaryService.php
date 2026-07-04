@@ -17,6 +17,7 @@ use App\Notifications\Reverse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class SecretaryService
 {
@@ -487,7 +488,7 @@ Notification::send($user, new Reverse("Your appointment has been rejected revers
                 $existingPreview =Apointment::where('enter',1)->where('doctor_id',$apointment->doctor_id)->exists();
 
                 if ($existingPreview) {
-                    return ['status' => 400, 'message' => "Alreday send notification"];
+                    return ['status' => 400, 'message' => "Alreday have patient now"];
                 }
                 $existingEnter = Apointment::where('enter', true)->where('doctor_id', $apointment->doctor_id)->exists();
                 if ($existingEnter)
@@ -556,6 +557,53 @@ $entered=Apointment::where('enter',1)->with(['doctor','doctor.department','patie
         ];
     } catch (\Exception $e) {
         return ['status' => 500, 'errors' => $e->getMessage()];
+    }
+}
+
+
+public function getDoctors()
+{
+    try {
+        $doctors = Doctor::with(['user', 'department', 'apointments.patient', 'days'])->withAverageRating()->get();
+        if ($doctors->isEmpty()) {
+            return ['status' => 404, 'message' => 'No doctors found'];
+        }
+        $formattedDoctors = $doctors->map(function ($doctor) {
+           $todayName = Carbon::now()->format('l');
+           $worksToday = $doctor->days->contains(function ($day) use ($todayName) {
+              return strtolower(trim($day->available_days)) === strtolower(trim($todayName));
+            });
+            return [
+                'id'            => $doctor->id,
+                'name'          => $doctor->user->first_name . ' ' . $doctor->user->last_name ?? 'Unknown',
+                'phone'         => $doctor->phone ?? $doctor->user->phone ?? 'N/A',
+                'section'       => $doctor->department->name ?? 'Unknown',
+                'rating'        => (float) ($doctor->average_rating?? 0.0),
+                'image'         => $doctor->image ?? '/images/default.jpg',
+                'if_work_today' => $worksToday,
+                'description'   => $doctor->bio?? '',
+                'schedules'     => $doctor->apointments->map(function ($appointment) {
+                    return [
+                        'id'          => $appointment->id,
+                        'time'        => Carbon::parse($appointment->appointment_date)->format('M d - h:i A'),
+                        'patientId'   => $appointment->patient_id,
+                        'patientName' => $appointment->patient->first_name . ' ' . $appointment->patient->last_name ?? 'Unknown',
+                        'description' => $appointment->description ?? 'Routine checkup',
+                    ];
+                })->values()->toArray(),
+            ];
+        });
+        return [
+            'status'  => 200,
+            'message' => 'Doctors retrieved successfully',
+            'data'    => $formattedDoctors
+        ];
+    } catch (\Exception $e) {
+        return [
+            'status'  => 500,
+            'message' => 'Something went wrong',
+            'error'   => $e->getMessage()
+        ];
     }
 }
 }
