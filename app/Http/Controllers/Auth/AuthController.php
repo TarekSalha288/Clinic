@@ -102,7 +102,7 @@ class AuthController extends Controller
         }
 
         $user = auth()->user();
-        if($user->role=='doctor'){
+        if ($user->role == 'doctor') {
             $user->doctor;
         }
 
@@ -113,7 +113,8 @@ class AuthController extends Controller
         $json = $this->respondWithToken($token)->getContent();
 
         $array = json_decode($json, true);
-        return response()->json(['token' => $array, 'user' => $user], 200);
+
+        return response()->json(['token' => $array, 'user' => $user->load('patient')], 200);
     }
 
     /**

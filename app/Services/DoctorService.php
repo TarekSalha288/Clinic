@@ -207,36 +207,36 @@ class DoctorService
         return ['article' => $article, 'message' => $message, 'code' => $code];
     }
     public function getArticles()
-{
-    $user = auth()->user();
-    if (!$user) {
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return [
+                'data' => null,
+                'message' => "User not found",
+                'code' => 404
+            ];
+        }
+        $doctor = $user->doctor;
+        if (!$doctor) {
+            return [
+                'data' => null,
+                'message' => "Doctor profile not found",
+                'code' => 404
+            ];
+        }
+        $articles = $doctor->posts()->paginate(5)->toArray();
+        $doctor->load('department');
+        $doctorInfo = $doctor->toArray();
+        $responseData = [
+            'doctor_info' => $doctorInfo,
+            'articles' => $articles
+        ];
         return [
-            'data'    => null,
-            'message' => "User not found",
-            'code'    => 404
+            'data' => $responseData,
+            'message' => 'Articles returned successfully',
+            'code' => 200
         ];
     }
-    $doctor = $user->doctor;
-    if (!$doctor) {
-        return [
-            'data'    => null,
-            'message' => "Doctor profile not found",
-            'code'    => 404
-        ];
-    }
-    $articles = $doctor->posts()->paginate(5)->toArray();
-    $doctor->load('department');
-    $doctorInfo = $doctor->toArray();
-    $responseData = [
-        'doctor_info' => $doctorInfo,
-        'articles'    => $articles
-    ];
-    return [
-        'data'    => $responseData,
-        'message' => 'Articles returned successfully',
-        'code'    => 200
-    ];
-}
     public function getArticleById($id)
     {
         $user = auth()->user();
@@ -303,41 +303,48 @@ class DoctorService
                 'code' => $code
             ];
     }
-    public function postPreview($request, $patient_id)
-    {
-        $doctor = auth()->user()->doctor;
-        if (!$doctor) {
-            $message = "doctor not found";
-            $code = 404;
-            return ['message' => $message, 'preview' => null, 'code' => $code];
-        }
-        $appointment = Apointment::where('id', $request->appointment_id)->where('patient_id', $patient_id)->first();
-        if (!$appointment) {
-            $message = "apointment not found";
-            $code = 404;
-            return ['message' => $message, 'preview' => null, 'code' => $code];
-        }
-        $preview = Preview::create([
-            'patient_id' => $patient_id,
-            'doctor_id' => $doctor->id,
-            'department_id' => $doctor->department_id,
-            'apointment_id' => $appointment->id,
-            'diagnoseis' => Patient::encryptField($request->diagnoseis),
-            'diagnoseis_type' => $request->diagnoseis_type,
-            'medicine' => Patient::encryptField($request->medicine),
-            'notes' => Patient::encryptField($request->notes),
-            'date' => Carbon::today(),
-            'status' => Patient::encryptField($request->status)
-        ]);
-        if ($preview) {
-            $message = "preview added successfully";
-            $code = 200;
-        } else {
-            $message = "preview added failed";
-            $code = 400;
-        }
-        return ['preview' => $preview, 'message' => $message, 'code' => $code];
-    }
+    // public function postPreview($request, $patient_id)
+    // {
+    //     $doctor = auth()->user()->doctor;
+    //     if (!$doctor) {
+    //         $message = "doctor not found";
+    //         $code = 404;
+    //         return ['message' => $message, 'preview' => null, 'code' => $code];
+    //     }
+    //     $appointment = Apointment::where('id', $request->appointment_id)->where('patient_id', $patient_id)->first();
+    //     if (!$appointment) {
+    //         $message = "apointment not found";
+    //         $code = 404;
+    //         return ['message' => $message, 'preview' => null, 'code' => $code];
+    //     }
+    //     $preview = Preview::create([
+    //         'patient_id' => $patient_id,
+    //         'doctor_id' => $doctor->id,
+    //         'department_id' => $doctor->department_id,
+    //         'apointment_id' => $appointment->id,
+    //         'diagnoseis' => Patient::encryptField($request->diagnoseis),
+    //         'diagnoseis_type' => $request->diagnoseis_type,
+    //         'medicine' => Patient::encryptField($request->medicine),
+    //         'notes' => Patient::encryptField($request->notes),
+    //         'date' => Carbon::today(),
+    //         'status' => Patient::encryptField($request->status)
+    //     ]);
+    //     if ($preview) {
+    //         $appointment = Apointment::where('id', $preview->apointment_id)->first();
+    //         $appointment->enter = 0;
+    //         $appointment->save();
+    //         $scretary = User::where('role', 'secretary')->first();
+    //         $scretary->notify(new OutPatient('I am finshed from this patient please enter the next one'));
+    //         event(new \App\Events\OutPatient('I am finshed from this patient please enter the next one', $scretary->id));
+
+    //         $message = "preview added successfully";
+    //         $code = 200;
+    //     } else {
+    //         $message = "preview added failed";
+    //         $code = 400;
+    //     }
+    //     return ['preview' => $preview, 'message' => $message, 'code' => $code];
+    // }
     public function updatePreview($request, $preview_id)
     {
         $preview = Preview::find($preview_id);
@@ -354,10 +361,14 @@ class DoctorService
             ]);
             $preview->save();
             if ($updatePreview) {
-
-                $scretary = User::where('role', 'secretary')->first();
-                $scretary->notify(new OutPatient('I am finshed from this patient please enter the next one'));
-                event(new \App\Events\OutPatient('I am finshed from this patient please enter the next one', $scretary->id));
+                $appointment = Apointment::where('id', $preview->apointment_id)->first();
+                if ($appointment->enter === 1) {
+                    $appointment->enter = 0;
+                    $appointment->save();
+                    $scretary = User::where('role', 'secretary')->first();
+                    $scretary->notify(new OutPatient('I am finshed from this patient please enter the next one'));
+                    event(new \App\Events\OutPatient('I am finshed from this patient please enter the next one', $scretary->id));
+                }
 
                 $message = "preview updated successfully";
                 $code = 200;
@@ -390,32 +401,32 @@ class DoctorService
         return ['message' => $message, 'preview' => $preview, 'code' => $code];
     }
     public function getPreviews()
-{
-    $user = auth()->user();
-    if (!$user) {
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return [
+                'data' => null,
+                'message' => "User not found",
+                'code' => 404
+            ];
+        }
+        $doctor = $user->doctor;
+        if (!$doctor) {
+            return [
+                'data' => null,
+                'message' => "Doctor profile not found",
+                'code' => 404
+            ];
+        }
+        $previews = Preview::with(['patient', 'doctor', 'department', 'patient.user'])
+            ->where('doctor_id', $doctor->id)
+            ->get();
         return [
-            'data'    => null,
-            'message' => "User not found",
-            'code'    => 404
+            'data' => $previews,
+            'message' => "Previews returned successfully",
+            'code' => 200
         ];
     }
-    $doctor = $user->doctor;
-    if (!$doctor) {
-        return [
-            'data'    => null,
-            'message' => "Doctor profile not found",
-            'code'    => 404
-        ];
-    }
-    $previews = Preview::with(['patient', 'doctor', 'department','patient.user'])
-        ->where('doctor_id',$doctor->id)
-        ->get();
-    return [
-        'data'    => $previews,
-        'message' => "Previews returned successfully",
-        'code'    => 200
-    ];
-}
     public function getPreviewById($preview_id)
     {
         $doctor = auth()->user()->doctor;

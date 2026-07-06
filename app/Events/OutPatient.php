@@ -33,7 +33,7 @@ class OutPatient
     public function broadcastOn(): array
     {
         return [
-            new Channel('out-patient.' . $this->scretary_id),
+            new PrivateChannel('out-patient.' . $this->scretary_id),
         ];
     }
     public function broadcastWith()

@@ -7,3 +7,6 @@ use App\Models\User;
 Broadcast::channel('enter-patient.{doctorId}', function (User $user, int $doctorId) {
    return $user->doctor->id === $doctorId && $user->role === 'doctor'; // Accses just for doctor
 });
+Broadcast::channel('out-patient.{secretaryId}', function (User $user, int $secretaryId) {
+   return $user->id === $secretaryId && $user->role === 'secretary';
+});
