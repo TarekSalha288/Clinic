@@ -72,7 +72,7 @@ class SecretaryService
                 'apointment_date' => request('appointment_date'),
                 'apoitment_status' => 'unapp',
                 'status' => 'accepted',
-                'price_after_discount'=>$doctor->price_of_examination,
+                'price_after_discount' => $doctor->price_of_examination,
             ]);
 
             return [
@@ -107,11 +107,11 @@ class SecretaryService
             }
             $patient = Patient::find(request('patient_id'));
             $doctor = Doctor::find(request('doctor_id'));
-            $date=request('apointment_date');
-            if($date<now()){
+            $date = request('apointment_date');
+            if ($date < now()) {
                 return [
-                    'status'=>400,
-                    'errors'=>'Time not correct'
+                    'status' => 400,
+                    'errors' => 'Time not correct'
                 ];
             }
             if (!$patient) {
@@ -128,7 +128,7 @@ class SecretaryService
                 ];
             }
 
-$user = $patient->user;
+            $user = $patient->user;
             $appointment = Apointment::create([
                 'patient_id' => $patient->id,
                 'doctor_id' => request('doctor_id'),
@@ -136,14 +136,14 @@ $user = $patient->user;
                 'apointment_date' => request('apointment_date'),
                 'apoitment_status' => 'immediate',
                 'status' => 'accepted',
-'price_after_discount'=>$doctor->price_of_examination,
+                'price_after_discount' => $doctor->price_of_examination,
 
             ]);
             if (!$user) {
                 $appointment->update(['apoitment_status' => 'unapp']);
                 $appointment->save();
             }
-$appointment->patient;
+            $appointment->patient;
             return [
                 'status' => 201,
                 'message' => 'Appointment added successfully',
@@ -193,14 +193,14 @@ $appointment->patient;
 
             if ($user) {
                 // Notify the user
-        if($user->fcm_token){
-  app('App\Services\FcmService')->sendNotification(
-                $user->fcm_token,
-                "Appointment Accepted",
-                "We have accepted your appointment ",
-                ['appointment' => $appointment]
-            );
-        }
+                if ($user->fcm_token) {
+                    app('App\Services\FcmService')->sendNotification(
+                        $user->fcm_token,
+                        "Appointment Accepted",
+                        "We have accepted your appointment ",
+                        ['appointment' => $appointment]
+                    );
+                }
                 Notification::send($user, new Reverse("Your appointment has been accepted"));
             }
 
@@ -222,42 +222,41 @@ $appointment->patient;
     {
         try {
             $appointment = Apointment::find($id);
-if(!$appointment)
- return ['status' => 404, 'message' => "Appointment not found"];
- $patient = Patient::find($appointment->patient_id);
+            if (!$appointment)
+                return ['status' => 404, 'message' => "Appointment not found"];
+            $patient = Patient::find($appointment->patient_id);
             $user = $patient->user;
-                if ($user) {
-                    $price=$appointment->price_after_discount;
-                    $doctorpreview=$appointment->doctor->price_of_examination;
-                    $points=($doctorpreview-$price)/200;
+            if ($user) {
+                $price = $appointment->price_after_discount;
+                $doctorpreview = $appointment->doctor->price_of_examination;
+                $points = ($doctorpreview - $price) / 200;
 
-                    $payment=PaymentCompany::find($appointment->payment_id);
-                    $allmoney=$payment->balance;
-                    $allmoney+=$price;
-                    $allpoints=$patient->discount_point;
-                    $allpoints+=$points;
-                    $patient->update(['discount_point'=>$allpoints]);
+                $payment = PaymentCompany::find($appointment->payment_id);
+                $allmoney = $payment->balance;
+                $allmoney += $price;
+                $allpoints = $patient->discount_point;
+                $allpoints += $points;
+                $patient->update(['discount_point' => $allpoints]);
 
-                    $payment->update(['balance'=>$allmoney]);
+                $payment->update(['balance' => $allmoney]);
 
 
 
-                }
-                $appointment->delete();
-                                    // Notify the user
-        if($user->fcm_token){
-  app('App\Services\FcmService')->sendNotification(
-                $user->fcm_token,
-                "Appointment Rejected",
-                "We have rejected your appointment ",
-                ['appointment' => $appointment]
-            );
-Notification::send($user, new Reverse("Your appointment has been rejected reverse again"));
-        }
-
-                return ['status' => 200, 'message' => "Appointment rejected sucssfully", 'data' => null];
             }
-         catch (\Exception $e) {
+            $appointment->delete();
+            // Notify the user
+            if ($user->fcm_token) {
+                app('App\Services\FcmService')->sendNotification(
+                    $user->fcm_token,
+                    "Appointment Rejected",
+                    "We have rejected your appointment ",
+                    ['appointment' => $appointment]
+                );
+                Notification::send($user, new Reverse("Your appointment has been rejected reverse again"));
+            }
+
+            return ['status' => 200, 'message' => "Appointment rejected sucssfully", 'data' => null];
+        } catch (\Exception $e) {
             return [
                 'status' => 500,
                 'message' => 'Something went wrong.',
@@ -269,7 +268,7 @@ Notification::send($user, new Reverse("Your appointment has been rejected revers
     {
         try {
 
-           // $date = date('Y-m-d', strtotime($appointment_date));
+            // $date = date('Y-m-d', strtotime($appointment_date));
 
             $appointments = Apointment::with('patient')->whereDate('apointment_date', $appointment_date)
                 ->where('doctor_id', $doctor_id)
@@ -439,53 +438,53 @@ Notification::send($user, new Reverse("Your appointment has been rejected revers
             ];
         }
     }
-  public function relaseRate()
-{
-    try {
-        $appointments = Apointment::where('status', 'accepted')->get();
+    public function relaseRate()
+    {
+        try {
+            $appointments = Apointment::where('status', 'accepted')->get();
 
-        if ($appointments->isEmpty()) {
-            return ['status' => 404, 'message' => 'No accepted appointments found'];
-        }
-
-        foreach ($appointments as $appointment) {
-            $patient = $appointment->patient;
-            $patient->honest_score -= 10;
-            $patient->save();
-
-            if ($patient->user) {
-                $price = $appointment->price_after_discount;
-                $doctorPreview = $appointment->doctor->price_of_examination;
-                $points = ($doctorPreview - $price) / 200;
-
-                $payment = PaymentCompany::find($appointment->payment_id);
-
-                if ($payment) {
-                    $payment->balance += $price;
-                    $payment->save();
-
-                    $patient->discount_point += $points;
-                    $patient->save();
-                }
+            if ($appointments->isEmpty()) {
+                return ['status' => 404, 'message' => 'No accepted appointments found'];
             }
-            $appointment->delete();
-        }
 
-        return ['status' => 200, 'message' => 'Release rates processed successfully'];
-    } catch (\Exception $e) {
-        return [
-            'status' => 500,
-            'message' => 'Something went wrong',
-            'error' => $e->getMessage()
-        ];
+            foreach ($appointments as $appointment) {
+                $patient = $appointment->patient;
+                $patient->honest_score -= 10;
+                $patient->save();
+
+                if ($patient->user) {
+                    $price = $appointment->price_after_discount;
+                    $doctorPreview = $appointment->doctor->price_of_examination;
+                    $points = ($doctorPreview - $price) / 200;
+
+                    $payment = PaymentCompany::find($appointment->payment_id);
+
+                    if ($payment) {
+                        $payment->balance += $price;
+                        $payment->save();
+
+                        $patient->discount_point += $points;
+                        $patient->save();
+                    }
+                }
+                $appointment->delete();
+            }
+
+            return ['status' => 200, 'message' => 'Release rates processed successfully'];
+        } catch (\Exception $e) {
+            return [
+                'status' => 500,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ];
+        }
     }
-}
     public function enterPatient($id)
     {
         try {
             $apointment = Apointment::find($id);
             if ($apointment) {
-                $existingPreview =Apointment::where('enter',1)->where('doctor_id',$apointment->doctor_id)->exists();
+                $existingPreview = Apointment::where('enter', 1)->where('doctor_id', $apointment->doctor_id)->exists();
 
                 if ($existingPreview) {
                     return ['status' => 400, 'message' => "Alreday have patient now"];
@@ -509,13 +508,13 @@ Notification::send($user, new Reverse("Your appointment has been rejected revers
                         'status' => "",
                         'notes' => "",
                         'date' => now(),
-                        'price_after_discount'=>$apointment->price_after_discount,
+                        'price_after_discount' => $apointment->price_after_discount,
                     ])->with('medical_analysis');
                 }
 
                 $apointment->doctor->notify(new NotificationsEnterPatient("That is your patient", $apointment->patient));
 
-                event(new EnterPatient("That is your patient", $apointment->doctor_id, $apointment->patient,$preview));
+                event(new EnterPatient("That is your patient", $apointment->doctor_id, $apointment->patient, $preview));
                 return ['status' => 200, 'message' => "Enter patient done"];
 
             }
@@ -528,82 +527,86 @@ Notification::send($user, new Reverse("Your appointment has been rejected revers
 
         }
     }
-   public function secretaryInfo($dayId)
-{
-    try {
-        $day = Day::find($dayId);
-        if (!$day) {
-            return ['status' => 404, 'message' => 'Day not found'];
-        }
-        // $departments = Department::with(['doctors' => function($query) use ($dayId) {
-        //     $query->whereHas('days', function($q) use ($dayId) {
-        //             $q->where('days.id', $dayId);
-        //         })
-        //         ->with('user')
-        //         ->withAverageRating();
-        // }])->get();
-$entered=Apointment::where('enter',1)->with(['doctor','doctor.department','patient'])->get();
-        if ($entered->isEmpty()) {
-            return ['status' => 400, 'message' => 'No appointments yet', 'data' => null];
-        }
+    public function secretaryInfo($dayId)
+    {
+        try {
+            $day = Day::find($dayId);
+            if (!$day) {
+                return ['status' => 404, 'message' => 'Day not found'];
+            }
+            // $departments = Department::with(['doctors' => function($query) use ($dayId) {
+            //     $query->whereHas('days', function($q) use ($dayId) {
+            //             $q->where('days.id', $dayId);
+            //         })
+            //         ->with('user')
+            //         ->withAverageRating();
+            // }])->get();
+            $entered = Apointment::where('enter', 1)->with(['doctor', 'doctor.department', 'patient'])->get();
+            if ($entered->isEmpty()) {
+                return ['status' => 400, 'message' => 'No appointments yet', 'data' => null];
+            }
 
-        return [
-            'status' => 200,
-            'message' => 'Secretary information retrieved successfully',
-            'data' => [
+            return [
+                'status' => 200,
+                'message' => 'Secretary information retrieved successfully',
+                'data' => [
 
-                'entered_patients' => $entered
-            ]
-        ];
-    } catch (\Exception $e) {
-        return ['status' => 500, 'errors' => $e->getMessage()];
+                    'entered_patients' => $entered
+                ]
+            ];
+        } catch (\Exception $e) {
+            return ['status' => 500, 'errors' => $e->getMessage()];
+        }
     }
-}
 
 
-public function getDoctors()
-{
-    try {
-        $doctors = Doctor::with(['user', 'department', 'apointments.patient', 'days'])->withAverageRating()->get();
-        if ($doctors->isEmpty()) {
-            return ['status' => 404, 'message' => 'No doctors found'];
-        }
-        $formattedDoctors = $doctors->map(function ($doctor) {
-           $todayName = Carbon::now()->format('l');
-           $worksToday = $doctor->days->contains(function ($day) use ($todayName) {
-              return strtolower(trim($day->available_days)) === strtolower(trim($todayName));
+    public function getDoctors()
+    {
+        try {
+            $doctors = Doctor::with(['user', 'department', 'apointments.patient', 'days'])->withAverageRating()->get();
+            if ($doctors->isEmpty()) {
+                return ['status' => 404, 'message' => 'No doctors found'];
+            }
+            $formattedDoctors = $doctors->map(function ($doctor) {
+                $todayName = Carbon::now()->format('l');
+                $worksToday = $doctor->days->contains(function ($day) use ($todayName) {
+                    return strtolower(trim($day->available_days)) === strtolower(trim($todayName));
+                });
+                return [
+                    'id' => $doctor->id,
+                    'name' => $doctor->user->first_name . ' ' . $doctor->user->last_name ?? 'Unknown',
+                    'phone' => $doctor->phone ?? $doctor->user->phone ?? 'N/A',
+                    'section' => $doctor->department->name ?? 'Unknown',
+                    'rating' => (float) ($doctor->average_rating ?? 0.0),
+                    'image' => $doctor->image ?? '/images/default.jpg',
+                    'if_work_today' => $worksToday,
+                    'description' => $doctor->bio ?? '',
+                    'schedules' => $doctor->apointments
+                        ->filter(function ($appointment) {
+                            return Carbon::parse($appointment->apointment_date)->isToday();
+                        })
+                        ->map(function ($appointment) {
+                            return [
+                                'id' => $appointment->id,
+                                'time' => Carbon::parse($appointment->apointment_date)->format('M d - h:i A'),
+                                'patientId' => $appointment->patient_id,
+                                'patientName' => $appointment->patient->first_name . ' ' . $appointment->patient->last_name ?? 'Unknown',
+                                'description' => $appointment->description ?? 'Routine checkup',
+                            ];
+                        })->values()->toArray(),
+                ];
             });
             return [
-                'id'            => $doctor->id,
-                'name'          => $doctor->user->first_name . ' ' . $doctor->user->last_name ?? 'Unknown',
-                'phone'         => $doctor->phone ?? $doctor->user->phone ?? 'N/A',
-                'section'       => $doctor->department->name ?? 'Unknown',
-                'rating'        => (float) ($doctor->average_rating?? 0.0),
-                'image'         => $doctor->image ?? '/images/default.jpg',
-                'if_work_today' => $worksToday,
-                'description'   => $doctor->bio?? '',
-                'schedules'     => $doctor->apointments->map(function ($appointment) {
-                    return [
-                        'id'          => $appointment->id,
-                        'time'        => Carbon::parse($appointment->appointment_date)->format('M d - h:i A'),
-                        'patientId'   => $appointment->patient_id,
-                        'patientName' => $appointment->patient->first_name . ' ' . $appointment->patient->last_name ?? 'Unknown',
-                        'description' => $appointment->description ?? 'Routine checkup',
-                    ];
-                })->values()->toArray(),
+                'status' => 200,
+                'message' => 'Doctors retrieved successfully',
+                'data' => $formattedDoctors
             ];
-        });
-        return [
-            'status'  => 200,
-            'message' => 'Doctors retrieved successfully',
-            'data'    => $formattedDoctors
-        ];
-    } catch (\Exception $e) {
-        return [
-            'status'  => 500,
-            'message' => 'Something went wrong',
-            'error'   => $e->getMessage()
-        ];
+        } catch (\Exception $e) {
+            return [
+                'status' => 500,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ];
+        }
     }
-}
 }
